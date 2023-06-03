@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "target": "esnext",
+      "allowJs": true,
+      "skipLibCheck": true,
+      "strict": true,
+      "forceConsistentCasingInFileNames": true,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "module": "esnext", 
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "noErrorTruncation": true,
+      "allowImportingTsExtensions": true,
+      "outDir": "./dist"
+    },
+    "include": ["**/*.ts"],
+    "exclude": ["node_modules"]
+  }
+  

@@ -1,0 +1,23 @@
+{
+  "name": "client-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "wimp": "ts-node --esm index.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.1.3",
+    "mpesa": "0.0.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "ts-node": "^10.9.1",
+    "tsc": "^2.0.4",
+    "typescript": "^5.0.4"
+  }
+}
