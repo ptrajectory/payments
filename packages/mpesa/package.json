@@ -1,6 +1,6 @@
 {
   "name": "porkytheblack-mpesa",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "main": "index.js",
   "license": "MIT",
   "type": "module",
@@ -37,5 +37,11 @@
         "dist/*"
       ]
     }
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ptrajectory/ptrajectory-payments",
+    "directory": "packages/mpesa"
+  },
+  "author": "porkytheblack https://github.com/porkytheblack"
 }
