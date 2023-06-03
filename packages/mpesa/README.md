@@ -6,9 +6,9 @@ The MpesaClient is a package used for sending payments and payouts using the Mpe
 
 ```
 # npm
-npm install @ptrajectory-payments/mpesa
+npm install porkytheblack-mpesa
 # yarn
-yarn add @ptrajectory-payments/mpesa
+yarn add porkytheblack-mpesa
 ```
 
 ## Usage
