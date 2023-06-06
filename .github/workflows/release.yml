@@ -16,6 +16,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm install -g pnpm
       - run: cd packages/mpesa && pnpm install && pnpm run build
-      - run: cd packages/mpesa && pnpm publish
+      - run: cd packages/mpesa && pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
