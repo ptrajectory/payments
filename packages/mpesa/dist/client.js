@@ -1,5 +1,5 @@
 // src/client.ts
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 // src/lib/utils.ts
 var format_mpesa_date = (date) => {
@@ -34,35 +34,64 @@ var format_mpesa_date = (date) => {
 
 // src/client.ts
 import fetch from "node-fetch";
+
+// src/lib/schemas.ts
+import z from "zod";
+var payout_request_callback_body_schema = z.object({
+  Result: z.object({
+    ResultType: z.number().optional(),
+    ResultCode: z.number().optional(),
+    ResultDesc: z.string().optional(),
+    OriginatorConversationID: z.string().optional(),
+    ConversationID: z.string().optional(),
+    TransactionID: z.string().optional(),
+    ReferenceData: z.object({
+      ReferenceItem: z.object({
+        Key: z.string().optional(),
+        Value: z.string().optional()
+      }).optional()
+    }).optional()
+  }).optional()
+});
+var payment_request_callback_body_schema = z.object({
+  Body: z.object({
+    stkCallback: z.object({
+      MerchantRequestID: z.string(),
+      CheckoutRequestID: z.string(),
+      ResultCode: z.number().optional(),
+      ResultDesc: z.string().optional(),
+      CallbackMetadata: z.object({
+        Item: z.array(z.object({
+          Name: z.string(),
+          Value: z.string()
+        })).optional()
+      }).array().optional()
+    })
+  })
+});
+
+// src/client.ts
 var MpesaClient = class {
   _env = "sandbox";
-  _consumer_key = "";
-  _consumer_secret = "";
-  _pass_key = "";
-  _business_short_code;
   _callback_url = "";
   _base_url = "https://sandbox.safaricom.co.ke";
-  _password = "";
-  _security_credential = "";
+  _b2c = {};
+  _c2b = {};
   constructor(props) {
     this._env = props.env || "sandbox";
-    this._consumer_key = props.consumer_key || "";
-    this._consumer_secret = props.consumer_secret || "";
-    this._pass_key = props.pass_key || "";
-    this._business_short_code = props.business_short_code || 0;
-    this._callback_url = props.callback_url || "";
-    this._password = props.b2c?.password || "";
-    this._security_credential = props.b2c?.security_credential || "";
     this._base_url = props.env === "sandbox" ? "https://sandbox.safaricom.co.ke" : "https://api.safaricom.co.ke";
+    this._b2c = props.b2c || {};
+    this._c2b = props.c2b || {};
+    this._callback_url = props.callback_url || "";
   }
   /**
    * @name generate_access_token 
    * @description Generates an access token for the mpesa api 
    * @returns 
    */
-  async _generate_access_token() {
-    const username = this._consumer_key;
-    const password = this._consumer_secret;
+  async _generate_access_token(type = "c2b") {
+    const username = type === "b2c" ? this._b2c.consumer_key : this._c2b.consumer_key;
+    const password = type === "b2c" ? this._b2c.consumer_secret : this._c2b.consumer_secret;
     const basic_auth = Buffer.from(username + ":" + password).toString("base64");
     const url = `${this._base_url}/oauth/v1/generate`;
     try {
@@ -80,7 +109,7 @@ var MpesaClient = class {
       } else {
         return Promise.reject({
           message: "Error generating access token",
-          error: await res.json()
+          error: res.statusText
         });
       }
       return access_token;
@@ -91,9 +120,11 @@ var MpesaClient = class {
       });
     }
   }
-  async _generate_password() {
+  async _generate_password(type = "c2b") {
     const timestamp = format_mpesa_date(/* @__PURE__ */ new Date());
-    const pre = `${this._business_short_code}${this._pass_key}${timestamp}`;
+    const short_code = type === "b2c" ? this._b2c.short_code : this._c2b.short_code;
+    const pass_key = type === "b2c" ? this._b2c.pass_key : this._c2b.pass_key;
+    const pre = `${short_code}${pass_key}${timestamp}`;
     const password = Buffer.from(pre).toString("base64");
     return {
       password,
@@ -121,19 +152,19 @@ var MpesaClient = class {
     const base_url = this._base_url;
     const url = `${base_url}/mpesa/stkpush/v1/processrequest`;
     try {
-      const access_token = await this._generate_access_token();
+      const access_token = await this._generate_access_token("c2b");
       const {
         password,
         timestamp
-      } = await this._generate_password();
+      } = await this._generate_password("c2b");
       const response = await axios.post(url, {
-        BusinessShortCode: this._business_short_code,
+        BusinessShortCode: this._c2b.short_code,
         Password: password,
-        AccountReference: "account",
+        AccountReference: this._c2b.business_name,
         Amount: amount,
-        CallBackURL: this._callback_url,
+        CallBackURL: `${this._callback_url}/c2b/callback`,
         PartyA: phone_number,
-        PartyB: this._business_short_code,
+        PartyB: this._c2b.short_code,
         PhoneNumber: phone_number,
         Timestamp: timestamp,
         TransactionDesc: transaction_desc,
@@ -145,9 +176,15 @@ var MpesaClient = class {
       });
       return response.data;
     } catch (e) {
+      if (e instanceof AxiosError) {
+        return Promise.reject({
+          message: "Error sending payment request",
+          error: e.response?.data
+        });
+      }
       return Promise.reject({
-        message: "Error generating sending payment request",
-        error: e?.response?.data
+        message: "Error sending payment request",
+        error: e
       });
     }
   }
@@ -156,17 +193,18 @@ var MpesaClient = class {
     const base_url = this._base_url;
     const url = `${base_url}/mpesa/b2c/v1/paymentrequest`;
     try {
-      const access_token = await this._generate_access_token();
+      const access_token = await this._generate_access_token("b2c");
       const response = await axios.post(url, {
-        InitiatorName: this._password,
-        SecurityCredential: this._security_credential,
+        InitiatorPassword: this._b2c.security_credential,
+        InitiatorName: this._b2c.business_name,
+        SecurityCredential: this._b2c.security_credential,
         CommandID: transaction_type,
         Amount: amount,
         Occassion: "occassion",
-        PartyA: this._business_short_code,
+        PartyA: this._b2c.short_code,
         PartyB: phone_number,
-        QueueTimeOutURL: this._callback_url,
-        ResultURL: this._callback_url,
+        QueueTimeOutURL: `${this._callback_url}/b2c/timeout`,
+        ResultURL: `${this._callback_url}/b2c/result`,
         Remarks: description
       }, {
         headers: {
@@ -175,11 +213,25 @@ var MpesaClient = class {
       });
       return response.data;
     } catch (e) {
+      if (e instanceof AxiosError) {
+        return Promise.reject({
+          message: "Error initiating payout",
+          error: e.response?.data
+        });
+      }
       return Promise.reject({
         message: "Error initiating payout",
-        error: e?.response?.data
+        error: e
       });
     }
+  }
+  /**
+   * @name set_callback_url
+   * @description for testing purposes, i.e when you need to dynamically change the callback url
+   * @param url 
+   */
+  set_callback_url(url) {
+    this._callback_url = url;
   }
 };
 var client_default = MpesaClient;

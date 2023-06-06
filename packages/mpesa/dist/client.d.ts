@@ -11,17 +11,65 @@ interface SendPayoutResponse {
     ResponseCode: string;
     ResponseDescription: string;
 }
+type B2BSetupCredentials = Partial<{
+    /**
+     * The password for the initiator security credential
+     */
+    password: string;
+    /**
+     * The security credential for the initiator
+     */
+    security_credential: string;
+    /**
+     * The consumer key for the app
+     */
+    consumer_key: string;
+    /**
+     * The consumer secret for the app
+     */
+    consumer_secret: string;
+    /**
+     * The pass key for the app
+     */
+    pass_key: string;
+    /**
+     * The short code for the app
+     */
+    short_code: number;
+    /**
+     * The business name for the app, will be used to identify the initiator
+     */
+    business_name: string;
+}>;
+type C2BSetupCredentials = Partial<{
+    /**
+     * The consumer key for the app
+     */
+    consumer_key: string;
+    /**
+     * The consumer secret for the app
+     */
+    consumer_secret: string;
+    /**
+     * The pass key for the app
+     */
+    pass_key: string;
+    /**
+     * The short code for the app
+     */
+    short_code: number;
+    /**
+     * The business name for the app, will be used for the initiator name value
+     */
+    business_name: string;
+}>;
 
 declare class MpesaClient {
     private _env;
-    private _consumer_key;
-    private _consumer_secret;
-    private _pass_key;
-    private _business_short_code;
     private _callback_url;
     private _base_url;
-    private _password;
-    private _security_credential;
+    private _b2c;
+    private _c2b;
     constructor(props: Partial<{
         /**
          * @name env
@@ -30,47 +78,24 @@ declare class MpesaClient {
          */
         env: 'sandbox' | 'production';
         /**
-         * @name consumer_key
-         * @description The consumer key got from the daraja portal
-         * @type {string}
+         * @name b2c
+         * @description The b2c credentials, if you plan to use the b2c api
+         * @type {B2BSetupCredentials}
          */
-        consumer_key: string;
+        b2c: B2BSetupCredentials;
         /**
-         * @name consumer_secret
-         * @description The consumer secret got from the daraja portal
-         * @type {string}
+         * @name c2b
+         * @description The c2b credentials, if you plan to use the c2b api
+         * @type {C2BSetupCredentials}
          */
-        consumer_secret: string;
-        /**
-         * @name pass_key
-         * @description The pass key got from the daraja portal
-         * @type {string}
-         */
-        pass_key: string;
-        /**
-         * @name business_short_code
-         * @description The business short code got from the daraja portal
-         * @type {number}
-         */
-        business_short_code: number;
+        c2b: C2BSetupCredentials;
         /**
          * @name callback_url
-         * @description The callback url to be used by the mpesa api
-         * @type {string}
+         * @description The callback url to use for the api,
+         * **Note** do not postfix the url with a `/` also, the url needs to be https
+         * @example https://example.com and not https://example.com/ or http://example.com
          */
         callback_url: string;
-        /**
-         * @name b2c
-         * @description The b2c credentials for b2c transactions
-         * @type {Partial<{
-         *  password: string,
-         *  security_credential: string
-         * }>}
-         */
-        b2c: Partial<{
-            password: string;
-            security_credential: string;
-        }>;
     }>);
     /**
      * @name generate_access_token
@@ -147,6 +172,12 @@ declare class MpesaClient {
          */
         description: string;
     }>): Promise<SendPayoutResponse>;
+    /**
+     * @name set_callback_url
+     * @description for testing purposes, i.e when you need to dynamically change the callback url
+     * @param url
+     */
+    set_callback_url(url: string): void;
 }
 
 export { MpesaClient as default };

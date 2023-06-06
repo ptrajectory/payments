@@ -54,3 +54,59 @@ export interface PaymentRequestCallback {
         
     }
 }
+
+
+export type B2BSetupCredentials = Partial<{
+    /**
+     * The password for the initiator security credential
+     */
+    password: string,
+    /**
+     * The security credential for the initiator
+     */
+    security_credential: string
+    /**
+     * The consumer key for the app
+     */
+    consumer_key: string,
+    /**
+     * The consumer secret for the app
+     */
+    consumer_secret: string,
+    /**
+     * The pass key for the app
+     */
+    pass_key: string,
+    /**
+     * The short code for the app
+     */
+    short_code: number,
+    /**
+     * The business name for the app, will be used to identify the initiator
+     */
+    business_name: string,
+}>
+
+
+export type C2BSetupCredentials = Partial<{
+    /**
+     * The consumer key for the app
+     */
+    consumer_key: string,
+    /**
+     * The consumer secret for the app
+     */
+    consumer_secret: string,
+    /**
+     * The pass key for the app
+     */
+    pass_key: string,
+    /**
+     * The short code for the app
+     */
+    short_code: number,
+    /**
+     * The business name for the app, will be used for the initiator name value
+     */
+    business_name: string,
+}>

@@ -1,5 +1,29 @@
 import z from 'zod'
 
+/**
+ * @name payout_request_callback_body_schema
+ * @description Schema for the body of the payout request callback
+ * @type {zod.Schema}
+ */
+const payout_request_callback_body_schema = z.object({
+    Result: z.object({
+        ResultType: z.number().optional(),
+        ResultCode: z.number().optional(),
+        ResultDesc: z.string().optional(),
+        OriginatorConversationID: z.string().optional(),
+        ConversationID: z.string().optional(),
+        TransactionID: z.string().optional(),
+        ReferenceData: z.object({
+            ReferenceItem: z.object({
+                Key: z.string().optional(),
+                Value: z.string().optional()
+            }).optional()
+        }).optional()
+    }).optional()
+})
+
+type tPayoutRequestCallbackBody = z.infer<typeof payout_request_callback_body_schema>
+
 
 /**
  * @name payment_request_callback_body_schema
@@ -28,5 +52,7 @@ type tPaymentRequestCallbackBody = z.infer<typeof payment_request_callback_body_
 
 export {
     payment_request_callback_body_schema,
-    type tPaymentRequestCallbackBody
+    type tPaymentRequestCallbackBody,
+    payout_request_callback_body_schema,
+    type tPayoutRequestCallbackBody
 }

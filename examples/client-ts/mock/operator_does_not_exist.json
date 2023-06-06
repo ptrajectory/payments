@@ -1,0 +1,10 @@
+{
+    "Body": {
+      "stkCallback": {
+        "MerchantRequestID": "22244-80247751-1",
+        "CheckoutRequestID": "ws_CO_06062023200601365794699065",
+        "ResultCode": "SFC_IC0003",
+        "ResultDesc": "The operator does not exist."
+      }
+    }
+  }

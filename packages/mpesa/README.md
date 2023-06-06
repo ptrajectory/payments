@@ -1,133 +1,179 @@
-# MpesaClient Package Documentation
+# `porkytheblack-mpesa` docs
 
-The MpesaClient is a package used for sending payments and payouts using the Mpesa API. It provides an easy way to send payment requests and handle payouts without dealing with the low-level API details.
+`porkytheblack-mpesa` is a TypeScript library that helps developers interact with the Mpesa API easily. It includes a set of interfaces and classes that encapsulate the behavior of Mpesa API.
 
-## Install
+## Interfaces
 
+### SendPaymentResponse
+
+```ts
+interface SendPaymentResponse {
+    MerchantRequestID: string;
+    CheckoutRequestID: string;
+    ResponseCode: string;
+    ResponseDescription: string;
+    CustomerMessage: string;
+}
 ```
-# npm
-npm install porkytheblack-mpesa
-# yarn
-yarn add porkytheblack-mpesa
+
+This interface represents the response of a payment request.
+
+### SendPayoutResponse
+
+```ts
+interface SendPayoutResponse {
+    ConversationID: string;
+    OriginatorConversationID: string;
+    ResponseCode: string;
+    ResponseDescription: string;
+}
+```
+
+This interface represents the response of a payout request.
+
+### B2BSetupCredentials and C2BSetupCredentials
+
+```ts
+type B2BSetupCredentials = Partial<{
+    password: string;
+    security_credential: string;
+    consumer_key: string;
+    consumer_secret: string;
+    pass_key: string;
+    short_code: number;
+    business_name: string;
+}>;
+
+type C2BSetupCredentials = Partial<{
+    consumer_key: string;
+    consumer_secret: string;
+    pass_key: string;
+    short_code: number;
+    business_name: string;
+}>;
+```
+
+These types are used for setting up the Mpesa client with the necessary B2B or C2B API credentials.
+
+## Class
+
+### MpesaClient
+
+The main class of this library. It provides methods for interacting with the Mpesa API.
+
+#### Constructor
+
+The constructor accepts an object which includes:
+
+- `env`: The environment to use ('sandbox' or 'production').
+- `b2c`: The B2C credentials (B2BSetupCredentials).
+- `c2b`: The C2B credentials (C2BSetupCredentials).
+- `callback_url`: The callback URL to use for the API.
+
+```ts
+const client = new MpesaClient({
+    env: 'sandbox',
+    c2b: {...},
+    b2c: {...},
+    callback_url: 'https://example.com'
+});
+```
+
+#### Methods
+
+##### `send_payment_request`
+
+This method sends a payment request to the Mpesa API and returns a `Promise` that resolves to `SendPaymentResponse`.
+
+```ts
+client.send_payment_request({
+    transaction_type: 'CustomerPayBillOnline',
+    amount: 500,
+    phone_number: 123456789,
+    transaction_desc: 'Payment for goods'
+}).then((response) => {...});
+```
+
+##### `send_payout_request`
+
+This method sends a payout request to the Mpesa API and returns a `Promise` that resolves to `SendPayoutResponse`.
+
+```ts
+client.send_payout_request({
+    transaction_type: 'BusinessPayment',
+    amount: 500,
+    phone_number: 123456789,
+    description: 'Salary for May'
+}).then((response) => {...});
+```
+
+##### `set_callback_url`
+
+This method sets a new callback URL. Useful for testing when you need to dynamically change the callback URL.
+
+```ts
+client.set_callback_url('https://new-callback.com');
 ```
 
 ## Usage
 
-First, import the package and the dotenv config:
+Here's a brief example of how to use this library:
 
-```javascript
-import "dotenv/config"
-import MpesaClient from 'mpesa/client'
-```
+```ts
+import MpesaClient from 'porkytheblack-mpesa/client'
 
-Instantiate the MpesaClient class and pass in an object with the following properties:
-
-- `env`: The environment to use. Can be either 'sandbox' or 'production'.
-- `consumer_key`: The consumer key you received from the daraja portal.
-- `consumer_secret`: The consumer secret you received from the daraja portal.
-- `pass_key`: The pass key you received from the daraja portal.
-- `business_short_code`: The business short code you received from the daraja portal.
-- `callback_url`: The callback URL to be used by the Mpesa API.
-- `b2c`: An object with the B2C credentials for B2C transactions. Contains 'password' and 'security_credential'.
-
-Example:
-
-```javascript
 const client = new MpesaClient({
     env: 'sandbox',
-    consumer_key: process.env.MPESA_CONSUMER_KEY,
-    consumer_secret: process.env.MPESA_CONSUMER_SECRET,
-    pass_key: process.env.MPESA_PASSKEY,
-    business_short_code: Number(process.env.MPESA_SHORTCODE),
-    callback_url: 'https://webhook.site/e20c9ce5-2cf6-493a-8fbc-3167dec7020d',
+    c2b: {
+        consumer_key: 'your_c2b_consumer_key',
+        consumer_secret: 'your_c2b_consumer_secret',
+        pass_key: 'your_c2b_passkey',
+        short
+
+_code: 12345,
+        business_name: 'C2B Sandbox'
+    },
     b2c: {
-        password: process.env.PASSWORD,
-        security_credential: process.env.SECURITY_CREDENTIAL
-    }
-})
+        password: 'your_b2c_password',
+        security_credential: 'your_b2c_security_credential',
+        consumer_key: 'your_b2c_consumer_key',
+        consumer_secret: 'your_b2c_consumer_secret',
+        pass_key: 'your_b2c_passkey',
+        short_code: 67890,
+        business_name: 'testapi'
+    },
+    callback_url: 'https://example.com'
+});
+
+client.send_payment_request({
+    transaction_type: 'CustomerPayBillOnline',
+    amount: 500,
+    phone_number: 123456789,
+    transaction_desc: 'Payment for goods'
+}).then((response) => {
+    console.log(response);
+});
+
+client.send_payout_request({
+    transaction_type: 'BusinessPayment',
+    amount: 500,
+    phone_number: 123456789,
+    description: 'Salary for May'
+}).then((response) => {
+    console.log(response);
+});
 ```
 
-To send a payment request, call the `send_payment_request` method with the following properties:
+Note: Always ensure to secure your keys and secrets. The above example uses hard-coded strings for simplicity. In a real-life application, use environment variables or some other form of secure configuration.
 
-- `amount`: The amount to be sent.
-- `phone_number`: The phone number to send the money to.
-- `transaction_desc`: The description of the transaction.
-- `transaction_type`: The type of transaction to be performed. Can be either 'CustomerPayBillOnline' or 'CustomerBuyGoodsOnline'.
+## Development Notice
 
-Example:
+Please be aware that the `porkytheblack-mpesa` library is currently under active development. We are working hard to make this library as robust, user-friendly, and feature-complete as possible.
 
-```javascript
-await client.send_payment_request({
-    amount: 20,
-    phone_number: Number(process.env.PHONE_NUMBER),
-    transaction_desc: "Hey there 👋",
-    transaction_type: "CustomerBuyGoodsOnline"
-})
-```
+As we continue to improve and expand the library, you may notice regular updates. These will often include bug fixes, performance improvements, and even new features. We strongly recommend keeping up to date with the latest versions to benefit from these improvements.
 
-To send a payout request, call the `send_payout_request` method with the following properties:
+Please rest assured that every update is thoroughly tested to ensure compatibility and minimize any potential disruptions. We understand that updating your dependencies can sometimes be a concern, but we are committed to making each update as smooth and beneficial as possible.
 
-- `amount`: The amount to be sent.
-- `phone_number`: The phone number to send the money to.
-- `description`: The description of the transaction.
-- `transaction_type`: The type of transaction to be performed. Can be either 'BusinessPayment', 'SalaryPayment' or 'PromotionPayment'.
+Our goal is to provide you with a stable, reliable, and efficient tool for interacting with the Mpesa API. We appreciate your support and patience as we continue to enhance the `porkytheblack-mpesa` library.
 
-Example:
-
-```javascript
-await client.send_payout_request({
-    amount: 20,
-    description: "Hey there 👋",
-    phone_number: Number(process.env.PHONE_NUMBER),
-    transaction_type: "BusinessPayment"
-})
-```
-
-## Error Handling
-
-You should handle any errors that may arise from sending payment or payout requests in a try-catch block.
-
-Example:
-
-```javascript
-try {
-    // send payment or payout request
-} catch (e) {
-    console.log("Something went wrong::", e)
-}
-```
-
-## Important Notes
-
-Make sure to set your environment variables appropriately. Use a .env file in your project root or set them directly in your environment.
-
-- `MPESA_CONSUMER_KEY`: Your Mpesa Consumer Key.
-- `MPESA_CONSUMER_SECRET`: Your Mpesa Consumer Secret.
-- `MPESA_PASSKEY`: Your Mpesa Passkey.
-- `MPESA_SHORTCODE`: Your Mpesa Business Shortcode.
-- `PHONE_NUMBER`: The phone number for the payment recipient.
-- `PASSWORD`: Your B2C password.
-- `SECURITY_CREDENTIAL`: Your B2C security credential.
-
-## Returned Responses
-
-The `send_payment_request` and `send_payout_request` methods both return a Promise with the response from the Mpesa API.
-
-The `send_payment_request` method returns a Promise that resolves to an object with the following properties:
-
-- `MerchantRequestID`: A string representing the merchant request ID.
-- `CheckoutRequestID`: A string representing the checkout request ID.
-- `ResponseCode`: A string representing the response code from the API.
-- `ResponseDescription`: A string providing a description of the response.
-- `CustomerMessage`: A string message intended for the customer.
-
-The `send_payout_request` method returns a Promise that resolves to an object with the following properties:
-
-- `ConversationID`: A string representing the conversation ID.
-- `OriginatorConversationID`: A string representing the originator conversation ID.
-- `ResponseCode`: A string representing the response code from the API.
-- `ResponseDescription`: A string providing a description of the response.
-
-## Contributing
-
-If you find any bugs or have a feature request, please open an issue on github. We appreciate your contributions!
+Thank you for choosing `porkytheblack-mpesa` as your Mpesa API solution, and we look forward to helping you achieve your goals.

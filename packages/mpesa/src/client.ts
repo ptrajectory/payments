@@ -1,21 +1,72 @@
 import axios, { AxiosError } from "axios"
-import { AccessTokenResponse, SendPaymentRequestBody, SendPaymentResponse, SendPayoutRequest, SendPayoutResponse } from "./lib/types.ts"
+import { AccessTokenResponse, B2BSetupCredentials, C2BSetupCredentials, SendPaymentRequestBody, SendPaymentResponse, SendPayoutRequest, SendPayoutResponse } from "./lib/types.ts"
 import { format_mpesa_date } from "./lib/utils.ts"
 import fetch from 'node-fetch'
+import { payment_request_callback_body_schema, tPaymentRequestCallbackBody } from "./lib/schemas.ts";
 
+
+
+class MpesaEvent {
+    // private _event_type: 'express' | 'payout';
+    constructor(props?: Partial<{
+        /**
+         * @name event_type
+         * @description The type of mpesa event
+         * @type {'express' | 'payout'}
+         */
+        event_type: 'express' | 'payout' 
+
+    }>){
+        // this._event_type = props.event_type || 'express'
+    }
+
+    /**
+     * @name handle_payout_request_callback
+     * @description Handles the payout request callback
+     * @param body 
+     * @returns 
+     */
+    async handle_payment_request_callback(body: Partial<tPaymentRequestCallbackBody>){
+        const parsed = payment_request_callback_body_schema.safeParse(body) 
+
+        if(!parsed.success) {
+            return Promise.reject(parsed.error.formErrors)
+            // TODO: handle error locally
+        }
+
+        const data = parsed.data
+
+        return data
+    }
+
+
+    /**
+     * @name handle_payout_request_callback
+     * @description Handles the payout request callback
+     * @param body 
+     * @returns 
+     */
+    async handle_payout_request_callback(body: Partial<tPaymentRequestCallbackBody>){
+        const parsed = payment_request_callback_body_schema.safeParse(body)
+
+        if(!parsed.success) {
+            return Promise.reject(parsed.error.formErrors)
+        }
+
+        const data = parsed.data
+
+        return data
+    }
+}
 
 
 
 class MpesaClient {
     private _env = 'sandbox'
-    private _consumer_key = ''
-    private _consumer_secret = ''
-    private _pass_key = ''
-    private _business_short_code: number
     private _callback_url = ''
     private _base_url = 'https://sandbox.safaricom.co.ke'
-    private _password = ''
-    private _security_credential = ''
+    private _b2c: B2BSetupCredentials = {}
+    private _c2b: C2BSetupCredentials = {}
 
     constructor(props: Partial<{
         /**
@@ -25,58 +76,30 @@ class MpesaClient {
          */
         env: 'sandbox' | 'production',
         /**
-         * @name consumer_key
-         * @description The consumer key got from the daraja portal
-         * @type {string}
+         * @name b2c
+         * @description The b2c credentials, if you plan to use the b2c api
+         * @type {B2BSetupCredentials}
          */
-        consumer_key: string,
+        b2c: B2BSetupCredentials,
         /**
-         * @name consumer_secret
-         * @description The consumer secret got from the daraja portal
-         * @type {string}
+         * @name c2b
+         * @description The c2b credentials, if you plan to use the c2b api
+         * @type {C2BSetupCredentials}
          */
-        consumer_secret: string,
-        /**
-         * @name pass_key
-         * @description The pass key got from the daraja portal
-         * @type {string}
-         */
-        pass_key: string, 
-        /**
-         * @name business_short_code
-         * @description The business short code got from the daraja portal
-         * @type {number}
-         */
-        business_short_code: number,
+        c2b: C2BSetupCredentials,
         /**
          * @name callback_url
-         * @description The callback url to be used by the mpesa api
-         * @type {string}
+         * @description The callback url to use for the api, 
+         * **Note** do not postfix the url with a `/` also, the url needs to be https
+         * @example https://example.com and not https://example.com/ or http://example.com 
          */
         callback_url: string
-        /**
-         * @name b2c
-         * @description The b2c credentials for b2c transactions
-         * @type {Partial<{
-         *  password: string,
-         *  security_credential: string
-         * }>}
-         */
-        b2c: Partial<{
-            password: string,
-            security_credential: string
-        }>
     }>) {
         this._env = props.env || 'sandbox' 
-        this._consumer_key = props.consumer_key || '' 
-        this._consumer_secret = props.consumer_secret || '' 
-        this._pass_key = props.pass_key || ''
-        this._business_short_code = props.business_short_code || 0
-        this._callback_url = props.callback_url || ''
-        this._password = props.b2c?.password || ''
-        this._security_credential = props.b2c?.security_credential || ''
         this._base_url = props.env === 'sandbox' ? 'https://sandbox.safaricom.co.ke' : 'https://api.safaricom.co.ke'
-
+        this._b2c = props.b2c || {}
+        this._c2b = props.c2b || {}
+        this._callback_url = props.callback_url || ''
     }
 
 
@@ -85,9 +108,9 @@ class MpesaClient {
      * @description Generates an access token for the mpesa api 
      * @returns 
      */
-    private async _generate_access_token() {
-        const username = this._consumer_key 
-        const password = this._consumer_secret
+    private async _generate_access_token(type: 'b2c' | 'c2b' = 'c2b') {
+        const username = type === 'b2c' ? this._b2c.consumer_key : this._c2b.consumer_key
+        const password = type === 'b2c' ? this._b2c.consumer_secret : this._c2b.consumer_secret
         
         const basic_auth = Buffer.from(username + ':' + password).toString('base64') 
     
@@ -110,7 +133,7 @@ class MpesaClient {
             }else{
                 return Promise.reject({
                     message: 'Error generating access token',
-                    error: await res.json()
+                    error: res.statusText
                 })
             }
             return access_token
@@ -124,9 +147,11 @@ class MpesaClient {
     }
 
 
-    private async _generate_password() {
+    private async _generate_password(type: 'b2c' | 'c2b' = 'c2b') {
         const timestamp = format_mpesa_date(new Date());
-        const pre = `${this._business_short_code}${this._pass_key}${timestamp}`
+        const short_code = type === 'b2c' ? this._b2c.short_code : this._c2b.short_code
+        const pass_key = type === 'b2c' ? this._b2c.pass_key : this._c2b.pass_key
+        const pre = `${short_code}${pass_key}${timestamp}`
         const password = Buffer.from(pre).toString("base64");
 
         return {
@@ -184,21 +209,21 @@ class MpesaClient {
         const url = `${base_url}/mpesa/stkpush/v1/processrequest`
         
         try {
-            const access_token = await this._generate_access_token()
+            const access_token = await this._generate_access_token('c2b')
 
             const {
                 password,
                 timestamp
-            } = await this._generate_password()
+            } = await this._generate_password('c2b')
     
             const response = await axios.post<SendPaymentResponse>(url, {
-                BusinessShortCode: this._business_short_code,
+                BusinessShortCode: this._c2b.short_code,
                 Password: password,
-                AccountReference: 'account',
+                AccountReference: this._c2b.business_name,
                 Amount: amount,
-                CallBackURL: this._callback_url,
+                CallBackURL: `${this._callback_url}/c2b/callback`,
                 PartyA: phone_number,
-                PartyB: this._business_short_code,
+                PartyB: this._c2b.short_code,
                 PhoneNumber: phone_number,
                 Timestamp: timestamp,
                 TransactionDesc: transaction_desc,
@@ -212,9 +237,15 @@ class MpesaClient {
         } 
         catch (e)
         {
+            if (e instanceof AxiosError) {
+                return Promise.reject({
+                    message: 'Error sending payment request',
+                    error: e.response?.data
+                })
+            }
             return Promise.reject({
-                message: 'Error generating sending payment request',
-                error: (e as AxiosError)?.response?.data
+                message: 'Error sending payment request',
+                error: e
             })
         }
     
@@ -251,19 +282,20 @@ class MpesaClient {
         const base_url = this._base_url
         const url = `${base_url}/mpesa/b2c/v1/paymentrequest`
         try {
-            const access_token = await this._generate_access_token()
+            const access_token = await this._generate_access_token('b2c')
 
             const response = await axios.post<SendPayoutResponse>(url, {
-                InitiatorName: this._password,
-                SecurityCredential: this._security_credential,
+                InitiatorPassword: this._b2c.security_credential,
+                InitiatorName: this._b2c.business_name,
+                SecurityCredential: this._b2c.security_credential,
                 CommandID: transaction_type,
                 Amount: amount,
                 Occassion: 'occassion',
-                PartyA: this._business_short_code,
+                PartyA: this._b2c.short_code,
                 PartyB: phone_number,
-                QueueTimeOutURL: this._callback_url,
-                ResultURL: this._callback_url,
-                Remarks: description
+                QueueTimeOutURL: `${this._callback_url}/b2c/timeout`,
+                ResultURL: `${this._callback_url}/b2c/result`,
+                Remarks: description,
             } as SendPayoutRequest, {
                 headers: {
                     'Authorization': `Bearer ${access_token}`
@@ -274,11 +306,27 @@ class MpesaClient {
         }
         catch (e)
         {
+            if(e instanceof AxiosError) {
+                return Promise.reject({
+                    message: 'Error initiating payout',
+                    error: e.response?.data
+                })
+            }
             return Promise.reject({
                 message: 'Error initiating payout',
-                error: (e as AxiosError)?.response?.data
+                error: e
             })
         }
+    }
+
+
+    /**
+     * @name set_callback_url
+     * @description for testing purposes, i.e when you need to dynamically change the callback url
+     * @param url 
+     */
+    set_callback_url(url: string){
+        this._callback_url = url
     }
 }
 

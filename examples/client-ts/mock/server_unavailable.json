@@ -1,0 +1,8 @@
+{
+    "message": "Error sending payment request",
+    "error": {
+      "requestId": "12128-99305352-1",
+      "errorCode": "500.002.1001",
+      "errorMessage": "Service is temporarily unavailable. Please try again later"
+    }
+  }
