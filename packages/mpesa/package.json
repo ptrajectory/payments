@@ -14,6 +14,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/express": "^4.17.17",
     "@types/node": "^20.2.5",
     "tsup": "^6.7.0"
   },
@@ -26,6 +27,11 @@
       "import": "./dist/client.js",
       "types": "./dist/client.d.ts",
       "default": "./dist/client.js"
+    },
+    "./events/express":{
+      "import": "./dist/events/express.js",
+      "types": "./dist/events/express.d.ts",
+      "default": "./dist/events/express.js"
     }
   },
   "files": [

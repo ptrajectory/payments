@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig((opts)=>{
     return {
-        entry: ["./src/client.ts"],
+        entry: ["./src/client.ts", "./src/events/express.ts"],
         splitting: false,
         sourcemap: true,
         clean: !opts.watch,

@@ -1,5 +1,6 @@
+import mpesaExpressClient  from 'porkytheblack-mpesa/events/express';
 import ngrok from 'ngrok'
-import {client, events} from './client.ts'
+import { client } from './client.ts'
 import app from './app.ts';
 
 
@@ -14,14 +15,23 @@ describe('Client test', ()=>{
         client.set_callback_url(url)
     })
 
-    describe.skip('Send payment request', ()=>{
+    describe('Send payment request', ()=>{
 
         it('should send a payment request', (done)=>{
 
-            events.on('callback', (data)=>{
-                console.log("Data::", JSON.stringify(data))
+
+            mpesaExpressClient.on("payment:success", (data)=>{
                 done()
             })
+
+            mpesaExpressClient.on("payment:error", (data)=>{
+                done()
+            })
+
+            mpesaExpressClient.on("payment:invalid", (data)=>{
+                done()
+            })
+            
             client.send_payment_request({
                 amount: 5,
                 phone_number: Number(process.env.PHONE_NUMBER),
@@ -40,8 +50,17 @@ describe('Client test', ()=>{
     describe('Send b2c request', ()=>{
 
         it('should send a b2c request', (done)=>{
-            events.on('callback', (data)=>{
-                console.log("Data::", JSON.stringify(data))
+
+
+            mpesaExpressClient.on("payout:success", (data)=>{
+                done()
+            })
+
+            mpesaExpressClient.on("payout:error", (data)=>{
+                done()
+            })
+
+            mpesaExpressClient.on("payout:invalid", (data)=>{
                 done()
             })
 

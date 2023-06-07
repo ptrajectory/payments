@@ -1,8 +1,6 @@
-import EventEmitter from 'events'
 import MpesaClient from 'porkytheblack-mpesa/client'
-import 'dotenv/config'
 
-const events = new EventEmitter()
+import 'dotenv/config'
 
 
 const client = new MpesaClient({
@@ -27,6 +25,5 @@ const client = new MpesaClient({
 
 
 export {
-    client,
-    events
+    client
 }
