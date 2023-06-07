@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  examples/client-ts:
+  examples/express-example:
     dependencies:
       dotenv:
         specifier: ^16.1.3
