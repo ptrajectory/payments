@@ -1,7 +1,7 @@
 import mpesaExpressClient  from 'porkytheblack-mpesa/events/express';
 import ngrok from 'ngrok'
-import { client } from './client.ts'
 import app from './app.ts';
+import request from 'supertest';
 
 
 let url: string;
@@ -12,13 +12,12 @@ app.listen(3000, ()=>{
 describe('Client test', ()=>{
     before(async ()=>{
         url = await ngrok.connect(3000)
-        client.set_callback_url(url)
+        mpesaExpressClient.setTestUrl(url)
     })
 
     describe('Send payment request', ()=>{
 
         it('should send a payment request', (done)=>{
-
 
             mpesaExpressClient.on("payment:success", (data)=>{
                 done()
@@ -31,15 +30,16 @@ describe('Client test', ()=>{
             mpesaExpressClient.on("payment:invalid", (data)=>{
                 done()
             })
-            
-            client.send_payment_request({
+
+
+            request(app).post('/c2b/payment-request').send({
                 amount: 5,
                 phone_number: Number(process.env.PHONE_NUMBER),
                 transaction_desc: "Hey there 👋",
                 transaction_type: "CustomerPayBillOnline"
-            }).then((data: any)=>{
-                console.log("Data::", JSON.stringify(data))
-            }).catch((e: any)=>{
+            }).expect(200).then((res)=>{
+                console.log("Response::", JSON.stringify(res.body))
+            }).catch((e)=>{
                 console.log("Error::", e)
             })
 
@@ -64,18 +64,19 @@ describe('Client test', ()=>{
                 done()
             })
 
-            client.send_payout_request({
-                amount: 5,
-                description: "Hey there 👋",
+            request(app)
+            .post("/b2c/payout-request")
+            .send({
+                amount: 5, 
                 phone_number: Number(process.env.PHONE_NUMBER),
+                transaction_desc: "Hey there 👋",
                 transaction_type: "BusinessPayment"
-            }).then((response)=>{
-                console.log("Response::", JSON.stringify(response))
+            }).then((data)=> {
+                console.log("Response::", JSON.stringify(data.body))
             }).catch((e)=>{
                 console.log("Error::", e)
             })
         }).timeout(120000)
-
     })
 
 

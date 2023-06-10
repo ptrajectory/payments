@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "wimp": "ts-node --esm index.ts",
+    "start": "ts-node --esm index.ts",
     "test": "ts-mocha './**/*.spec.ts' -p tsconfig.json --exit"
   },
   "dependencies": {
