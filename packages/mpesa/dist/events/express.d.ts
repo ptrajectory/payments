@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import z from 'zod';
 import { Request, Response } from 'express';
+import { M as MpesaClient, S as SendPaymentResponse, a as SendPayoutResponse, b as SendPayoutRequest } from '../client-141af4eb.js';
 
 /**
  * @name payout_request_callback_body_schema
@@ -212,6 +213,58 @@ declare const payment_request_callback_body_schema: z.ZodObject<{
     };
 }>;
 type tPaymentRequestCallbackBody = z.infer<typeof payment_request_callback_body_schema>;
+/**
+ * @name payment_request_body
+ * @description Schema for the body of the payment request body
+ * @type {zod.Schema}
+ */
+declare const payment_request_body: z.ZodObject<{
+    amount: z.ZodNumber;
+    phone_number: z.ZodNumber;
+    transaction_desc: z.ZodOptional<z.ZodString>;
+    transaction_type: z.ZodEnum<["CustomerPayBillOnline", "CustomerBuyGoodsOnline"]>;
+}, "strip", z.ZodTypeAny, {
+    transaction_type: "CustomerPayBillOnline" | "CustomerBuyGoodsOnline";
+    amount: number;
+    phone_number: number;
+    transaction_desc?: string | undefined;
+}, {
+    transaction_type: "CustomerPayBillOnline" | "CustomerBuyGoodsOnline";
+    amount: number;
+    phone_number: number;
+    transaction_desc?: string | undefined;
+}>;
+/**
+ * @name tPaymentRequestBody
+ * @description the payment request body type
+ */
+type tPaymentRequestBody = z.infer<typeof payment_request_body>;
+/**
+ * @name payout_request_body
+ * @description Schema for the body of a payout request
+ * @type {zod.Schema}
+ */
+declare const payout_request_body: z.ZodObject<{
+    amount: z.ZodNumber;
+    phone_number: z.ZodNumber;
+    transaction_desc: z.ZodOptional<z.ZodString>;
+    transaction_type: z.ZodEnum<["BusinessPayment", "SalaryPayment", "PromotionPayment"]>;
+}, "strip", z.ZodTypeAny, {
+    transaction_type: "BusinessPayment" | "SalaryPayment" | "PromotionPayment";
+    amount: number;
+    phone_number: number;
+    transaction_desc?: string | undefined;
+}, {
+    transaction_type: "BusinessPayment" | "SalaryPayment" | "PromotionPayment";
+    amount: number;
+    phone_number: number;
+    transaction_desc?: string | undefined;
+}>;
+/**
+ * @name tPayoutRequestBody
+ * @description the payout request body
+ */
+type tPayoutRequestBody = z.infer<typeof payout_request_body>;
 
 type CallBackEvents = {
     /**
@@ -255,6 +308,32 @@ type CallBackEvents = {
      * This is where tou can add your logging solution, e.g sentry
      */
     'uncaughtException': unknown;
+    /**
+     * Emmited when a payment request has successfully been sent to the mpesa api
+     * This is where to include logic for updating your database
+     */
+    'payment-request:success': SendPaymentResponse;
+    /**
+     * Emmited when a payment request has failed to be sent to the mpesa api
+     * This can be either due to an error in the request body or an error from the mpesa api, **Note** you need to include validation logic to know which error occured
+     */
+    'payment-request:error': {
+        type: 'code' | 'unknown' | 'body-error';
+        error: SendPaymentResponse | unknown | z.typeToFlattenedError<tPaymentRequestBody>;
+    };
+    /**
+     * Emmited when a payout request has successfully been sent to the mpesa api
+     * This is where to include logic for updating your database
+     */
+    'payout-request:success': SendPayoutResponse;
+    /**
+     * Emmited when a payout request has failed to be sent to the mpesa api
+     * This can be either due to an error in the request body or an error from the mpesa api, **Note** you need to include validation logic to know which error occured
+     */
+    'payout-request:error': {
+        type: 'code' | 'unknown' | 'body-error';
+        error: SendPayoutRequest | unknown | z.typeToFlattenedError<tPayoutRequestBody>;
+    };
 };
 /**
  * `ExpressMpesaEvents` class provides events and methods for handling MPesa events.
@@ -266,6 +345,7 @@ type CallBackEvents = {
  * ```
  */
 declare class ExpressMpesaEvents extends EventEmitter {
+    client: MpesaClient;
     constructor();
     /**
      * Emits an event.
@@ -293,6 +373,32 @@ declare class ExpressMpesaEvents extends EventEmitter {
      * @param res
      */
     paymentsCallbackHandler(req: Request, res: Response): Promise<void>;
+    /**
+     * @name payoutRequestHandler
+     * @description Handles the payment request from the client
+     * @param req
+     * @param res
+     */
+    paymentRequestHandler(req: Request, res: Response): Promise<void>;
+    payoutRequestHandler(req: Request, res: Response): Promise<void>;
+    /**
+     * @name setTestUrl
+     * @description Sets the test url for the client, this is for when your callback url will probably change dynamically e.g when testing with ngrok
+     * @param url
+     */
+    setTestUrl(url: string): void;
+    /**
+     * @name init
+     * @description Initializes the client with details, that cannot be automatically set using environment variables
+     *              - **Note** be sure to call this at the start of your application or before you start using the client
+     *
+     * @param props
+     */
+    init(props: Partial<{
+        env: 'production' | 'sandbox';
+        c2b_business_name: string;
+        b2c_business_name: string;
+    }>): void;
 }
 declare const _default: ExpressMpesaEvents;
 

@@ -50,9 +50,53 @@ const payment_request_callback_body_schema = z.object({
 type tPaymentRequestCallbackBody = z.infer<typeof payment_request_callback_body_schema> 
 
 
+/**
+ * @name payment_request_body 
+ * @description Schema for the body of the payment request body 
+ * @type {zod.Schema}
+ */
+const payment_request_body = z.object({
+    amount: z.number().min(0, {
+        message: "Amount cann't be 0 or less"
+    }),
+    phone_number: z.number(),
+    transaction_desc: z.string().optional(),
+    transaction_type: z.enum(['CustomerPayBillOnline', 'CustomerBuyGoodsOnline'])
+})
+/**
+ * @name tPaymentRequestBody 
+ * @description the payment request body type
+ */
+type tPaymentRequestBody = z.infer<typeof payment_request_body>
+
+/**
+ * @name payout_request_body
+ * @description Schema for the body of a payout request
+ * @type {zod.Schema}
+ */
+const payout_request_body = z.object({
+    amount: z.number().min(0, {
+        message: "Amount cann't be 0 or less"
+    }),
+    phone_number: z.number(),
+    transaction_desc: z.string().optional(),
+    transaction_type: z.enum(["BusinessPayment","SalaryPayment","PromotionPayment"])
+})
+
+/**
+ * @name tPayoutRequestBody 
+ * @description the payout request body 
+ */
+type tPayoutRequestBody = z.infer<typeof payout_request_body>
+
+
 export {
     payment_request_callback_body_schema,
     type tPaymentRequestCallbackBody,
     payout_request_callback_body_schema,
-    type tPayoutRequestCallbackBody
+    type tPayoutRequestCallbackBody,
+    payment_request_body,
+    type tPaymentRequestBody,
+    payout_request_body,
+    type tPayoutRequestBody
 }

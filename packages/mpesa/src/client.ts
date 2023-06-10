@@ -96,7 +96,7 @@ class MpesaClient {
         callback_url: string
     }>) {
         this._env = props.env || 'sandbox' 
-        this._base_url = props.env === 'sandbox' ? 'https://sandbox.safaricom.co.ke' : 'https://api.safaricom.co.ke'
+        this._base_url = (props.env === 'sandbox' || props.env === undefined) ? 'https://sandbox.safaricom.co.ke' : 'https://api.safaricom.co.ke'
         this._b2c = props.b2c || {}
         this._c2b = props.c2b || {}
         this._callback_url = props.callback_url || ''
@@ -272,13 +272,13 @@ class MpesaClient {
          */
         phone_number: number,
         /**
-         * @name description
+         * @name transaction_desc
          * @description The description of the transaction
          * @type {string}
          */
-        description: string
+        transaction_desc: string
     }>){
-        const { amount, transaction_type, phone_number, description } = props
+        const { amount, transaction_type, phone_number, transaction_desc } = props
         const base_url = this._base_url
         const url = `${base_url}/mpesa/b2c/v1/paymentrequest`
         try {
@@ -295,7 +295,7 @@ class MpesaClient {
                 PartyB: phone_number,
                 QueueTimeOutURL: `${this._callback_url}/b2c/timeout`,
                 ResultURL: `${this._callback_url}/b2c/result`,
-                Remarks: description,
+                Remarks: transaction_desc,
             } as SendPayoutRequest, {
                 headers: {
                     'Authorization': `Bearer ${access_token}`
@@ -325,8 +325,24 @@ class MpesaClient {
      * @description for testing purposes, i.e when you need to dynamically change the callback url
      * @param url 
      */
-    set_callback_url(url: string){
+    public set_callback_url(url: string){
         this._callback_url = url
+    }
+
+    /**
+     * @name set_client 
+     * !!! INTERNAL USE ONLY !!!
+     * @description this is for any clients e.g the express client, that rely on this client to set the env
+     * @param props 
+     */
+    public set_client(props: Partial<{
+        env: 'sandbox' | 'production',
+        b2c_business_name: string,
+        c2b_business_name: string,
+    }>){
+        this._env = props.env || 'sandbox'
+        this._b2c.business_name = props.b2c_business_name || ''
+        this._c2b.business_name = props.c2b_business_name || ''
     }
 }
 

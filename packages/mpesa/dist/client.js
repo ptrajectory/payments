@@ -69,6 +69,22 @@ var payment_request_callback_body_schema = z.object({
     })
   })
 });
+var payment_request_body = z.object({
+  amount: z.number().min(0, {
+    message: "Amount cann't be 0 or less"
+  }),
+  phone_number: z.number(),
+  transaction_desc: z.string().optional(),
+  transaction_type: z.enum(["CustomerPayBillOnline", "CustomerBuyGoodsOnline"])
+});
+var payout_request_body = z.object({
+  amount: z.number().min(0, {
+    message: "Amount cann't be 0 or less"
+  }),
+  phone_number: z.number(),
+  transaction_desc: z.string().optional(),
+  transaction_type: z.enum(["BusinessPayment", "SalaryPayment", "PromotionPayment"])
+});
 
 // src/client.ts
 var MpesaClient = class {
@@ -79,7 +95,7 @@ var MpesaClient = class {
   _c2b = {};
   constructor(props) {
     this._env = props.env || "sandbox";
-    this._base_url = props.env === "sandbox" ? "https://sandbox.safaricom.co.ke" : "https://api.safaricom.co.ke";
+    this._base_url = props.env === "sandbox" || props.env === void 0 ? "https://sandbox.safaricom.co.ke" : "https://api.safaricom.co.ke";
     this._b2c = props.b2c || {};
     this._c2b = props.c2b || {};
     this._callback_url = props.callback_url || "";
@@ -189,7 +205,7 @@ var MpesaClient = class {
     }
   }
   async send_payout_request(props) {
-    const { amount, transaction_type, phone_number, description } = props;
+    const { amount, transaction_type, phone_number, transaction_desc } = props;
     const base_url = this._base_url;
     const url = `${base_url}/mpesa/b2c/v1/paymentrequest`;
     try {
@@ -205,7 +221,7 @@ var MpesaClient = class {
         PartyB: phone_number,
         QueueTimeOutURL: `${this._callback_url}/b2c/timeout`,
         ResultURL: `${this._callback_url}/b2c/result`,
-        Remarks: description
+        Remarks: transaction_desc
       }, {
         headers: {
           "Authorization": `Bearer ${access_token}`
@@ -232,6 +248,17 @@ var MpesaClient = class {
    */
   set_callback_url(url) {
     this._callback_url = url;
+  }
+  /**
+   * @name set_client 
+   * !!! INTERNAL USE ONLY !!!
+   * @description this is for any clients e.g the express client, that rely on this client to set the env
+   * @param props 
+   */
+  set_client(props) {
+    this._env = props.env || "sandbox";
+    this._b2c.business_name = props.b2c_business_name || "";
+    this._c2b.business_name = props.c2b_business_name || "";
   }
 };
 var client_default = MpesaClient;
