@@ -5,7 +5,7 @@ on:
     types: [created]
 
 jobs:
-  build:
+  build-and-publish-mpesa-node-client:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,5 +17,20 @@ jobs:
       - run: npm install -g pnpm
       - run: cd packages/mpesa && pnpm install && pnpm run build
       - run: cd packages/mpesa && pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+  build-and-publish-mpesa-react-ui-components:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '18.16.0'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g pnpm
+      - run: cd packages/react && pnpm install && pnpm run build
+      - run: cd packages/react && pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
