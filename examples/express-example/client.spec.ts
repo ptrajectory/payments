@@ -67,7 +67,7 @@ describe('Client test', ()=>{
             request(app)
             .post("/b2c/payout-request")
             .send({
-                amount: 5, 
+                amount: 11, 
                 phone_number: Number(process.env.PHONE_NUMBER),
                 transaction_desc: "Hey there 👋",
                 transaction_type: "BusinessPayment"
