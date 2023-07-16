@@ -29,6 +29,7 @@ jobs:
         with:
           node-version: '18.16.0'
           registry-url: 'https://registry.npmjs.org'
+      - run: npm i -g postcss-cli
       - run: npm install -g pnpm
       - run: cd packages/react && pnpm install && pnpm run build
       - run: cd packages/react && pnpm publish --no-git-checks
