@@ -24,6 +24,7 @@ interface PaymentFormProps {
     additional_fields?: AdditionalField
     amount?: number | string
     onFormSubmit?: (data: z.infer<typeof form_schema>) => void
+    processing?: boolean
 }
 
 const form_schema = z.object({
@@ -49,7 +50,7 @@ const form_schema = z.object({
 
 
 function PaymentForm(props: PaymentFormProps) {
-    const { additional_fields, amount, onFormSubmit } = props
+    const { additional_fields, amount, onFormSubmit, processing } = props
 
     const [formInput, setFormInput] = useState<{
         data: z.infer<typeof form_schema> | null,
@@ -245,7 +246,7 @@ function PaymentForm(props: PaymentFormProps) {
             </Form.Control>
         </Form.Field>}
         <Form.Submit  asChild>
-            <Button disabled={isEmpty(formInput.data?.phone_number)} className='w-full' loadingText='Processing' >
+            <Button isLoading={processing} disabled={isEmpty(formInput.data?.phone_number)} className='w-full' loadingText='Processing' >
                 <span
                     className='text-white font-inter font-semibold'
                 >

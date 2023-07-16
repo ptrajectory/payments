@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Storybook
+storybook-static
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

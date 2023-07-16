@@ -2,7 +2,7 @@ import { VariantProps, cva } from "class-variance-authority";
 import React from "react";
 
 const inputVariants = cva(
-    "font-inter font-medium  w-full px-[8px] border-2 border-gray-300 focus:outline-none",
+    "font-inter font-medium  w-full px-[8px] border-2 border-gray-300 focus:outline-none bg-white focus:border-blue-500",
     {
         variants: {
             variant: {
