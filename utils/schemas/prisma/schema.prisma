@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Customer {
+  id              String          @id
+  first_name      String
+  last_name       String
+  email           String
+  meta            Json
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  payment_methods PaymentMethod[]
+  checkouts       Checkout[]
+}
+
+model PaymentMethod {
+  id           String     @id
+  customer     Customer?  @relation(fields: [customer_id], references: [id])
+  customer_id  String?
+  type         String
+  phone_number String
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  checkouts    Checkout[]
+}
+
+model Checkout {
+  id                String         @id
+  amount            Float
+  currency          String
+  status            String
+  customer          Customer?      @relation(fields: [customer_id], references: [id])
+  customer_id       String?
+  payment_method    PaymentMethod? @relation(fields: [payment_method_id], references: [id])
+  payment_method_id String?
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+}

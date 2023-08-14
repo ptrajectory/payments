@@ -1,6 +1,8 @@
 
 
-class Customer
+class Customer {
+    
+}
 
 
 class Payments {

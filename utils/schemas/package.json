@@ -1,0 +1,20 @@
+{
+  "name": "schemas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "migrate:dev": "prisma migrate dev",
+    "format": "prisma format"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "5.1.1",
+    "prisma": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5"
+  }
+}
