@@ -1,0 +1,6 @@
+{
+    "verbose": true,
+    "ignore": ["node_modules"],
+    "watch": ["src"],
+    "exec": "dotenv -e .env.development ts-node ./src/index.ts"
+}
