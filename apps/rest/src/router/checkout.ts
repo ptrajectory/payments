@@ -2,17 +2,23 @@ import { Router } from "express";
 import handler, { HandlerObj } from "../../lib/handler";
 import { createCheckout } from "../resources/checkout/create";
 import { updateCheckout } from "../resources/checkout/update";
+import { getCheckout } from "../resources/checkout/read";
 
 const routes: Array<HandlerObj> = [
     {
         fn: createCheckout,
         method: "post",
-        path: "/checkout/create"
+        path: "/checkouts"
     },
     {
         fn: updateCheckout,
         method: "put",
-        path: "/checkout/update"
+        path: "/checkouts"
+    },
+    {
+        fn: getCheckout,
+        method: "get",
+        path: "/checkouts"
     }
 ]
 

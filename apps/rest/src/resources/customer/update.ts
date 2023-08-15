@@ -2,6 +2,7 @@ import { generate_dto, generate_unique_id } from "generators";
 import { CUSTOMER } from "../../../lib/db/schema";
 import { HandlerFn } from "../../../lib/handler";
 import { customer } from "zodiac"
+import { eq } from "drizzle-orm";
 
 
 
@@ -13,22 +14,24 @@ export const updateCustomer: HandlerFn = async (req, res, clients) => {
     // body
     const body = req.body
 
-    const parsed = customer.safeParse(body) 
+    const parsed = customer.required({
+        id: true
+    }).safeParse(body) 
 
     if (!parsed.success) {
         res.status(400).send(generate_dto(parsed.error.formErrors.fieldErrors, "Invalid body", "error"))
         return
     }
 
-    const {created_at, updated_at,...data} = parsed.data
+    const {created_at, updated_at, id,...data} = parsed.data
 
 
     try {
-        await db?.update(CUSTOMER).set({
+        var result = await db?.update(CUSTOMER).set({
             ...data
-        })
-
-        const dto = generate_dto(null, "Customer updated successfully", "success")
+        }).where(eq(CUSTOMER.id, id)).returning()
+        var cus = result?.at(0)
+        const dto = generate_dto(cus, "Customer updated successfully", "success")
         
         res.status(201).send(dto)
     }

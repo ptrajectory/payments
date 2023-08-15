@@ -9,7 +9,6 @@ export const createCheckout: HandlerFn = async (req, res, clients) => {
     // clients
     const { db } = clients
 
-
     // body
     const body = req.body
 

@@ -9,7 +9,6 @@ export const createCustomer: HandlerFn = async (req, res, clients) => {
     // clients
     const { db } = clients
 
-
     // body
     const body = req.body
 
@@ -24,15 +23,15 @@ export const createCustomer: HandlerFn = async (req, res, clients) => {
 
 
     try {
-        await db?.insert(CUSTOMER).values({
+        const result = await db?.insert(CUSTOMER).values({
             id: generate_unique_id("cus"),
             email: data.email,
             first_name: data.first_name,
             last_name: data.last_name,
             meta: data.meta
-        })
+        }).returning()
 
-        const dto = generate_dto(null, "Customer created successfully", "success")
+        const dto = generate_dto(result?.at(0), "Customer created successfully", "success")
         
         res.status(201).send(dto)
     }

@@ -4,17 +4,23 @@ import { createCheckout } from "../resources/checkout/create";
 import { updateCheckout } from "../resources/checkout/update";
 import { createPaymentMethod } from "../resources/payment_method/create";
 import { updatePaymentMethod } from "../resources/payment_method/update";
+import { getPaymentMethod } from "../resources/payment_method/read";
 
 const routes: Array<HandlerObj> = [
     {
         fn: createPaymentMethod,
         method: "post",
-        path: "/paymentmethod/create"
+        path: "/payment_methods"
     },
     {
         fn: updatePaymentMethod,
         method: "put",
-        path: "/paymentmethod/update"
+        path: "/payment_methods"
+    },
+    {
+        fn: getPaymentMethod,
+        method: "get",
+        path: "/payment_methods"
     }
 ]
 
