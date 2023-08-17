@@ -25,3 +25,12 @@ export const PAYMENT_METHOD_ENDPOINTS = {
     update: API_HOST + "/payment_method/update",
 }
 
+// CART SPECIFIC ENDPOINTS
+export const CART_ENDPOINTS = {
+    base: API_HOST + "/carts"
+}
+
+// PRODUCT SPECIFIC ENDPOINTS
+export const PRODUCT_ENDPOINTS = {
+    base: API_HOST + "/products"
+}

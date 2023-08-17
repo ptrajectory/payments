@@ -22,6 +22,7 @@ model Customer {
   payment_methods PaymentMethod[]
   checkouts       Checkout[]
   carts           Cart[]
+  payments        Payment[]
 }
 
 model PaymentMethod {
@@ -33,6 +34,7 @@ model PaymentMethod {
   created_at   DateTime   @default(now())
   updated_at   DateTime   @updatedAt
   checkouts    Checkout[]
+  payments     Payment[]
 }
 
 model Checkout {
@@ -48,6 +50,7 @@ model Checkout {
   updated_at        DateTime       @updatedAt
   cart              Cart?          @relation(fields: [cart_id], references: [id])
   cart_id           String?        @unique
+  payments          Payment[]
 }
 
 
@@ -83,3 +86,18 @@ model CartItem {
   updated_at DateTime @updatedAt
 }
 
+
+model Payment {
+  id String @id
+  amount Float 
+  token String
+  status String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  payment_method PaymentMethod @relation(fields: [payment_method_id], references: [id])
+  payment_method_id String
+  checkout_id String
+  checkout Checkout @relation(fields: [checkout_id], references: [id])
+  customer_id String 
+  customer Customer @relation(fields: [customer_id], references: [id])
+}
