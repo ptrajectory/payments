@@ -1,0 +1,37 @@
+../..                                    | Progress: resolved 0, reused 1, downloaded 0, added 0
+../../examples/express-example           |  WARN  deprecated @types/expect@24.3.0
+../..                                    | Progress: resolved 75, reused 75, downloaded 0, added 0
+ WARN  GET https://registry.npmjs.org/@storybook%2Faddon-interactions error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/storybook error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Fblocks error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Faddon-onboarding error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Faddon-essentials error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Freact error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Ftesting-library error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Fnextjs error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Faddon-links error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Faddon-interactions error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ WARN  GET https://registry.npmjs.org/storybook error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Fblocks error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Faddon-onboarding error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Faddon-essentials error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Faddon-links error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Fnextjs error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Ftesting-library error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ WARN  GET https://registry.npmjs.org/@storybook%2Freact error (ECONNRESET). Will retry in 1 minute. 1 retries left.
+ ERR_PNPM_META_FETCH_FAIL  GET https://registry.npmjs.org/@storybook%2Faddon-interactions: request to https://registry.npmjs.org/@storybook%2Faddon-interactions failed, reason: Client network socket disconnected before secure TLS connection was established
+ ERR_PNPM_NO_MATCHING_VERSION  No matching version found for @storybook/addon-interactions@^7.3.2
+
+This error happened while installing a direct dependency of /Users/don/Documents/d_house_dev/libs/mpesa/apps/transactions
+
+The latest release of @storybook/addon-interactions is "7.0.26".
+
+Other releases are:
+  * next: 7.1.0-rc.1
+  * prerelease: 6.5.17-alpha.0
+  * future: 7.1.0-alpha.29
+
+If you need the full list of all 378 published versions run "$ pnpm view @storybook/addon-interactions versions".
+ ERR_PNPM_META_FETCH_FAIL  GET https://registry.npmjs.org/@storybook%2Fblocks: request to https://registry.npmjs.org/@storybook%2Fblocks failed, reason: Client network socket disconnected before secure TLS connection was established
+ ERR_PNPM_META_FETCH_FAIL  GET https://registry.npmjs.org/storybook: request to https://registry.npmjs.org/storybook failed, reason: Client network socket disconnected before secure TLS connection was established
+../..                                    | Progress: resolved 76, reused 75, downloaded 0, added 0
