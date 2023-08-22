@@ -16,7 +16,7 @@ model Customer {
   first_name      String
   last_name       String
   email           String
-  meta            Json
+  meta            Json?
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
   payment_methods PaymentMethod[]
