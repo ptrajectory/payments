@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { clients } from "../../../lib/clients";
 import { PRODUCT } from "../../../lib/db/schema";
 import { HandlerFn } from "../../../lib/handler";
-import { isEmpty } from "lodash";
+import { isEmpty, isUndefined } from "lodash";
 import { generate_dto } from "generators";
 
 
@@ -10,7 +10,15 @@ export const getProduct: HandlerFn =  async (req, res, clients) => {
     const { db } = clients
 
 
-    const id = req.query.id as string
+    const id = req.params.product_id as string
+
+    if(isEmpty(id) || isUndefined(id)) return res.status(400).send(
+        generate_dto(
+            null,
+            "ID IS REQUIRED",
+            "error"
+        )
+    )
 
     try {
         const result = await db?.select().from(PRODUCT).where(eq(PRODUCT.id, id))

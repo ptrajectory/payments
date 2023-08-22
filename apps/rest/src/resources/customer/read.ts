@@ -3,23 +3,22 @@ import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { CUSTOMER } from "../../../lib/db/schema";
 import { eq } from "drizzle-orm";
-import { isEmpty } from "lodash";
+import { isEmpty, isUndefined } from "lodash";
 
 
 export const getCustomer: HandlerFn = async (req, res, clients) => {
     // clients
     const { db } = clients
 
-    const parsed = customer.required({
-        id: true
-    }).safeParse(req.query)
+    const id = req.params.customer_id
 
-    if (!parsed.success) {
-        res.status(400).send(parsed.error.formErrors.fieldErrors)
-        return
-    }
-
-    const { id } = parsed.data 
+    if(isUndefined(id) || isEmpty(id)) return res.status(400).send(
+        generate_dto(
+            null,
+            "ID not provided",
+            "error"
+        )
+    )
 
     try {
         const results = db?.select().from(CUSTOMER).where(eq(CUSTOMER.id, id))

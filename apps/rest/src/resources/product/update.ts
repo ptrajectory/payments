@@ -3,6 +3,7 @@ import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { PRODUCT } from "../../../lib/db/schema";
 import { eq } from "drizzle-orm";
+import { isEmpty, isUndefined } from "lodash";
 
 
 export const updateProduct: HandlerFn = async (req, res, clients) => {
@@ -10,16 +11,29 @@ export const updateProduct: HandlerFn = async (req, res, clients) => {
 
     const body = req.body 
 
-    const parsed = product.required({
-        id: true
-    }).safeParse(body)
+    console.log("Here is the body::", body)
+
+    const id = req.params.product_id
+
+    if(isEmpty(id) || isUndefined(id)) return res.status(400)
+    .send(generate_dto(
+        null,
+        "ID IS REQUIRED",
+        "error"
+    ))
+
+    const parsed = product.safeParse(body)
 
     if (!parsed.success) {
         res.status(400).send(parsed.error.formErrors.fieldErrors)
         return
     }
 
-    const {id, ...data} = parsed.data
+    const data = parsed.data
+
+    console.log("Here is the data:", data)
+
+    console.log("The iD::", id)
 
     try {
         var result = await db?.update(PRODUCT).set({
@@ -32,6 +46,41 @@ export const updateProduct: HandlerFn = async (req, res, clients) => {
     }
     catch (e)
     {
+        console.log("Something went wrong::", e)
         res.status(500).send(generate_dto(e, "Unable to update product", "error"))
     }
+}
+
+
+export const deleteProduct: HandlerFn =  async (req, res, clients) => {
+    const { db } = clients
+
+
+    const id = req.params.product_id as string
+
+    if(isEmpty(id) || isUndefined(id)) return res.status(400).send(
+        generate_dto(
+            null,
+            "ID IS REQUIRED",
+            "error"
+        )
+    )
+
+    try {
+        const result = await db?.delete(PRODUCT).where(eq(PRODUCT.id, id)).returning()
+
+        if (isEmpty(result?.at(0))) {
+            return res.status(404).send(generate_dto(null, "Product not found", "error"))
+        }
+
+        return res.status(200).send(generate_dto(result?.at(0), "Product found", "success"))
+    }
+    catch (e)
+    {
+        res.status(500).send({
+            success: false,
+            message: "Something went wrong"
+        })
+    }
+
 }

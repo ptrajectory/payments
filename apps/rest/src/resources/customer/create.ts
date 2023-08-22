@@ -6,6 +6,8 @@ import { customer } from "zodiac"
 
 
 export const createCustomer: HandlerFn = async (req, res, clients) => {
+
+    console.log("Invoming", req.body)
     // clients
     const { db } = clients
 
@@ -23,12 +25,15 @@ export const createCustomer: HandlerFn = async (req, res, clients) => {
 
 
     try {
+
+        console.log("The data", data)
         const result = await db?.insert(CUSTOMER).values({
             id: generate_unique_id("cus"),
             email: data.email,
             first_name: data.first_name,
             last_name: data.last_name,
-            meta: data.meta
+            meta: data.meta,
+            updated_at: new Date(),
         }).returning()
 
         const dto = generate_dto(result?.at(0), "Customer created successfully", "success")
@@ -37,6 +42,7 @@ export const createCustomer: HandlerFn = async (req, res, clients) => {
     }
     catch (e)
     {   
+        console.log("The error::", e)
         res.status(500)
         .send(generate_dto(e, "Unable to create customer", "error"))
     }

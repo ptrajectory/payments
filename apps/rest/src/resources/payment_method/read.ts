@@ -3,23 +3,21 @@ import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { PAYMENT_METHOD } from "../../../lib/db/schema";
 import { eq } from "drizzle-orm";
-import { isEmpty } from "lodash";
+import { isEmpty, isUndefined } from "lodash";
 
 
 
 export const getPaymentMethod: HandlerFn = async (req, res, clients) => {
     const { db } = clients
 
-    const parsed = payment_method.required({
-        id: true
-    }).safeParse(req.query)
 
-    if (!parsed.success) {
-        res.status(400).send(parsed.error.formErrors.fieldErrors)
-        return
-    }
+    const id = req.params.payment_method_id 
 
-    const { id } = parsed.data
+    if(isEmpty(id) || isUndefined(id)) return res.status(400).send(generate_dto(
+        null,
+        "ID IS NOT PROVIDED",
+        "error"
+    ))
 
     try {
 

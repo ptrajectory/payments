@@ -1,7 +1,7 @@
 import { Router } from "express";
 import handler, { HandlerObj } from "../../lib/handler";
 import { createCustomer } from "../resources/customer/create";
-import { updateCustomer } from "../resources/customer/update";
+import { deleteCustomer, updateCustomer } from "../resources/customer/update";
 import { getCustomer } from "../resources/customer/read";
 
 const routes: Array<HandlerObj> = [
@@ -13,12 +13,17 @@ const routes: Array<HandlerObj> = [
     {
         fn: updateCustomer,
         method: "put",
-        path: "/customers"
+        path: "/customers/:customer_id"
     },
     {
         fn: getCustomer,
         method: "get",
-        path: "/customers"
+        path: "/customers/:customer_id"
+    },
+    {
+        fn: deleteCustomer,
+        method: "delete",
+        path: "/customers/:customer_id"
     }
 ]
 

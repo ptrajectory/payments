@@ -2,6 +2,8 @@ import { clients } from './../../../lib/clients';
 import { HandlerFn } from "../../../lib/handler";
 import { CART } from '../../../lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { isEmpty } from 'lodash';
+import { generate_dto } from 'generators';
 
 
 
@@ -9,7 +11,13 @@ export const getCart: HandlerFn = async (req, res, clients) => {
 
     const { db } = clients
 
-    const id = req.query.id as string
+    const id = req.params.cart_id as string
+
+    if(isEmpty(id)) return res.status(400).send(generate_dto(
+        null,
+        "ID IS REQUIRED",
+        "error"
+    ))
 
     try {
         const result = await db?.query.CART.findFirst({
@@ -20,7 +28,7 @@ export const getCart: HandlerFn = async (req, res, clients) => {
         })
 
         res.status(200).send({
-            success: true,
+            status: "success",
             message: "Cart found",
             data: result
         })
@@ -28,8 +36,9 @@ export const getCart: HandlerFn = async (req, res, clients) => {
     catch (e)
     {
         res.status(500).send({
-            success: false,
-            message: "Something went wrong"
+            status: "error",
+            message: "Something went wrong",
+            data: e
         })
     }
 }

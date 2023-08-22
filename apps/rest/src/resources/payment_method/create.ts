@@ -24,17 +24,19 @@ export const createPaymentMethod: HandlerFn = async (req, res, clients) => {
 
 
     try {
-        await db?.insert(PAYMENT_METHOD).values({
+        const result = await db?.insert(PAYMENT_METHOD).values({
             id: generate_unique_id("pm"),
-            ...data
-        })
+            ...data,
+            updated_at: new Date()
+        }).returning()
 
-        const dto = generate_dto(null, "Payment Method created successfully", "success")
+        const dto = generate_dto(result?.at(0), "Payment Method created successfully", "success")
         
         res.status(201).send(dto)
     }
     catch (e)
     {   
+        console.log("The error ::", e)
         res.status(500)
         .send(generate_dto(e, "Unable to create payment method", "error"))
     }

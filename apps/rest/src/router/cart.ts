@@ -1,7 +1,7 @@
 import { Router } from "express";
 import handler, { HandlerObj } from "../../lib/handler";
 import { createCart, createCartItem } from "../resources/cart/create";
-import { updateCart, updateCartItem } from "../resources/cart/update";
+import { deleteCart, deleteCartItem, updateCart, updateCartItem } from "../resources/cart/update";
 import { getCart } from "../resources/cart/read";
 
 const routes: Array<HandlerObj> = [
@@ -13,22 +13,32 @@ const routes: Array<HandlerObj> = [
     {
         fn: updateCart,
         method: "put",
-        path: "/carts"
+        path: "/carts/:cart_id"
     },
     {
         fn: getCart,
         method: "get",
-        path: "/carts"
+        path: "/carts/:cart_id"
     },
     {
         fn: createCartItem,
         method: "post",
-        path: "/carts/:cart_id/cart_items"
+        path: "/carts/:cart_id"
     },
     {
         fn: updateCartItem,
         method: "put",
-        path: "/carts/:cart_id/cart_items/:cart_item_id"
+        path: "/carts/:cart_id/:cart_item_id"
+    },
+    {
+        fn: deleteCart,
+        method: "delete",
+        path: "/carts/:cart_id"
+    },
+    {
+        fn: deleteCartItem,
+        method: "delete",
+        path: "/carts/:cart_id/:cart_item_id"
     }
 ]
 

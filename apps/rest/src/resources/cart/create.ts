@@ -20,12 +20,16 @@ export const createCart: HandlerFn = async (req, res, clients) => {
         const result = await db?.insert(CART).values({
             id: generate_unique_id("crt"),
             customer_id: data.customer_id,
+            updated_at: new Date(),
+            create_at: new Date()
         }).returning()
 
         res.status(201).send(generate_dto(result?.at(0), "Cart created successfully", "success"))
     }
     catch (e)
     {
+
+        console.log("The actual error is::", e)
         res.status(500).send(generate_dto(e, "Unable to create cart", "error"))
     }
 
@@ -50,7 +54,9 @@ export const createCartItem: HandlerFn = async (req, res, clients) => {
         const cart_item = db?.insert(CART_ITEM).values({
            id: generate_unique_id("crt_itm"),
            cart_id,
-           ...data
+           ...data,
+           updated_at: new Date(),
+           created_at: new Date()
         }).returning()
 
         return res.status(201).send(generate_dto(cart_item, "Something went wrong", "error"))
@@ -58,6 +64,7 @@ export const createCartItem: HandlerFn = async (req, res, clients) => {
     }
     catch (e)
     {
+        console.log("Here is what's actually going wrong::", e)
         return res.status(500).send(generate_dto(e, "Something went wrong", "error"))
     }
 

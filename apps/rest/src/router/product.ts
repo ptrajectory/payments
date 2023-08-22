@@ -1,7 +1,7 @@
 import { Router } from "express";
 import handler, { HandlerObj } from "../../lib/handler";
 import { createProduct } from "../resources/product/create";
-import { updateProduct } from "../resources/product/update";
+import { deleteProduct, updateProduct } from "../resources/product/update";
 import { getProduct } from "../resources/product/read";
 
 const routes: Array<HandlerObj> = [
@@ -13,12 +13,17 @@ const routes: Array<HandlerObj> = [
     {
         fn: updateProduct,
         method: "put",
-        path: "/products"
+        path: "/products/:product_id"
     },
     {
         fn: getProduct,
         method: "get",
-        path: "/products"
+        path: "/products/:product_id"
+    },
+    {
+        fn: deleteProduct,
+        method: "delete",
+        path: "/products/:product_id"
     }
 ]
 
