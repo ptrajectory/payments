@@ -1,6 +1,8 @@
 import { CUSTOMER_ENDPOINTS } from "../lib/CONSTANTS"
 import { CUSTOMER, customer } from "zodiac"
 import got, { RequestError } from "got"
+import { isEmpty, isNull, isUndefined } from "lodash"
+import { DTO } from "src/lib/types"
 
 class Customer {
     private api_key: string = ""
@@ -32,9 +34,9 @@ class Customer {
                 },
                 body: JSON.stringify(parsedData),
                 method: "POST"
-            }).json<CUSTOMER>()
+            }).json<DTO<CUSTOMER>>()
 
-            return customer 
+            return customer.data 
 
         }
         catch (e) 
@@ -46,8 +48,10 @@ class Customer {
     }
 
 
-    async updateCustomer(data: CUSTOMER): Promise<CUSTOMER> {
+    async updateCustomer(id: string, data: CUSTOMER): Promise<CUSTOMER> {
         const parsed = customer.safeParse(data)
+
+        if(isEmpty(id)) throw new Error("ID NOT PROVIDED")
 
         if (!parsed.success) {
             throw new Error("INVALID BODY", {
@@ -59,16 +63,16 @@ class Customer {
         const url = CUSTOMER_ENDPOINTS.base
 
         try{
-            const customer = await got(url, {
+            const customer = await got.put(`${url}/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(parsedData),
                 method: "PUT"
-            }).json<CUSTOMER>()
+            }).json<DTO<CUSTOMER>>()
 
-            return customer
+            return customer.data
         }
         catch (e)
         {
@@ -79,23 +83,22 @@ class Customer {
     }
 
 
-    async getCustomer(id: string): Promise<CUSTOMER>{
+    async getCustomer(id: undefined | string | null = null): Promise<CUSTOMER>{
         
         const url = CUSTOMER_ENDPOINTS.base
 
+        if(isUndefined(id) || isNull(id) ) throw new Error("ID NOT PROVIDED")
+
         try {
 
-            const customer = await got(url, {
+            const customer = await got.get(`${url}/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`,
                     "Content-Type": "application/json",
-                },
-                searchParams: {
-                    id
                 }
-            }).json<CUSTOMER>()
+            }).json<DTO<CUSTOMER>>()
 
-            return customer
+            return customer.data
 
         }
         catch (e)
@@ -105,6 +108,36 @@ class Customer {
             })
         }
     }
+
+
+    async deleteCustomer(id: undefined | string | null = null): Promise<CUSTOMER>{
+        
+        const url = CUSTOMER_ENDPOINTS.base
+
+        if(isUndefined(id) || isNull(id) ) throw new Error("ID NOT PROVIDED")
+
+        try {
+
+            const customer = await got.delete(`${url}/${id}`, {
+                headers: {
+                    "Authorization": `Bearer ${this.api_key}`,
+                    "Content-Type": "application/json",
+                }
+            }).json<DTO<CUSTOMER>>()
+
+            return customer.data
+
+        }
+        catch (e)
+        {
+            throw new Error("UNABLE TO DELETE CUSTOMER", {
+                cause: (e as RequestError).response?.body
+            })
+        }
+    }
+
+
+
 
     
 

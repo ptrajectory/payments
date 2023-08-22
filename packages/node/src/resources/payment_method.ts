@@ -1,6 +1,8 @@
 import { PAYMENT_METHOD, payment_method } from "zodiac"
 import { PAYMENT_METHOD_ENDPOINTS } from "../lib/CONSTANTS"
 import got, { RequestError } from "got"
+import { DTO } from "src/lib/types"
+import { isEmpty } from "lodash"
 
 
 
@@ -14,11 +16,11 @@ class PaymentMethod {
     }
 
 
-    async createPaymentMethod(data: PAYMENT_METHOD) {
+    async createPaymentMethod(data: PAYMENT_METHOD): Promise<PAYMENT_METHOD> {
         const parsed = payment_method.safeParse(data)
 
         if (!parsed.success) {
-            throw new Error("INVALID BODY", {
+            throw new Error("INVALID BODY", { 
                 cause: parsed.error.formErrors.fieldErrors
             })
         }
@@ -28,19 +30,21 @@ class PaymentMethod {
 
         try {
 
-            const payment_method = await got(url, {
+            const payment_method = await got.post(url, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(parsedData),
-            })
+            }).json<DTO<PAYMENT_METHOD>>()
 
-            return payment_method
+            return payment_method.data
 
         } 
         catch (e)
         {
+
+            console.log("The error::", (e as RequestError)?.code, (e as RequestError)?.cause, (e as RequestError)?.message )
             throw new Error("UNABLE TO CREATE PAYMENT METHOD", {
                 cause: (e as RequestError).response?.body
             })
@@ -48,13 +52,16 @@ class PaymentMethod {
 
     }   
 
-    async updatePaymentMethod(data: PAYMENT_METHOD): Promise<PAYMENT_METHOD> {
+    async updatePaymentMethod(id: string, data: PAYMENT_METHOD): Promise<PAYMENT_METHOD> {
+
+        if(isEmpty(id)) throw Error("ID CANNT BE EMPTY")
+
         const parsed = payment_method.safeParse(data)
 
         if (!parsed.success) {
             throw new Error("INVALID BODY", {
                 cause: parsed.error.formErrors.fieldErrors
-            })
+            }) 
         }
 
         const { created_at, updated_at, ...parsedData } = parsed.data
@@ -63,15 +70,15 @@ class PaymentMethod {
 
         try {
 
-            const payment_method = await got(url, {
+            const payment_method = await got.put(`${url}/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`,
                     "Content-Type": "application/json", 
                 },
                 body: JSON.stringify(parsedData)
-            }).json<PAYMENT_METHOD>()
+            }).json<DTO<PAYMENT_METHOD>>()
 
-            return payment_method
+            return payment_method.data
 
         }
         catch (e) 
@@ -84,22 +91,50 @@ class PaymentMethod {
 
 
     async getPaymentMethod(id: string): Promise<PAYMENT_METHOD> {
+
+        if(isEmpty(id)) throw new Error("ID CANNT BE EMPTY")
         
         const url = PAYMENT_METHOD_ENDPOINTS.base 
 
         try {
 
-            const payment_method = await got(url, {
+            const payment_method = await got.get(`${url}/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`,
                     "Content-Type": "application/json",
-                },
-                searchParams: {
-                    id
                 }
-            }).json<PAYMENT_METHOD>()
+            }).json<DTO<PAYMENT_METHOD>>()
 
-            return payment_method
+            return payment_method.data
+
+        }
+        catch (e) 
+        {
+            throw new Error("UNABLE TO GET PAYMENT METHOD", {
+                cause: (e as RequestError).response?.body
+            })
+        }
+
+
+    }
+
+
+    async deletePaymentMethod(id: string): Promise<PAYMENT_METHOD> {
+
+        if(isEmpty(id)) throw new Error("ID CANNT BE EMPTY")
+        
+        const url = PAYMENT_METHOD_ENDPOINTS.base 
+
+        try {
+
+            const payment_method = await got.delete(`${url}/${id}`, {
+                headers: {
+                    "Authorization": `Bearer ${this.api_key}`,
+                    "Content-Type": "application/json",
+                }
+            }).json<DTO<PAYMENT_METHOD>>()
+
+            return payment_method.data
 
         }
         catch (e) 
