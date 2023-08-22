@@ -4,6 +4,8 @@ import Cost from '@/componenets/organisms/cost'
 import Header from '@/componenets/organisms/header'
 import React from 'react'
 import CartItem from "@/componenets/organisms/cart-item"
+import { ArrowLeftIcon } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/componenets/atoms/avatar"
 
 function CheckoutPage() {
   return (
@@ -11,13 +13,40 @@ function CheckoutPage() {
 
 
       <div className="flex flex-col w-1/2 h-full items-center justify-center">
-        <div className="flex flex-col items-center w-4/5 h-4/5 space-y-5">
-            <Header/>
-            <Cost/>
-            <div className="flex flex-col space-x-1">
-                <CartItem/>
-                
-            </div>
+        <div className="grid grid-cols-[20px_1fr] w-4/5 gap-x-2 h-4/5">
+          <div className="flex flex-row items-start justify-center w-full h-full py-1" >
+            <button className="outline-none background-none rounded-full p-1">
+              <ArrowLeftIcon
+                className="text-gray-400"
+                size={18}
+              />
+            </button>
+
+            
+
+          </div>
+          <div className="flex flex-col items-center justify-start w-full ">
+
+
+              <div className="flex flex-row items-center justify-start w-full">
+                <Avatar>
+                  <AvatarImage
+                    src="https://www.iamonyino.com/brand/ptrajectory.svg"
+                    className="p-1"
+                  />
+                  <AvatarFallback>
+                    ptrajectory
+                  </AvatarFallback>
+                </Avatar>
+                <h1
+                  className="font-semibold"
+                >
+                  ptrajectory
+                </h1>
+              </div>
+
+
+          </div>
         </div>
       </div>
 
