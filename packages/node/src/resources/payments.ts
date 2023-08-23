@@ -2,6 +2,7 @@ import got, { RequestError } from "got"
 import { CART, CART_ITEM, PAYMENT, cart, cart_item, payment } from "zodiac"
 import { CART_ENDPOINTS, PAYMENT_ENDPOINTS } from "../lib/CONSTANTS"
 import { isEmpty, isUndefined } from "lodash"
+import { DTO } from "src/lib/types"
 
 
 
@@ -23,13 +24,13 @@ class Payment {
 
         try {
             const result = await got.post(PAYMENT_ENDPOINTS.base, {
-                body: JSON.stringify(parsed.data),
+                json: parsed.data,
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`
                 }
-            }).json<PAYMENT>()
+            }).json<DTO<PAYMENT>>()
 
-            return result
+            return result.data
         }
         catch (e)
         {
@@ -57,13 +58,13 @@ class Payment {
         try {
 
             const result = await got.put(`${PAYMENT_ENDPOINTS.base}/${id}`, {
-                body: JSON.stringify(parsed.data),
+                json: parsed.data,
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`
                 }
-            }).json<PAYMENT>()
+            }).json<DTO<PAYMENT>>()
 
-            return result
+            return result.data
 
         }
         catch (e)
@@ -80,13 +81,13 @@ class Payment {
 
         try {
 
-            const result = await got.put(`${PAYMENT_ENDPOINTS.base}/${id}`, {
+            const result = await got.get(`${PAYMENT_ENDPOINTS.base}/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`
                 }
-            }).json<PAYMENT>()
+            }).json<DTO<PAYMENT>>()
 
-            return result
+            return result.data
 
         }
         catch (e)
@@ -96,6 +97,26 @@ class Payment {
             })
         }
 
+    }
+
+    async deletePayment(id: string) {
+        try {
+
+            const result = await got.delete(`${PAYMENT_ENDPOINTS.base}/${id}`, {
+                headers: {
+                    "Authorization": `Bearer ${this.api_key}`
+                }
+            }).json<DTO<PAYMENT>>()
+
+            return result.data
+
+        }
+        catch (e)
+        {
+            throw new Error("Something went wrong", {
+                cause: (e as RequestError)?.response?.body
+            })
+        }
     }
 }
 

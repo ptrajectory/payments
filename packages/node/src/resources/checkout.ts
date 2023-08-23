@@ -1,6 +1,7 @@
 import { CHECKOUT, checkout } from "zodiac"
 import { CHECKOUT_ENDPOINTS } from "../lib/CONSTANTS"
 import got, { RequestError } from "got"
+import { DTO } from "src/lib/types"
 
 
 
@@ -27,16 +28,16 @@ class Checkout {
 
         try {
 
-            const checkout = await got(url, {
+            const checkout = await got.post(url, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(parsedData),
                 method: "POST"
-            }).json<CHECKOUT>()
+            }).json<DTO<CHECKOUT>>()
 
-            return checkout
+            return checkout.data
 
         }
         catch (e)
@@ -47,7 +48,7 @@ class Checkout {
         }
     }
 
-    async updateCheckout(data: CHECKOUT): Promise<CHECKOUT> {
+    async updateCheckout(id: string, data: CHECKOUT): Promise<CHECKOUT> {
         const parsed = checkout.safeParse(data) 
 
         if (!parsed.success) {
@@ -61,15 +62,15 @@ class Checkout {
         const url = CHECKOUT_ENDPOINTS.base
 
         try {
-            const checkout = await got(url, {
+            const checkout = await got.put(`${url}/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(parsedData),
-            }).json<CHECKOUT>()
+            }).json<DTO<CHECKOUT>>()
 
-            return checkout
+            return checkout.data
 
         }
         catch (e)
@@ -85,17 +86,35 @@ class Checkout {
         const url = CHECKOUT_ENDPOINTS.base
 
         try {
-            const checkout = await got(url, {
+            const checkout = await got.get(`${url}/${id}`, {
                 headers: {
                     "Authorization": `Bearer ${this.api_key}`,
                     "Content-Type": "application/json",
-                },
-                searchParams: {
-                    id
                 }
-            }).json<CHECKOUT>()
+            }).json<DTO<CHECKOUT>>()
 
-            return checkout
+            return checkout.data
+        }
+        catch (e)
+        {
+            throw new Error("UNABLE TO GET CHECKOUT", {
+                cause: (e as RequestError).response?.body
+            })
+        }
+    }
+
+    async deleteCheckout(id: string): Promise<CHECKOUT> {
+        const url = CHECKOUT_ENDPOINTS.base
+
+        try {
+            const checkout = await got.delete(`${url}/${id}`, {
+                headers: {
+                    "Authorization": `Bearer ${this.api_key}`,
+                    "Content-Type": "application/json",
+                }
+            }).json<DTO<CHECKOUT>>()
+
+            return checkout.data
         }
         catch (e)
         {

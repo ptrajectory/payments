@@ -79,7 +79,7 @@ class Cart {
                     "Authorization": `Bearer ${this.api_key}`
                 }
             }).json<DTO<CART & {
-                cart_items: CART_ITEM[]
+                items: CART_ITEM[]
             }>>()
 
             return result.data
