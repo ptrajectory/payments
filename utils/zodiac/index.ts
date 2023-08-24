@@ -49,7 +49,8 @@ type PRODUCT = z.infer<typeof product>;
 
 const cart = z.object({
     id: z.string().optional(),
-    customer_id: z.string().optional(), 
+    customer_id: z.string().optional(),
+    status: z.string().optional() 
 })
 
 type CART = z.infer<typeof cart>; 

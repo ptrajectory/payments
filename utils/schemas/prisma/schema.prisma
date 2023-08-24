@@ -68,6 +68,7 @@ model Product {
 model Cart {
   id String @id 
   customer Customer? @relation(fields: [customer_id], references: [id])
+  status String?
   customer_id String? 
   items CartItem[]
   checkout Checkout?
