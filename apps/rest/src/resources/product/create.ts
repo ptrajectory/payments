@@ -1,7 +1,7 @@
 import { product } from "zodiac";
 import { HandlerFn } from "../../../lib/handler";
 import { generate_dto, generate_unique_id } from "generators";
-import { PRODUCT } from "../../../lib/db/schema";
+import { PRODUCT } from "db/schema";
 
 
 export const createProduct: HandlerFn = async (req, res, clients) => {

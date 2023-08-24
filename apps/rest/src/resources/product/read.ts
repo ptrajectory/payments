@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { clients } from "../../../lib/clients";
-import { PRODUCT } from "../../../lib/db/schema";
+import { PRODUCT } from "db/schema";
 import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";

@@ -1,5 +1,5 @@
 import { generate_dto, generate_unique_id } from "generators";
-import { CHECKOUT, CUSTOMER } from "../../../lib/db/schema";
+import { CHECKOUT, CUSTOMER } from "db/schema";
 import { HandlerFn } from "../../../lib/handler";
 import { checkout } from "zodiac"
 

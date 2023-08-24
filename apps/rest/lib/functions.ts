@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import db from "./db";
-import { PAYMENT } from "./db/schema";
+import db from "db";
+import { PAYMENT } from "db/schema";
 import { sleep } from "functions"
 import { isUndefined } from "./cjs/lodash";
 

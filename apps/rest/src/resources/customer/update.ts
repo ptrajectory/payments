@@ -1,5 +1,5 @@
 import { generate_dto, generate_unique_id } from "generators";
-import { CUSTOMER } from "../../../lib/db/schema";
+import { CUSTOMER } from "db/schema";
 import { HandlerFn } from "../../../lib/handler";
 import { customer } from "zodiac"
 import { eq } from "drizzle-orm";

@@ -1,6 +1,6 @@
 import { clients } from './../../../lib/clients';
 import { HandlerFn } from "../../../lib/handler";
-import { CART, CART_ITEM } from '../../../lib/db/schema';
+import { CART, CART_ITEM } from 'db/schema';
 import { eq } from 'drizzle-orm';
 import { generate_dto } from 'generators';
 import { isEmpty } from '../../../lib/cjs/lodash';

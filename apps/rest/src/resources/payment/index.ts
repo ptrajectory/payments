@@ -1,7 +1,7 @@
 import { payment } from "zodiac";
 import { HandlerFn } from "../../../lib/handler";
 import { generate_dto, generate_unique_id } from "generators";
-import { CHECKOUT, PAYMENT, PAYMENT_METHOD } from "../../../lib/db/schema";
+import { CHECKOUT, PAYMENT, PAYMENT_METHOD } from "db/schema";
 import { eq } from "drizzle-orm";
 import mpesaExpressClient from "./mpesa";
 import { isEmpty, isNull, isUndefined } from "../../../lib/cjs/lodash";

@@ -1,7 +1,7 @@
 import { payment_method } from "zodiac";
 import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
-import { PAYMENT_METHOD } from "../../../lib/db/schema";
+import { PAYMENT_METHOD } from "db/schema";
 import { eq } from "drizzle-orm";
 import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 

@@ -1,7 +1,7 @@
 import { checkout } from "zodiac";
 import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
-import { CHECKOUT } from "../../../lib/db/schema";
+import { CHECKOUT } from "db/schema";
 import { eq } from "drizzle-orm";
 import { isEmpty } from "../../../lib/cjs/lodash";
 

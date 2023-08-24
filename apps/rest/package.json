@@ -35,6 +35,7 @@
     "postgres": "^3.3.5",
     "zodiac": "workspace:*",
     "porkytheblack-mpesa": "workspace:*",
-    "functions": "workspace:*"
+    "functions": "workspace:*",
+    "db": "workspace:*"
   }
 }

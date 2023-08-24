@@ -1,6 +1,6 @@
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { NextFunction, Request, Response, Router } from "express";
-import db from "./db";
+import db from "db";
 import { APPCLIENTS, clients } from "./clients";
 import { isEmpty, isUndefined } from "./cjs/lodash";
 

@@ -1,7 +1,7 @@
 import { cart, cart_item } from "zodiac";
 import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
-import { CART, CART_ITEM } from "../../../lib/db/schema";
+import { CART, CART_ITEM } from "db/schema";
 import { and, eq } from "drizzle-orm";
 import { isEmpty } from "../../../lib/cjs/lodash";
 

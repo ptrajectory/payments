@@ -1,7 +1,7 @@
 import { cart, cart_item } from "zodiac";
 import { HandlerFn } from "../../../lib/handler";
 import { generate_dto, generate_unique_id } from "generators";
-import { CART, CART_ITEM } from "../../../lib/db/schema";
+import { CART, CART_ITEM } from "db/schema";
 
 
 export const createCart: HandlerFn = async (req, res, clients) => {

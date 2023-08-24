@@ -1,7 +1,7 @@
 import mpesaExpressClient from 'porkytheblack-mpesa/events/express'
 import { clients } from '../../../lib/clients'
 import { eq } from 'drizzle-orm'
-import { PAYMENT } from '../../../lib/db/schema'
+import { PAYMENT } from 'db/schema'
 
 mpesaExpressClient.init({
     b2c_business_name: 'testapi',
