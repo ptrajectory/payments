@@ -1,6 +1,6 @@
 import { describe } from "node:test";
-import Payments from "../src";
-import { isNull } from "lodash";
+import Payments from "../src/index.ts";
+import { isNull } from "../src/lib/cjs/lodash.ts";
 
 const payments = new Payments("some_api_key")
 let customer_id: string | null

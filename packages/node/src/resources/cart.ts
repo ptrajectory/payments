@@ -1,7 +1,7 @@
 import got, { RequestError } from "got"
 import { CART, CART_ITEM, cart, cart_item } from "zodiac"
 import { CART_ENDPOINTS } from "../lib/CONSTANTS"
-import { DTO } from "src/lib/types"
+import { DTO } from "../lib/types"
 
 
 

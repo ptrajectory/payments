@@ -1,8 +1,8 @@
 import { CUSTOMER_ENDPOINTS } from "../lib/CONSTANTS"
 import { CUSTOMER, customer } from "zodiac"
 import got, { RequestError } from "got"
-import { isEmpty, isNull, isUndefined } from "lodash"
-import { DTO } from "src/lib/types"
+import { DTO } from "../lib/types"
+import { isEmpty, isNull, isUndefined } from "../lib/cjs/lodash"
 
 class Customer {
     private api_key: string = ""

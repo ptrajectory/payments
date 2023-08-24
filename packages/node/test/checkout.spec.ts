@@ -1,5 +1,5 @@
-import { isNull } from "lodash"
-import Payments from "../src"
+import { isNull } from "../src/lib/cjs/lodash.ts"
+import Payments from "../src/index.ts"
 import assert from "assert"
 
 

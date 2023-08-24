@@ -1,8 +1,8 @@
 import { PAYMENT_METHOD, payment_method } from "zodiac"
 import { PAYMENT_METHOD_ENDPOINTS } from "../lib/CONSTANTS"
 import got, { RequestError } from "got"
-import { DTO } from "src/lib/types"
-import { isEmpty } from "lodash"
+import { DTO } from "../lib/types"
+import { isEmpty } from "../lib/cjs/lodash"
 
 
 

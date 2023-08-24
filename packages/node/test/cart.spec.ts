@@ -1,6 +1,6 @@
 import assert from "assert"
-import Payments from "../src"
-import { isEmpty, isNull } from "lodash"
+import Payments from "../src/index.ts"
+import { isEmpty, isNull } from "../src/lib/cjs/lodash.ts"
 
 const payments = new Payments("")
 let customer_id: string | null = null 

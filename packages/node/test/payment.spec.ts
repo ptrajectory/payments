@@ -1,5 +1,5 @@
-import { isEmpty, isNull } from "lodash"
-import Payments from "../src"
+import { isEmpty, isNull } from "../src/lib/cjs/lodash.ts"
+import Payments from "../src/index.ts"
 import assert from "assert"
 
 
@@ -11,9 +11,10 @@ let cart_id: string | null = null
 let cart_item_id: string | null = null
 let payment_method_id: string | null = null
 let checkout_id: string | null = null 
+let payment_id: string | null = null 
 const camera_image = "https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
 
-describe.only("PAYMENT", ()=>{
+describe("PAYMENT", ()=>{
 
     before(async ()=>{
         const customer = await payments.customer?.createCustomers({
@@ -81,6 +82,7 @@ describe.only("PAYMENT", ()=>{
             }).then((data)=>{
                 assert.strictEqual(data.status, "PROCESSING")
                 assert(!isEmpty(data.token))
+                payment_id = data?.id ?? null 
                 done()
             })
             .catch((e)=>{
@@ -93,6 +95,42 @@ describe.only("PAYMENT", ()=>{
         })
 
 
+        it("CONFIRM PAYMENT", (done)=>{
+
+            if(isNull(payment_id)) return done(Error("PAYMENT ID is null"))
+
+            payments.payment?.confirmPayment(payment_id)
+            .then((status)=>{
+
+                assert.strictEqual(status, "SUCCESS")
+
+                done()
+
+            })
+            .catch((e)=>{
+                console.log("ERROR:",e)
+                done(e)
+            })
+
+        })
+        .timeout(120000) // THIS MAY TAKE LONGER CAUSE ITS DEPENDANT ON MPESA
+
+
+        it("DELETE PAYMENT", (done)=>{
+
+            if(isNull(payment_id)) return done(Error("PAYMENT ID is null"))
+
+            payments.payment?.deletePayment(payment_id)
+            .then((data)=>{
+                assert.strictEqual(data.id, payment_id)
+                done()
+            })
+            .catch((e)=>{
+                console.log("ERROR:",e)
+                done(e)
+            })
+
+        })
     })
 
 

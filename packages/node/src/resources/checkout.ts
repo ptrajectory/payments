@@ -1,7 +1,7 @@
 import { CHECKOUT, checkout } from "zodiac"
 import { CHECKOUT_ENDPOINTS } from "../lib/CONSTANTS"
 import got, { RequestError } from "got"
-import { DTO } from "src/lib/types"
+import { DTO } from "../lib/types"
 
 
 

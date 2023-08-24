@@ -1,7 +1,7 @@
 import got, { RequestError } from "got"
 import { PRODUCT, product } from "zodiac"
 import { PRODUCT_ENDPOINTS } from "../lib/CONSTANTS"
-import { DTO } from "src/lib/types"
+import { DTO } from "../lib/types"
 
 
 class Product {

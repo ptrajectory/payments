@@ -1,5 +1,5 @@
 import assert from "assert"
-import Payments from "../src"
+import Payments from "../src/index.ts"
 
 const payments = new Payments("")
 let customer_id: string | null = null

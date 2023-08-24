@@ -1,8 +1,8 @@
 import got, { RequestError } from "got"
 import { CART, CART_ITEM, PAYMENT, cart, cart_item, payment } from "zodiac"
 import { CART_ENDPOINTS, PAYMENT_ENDPOINTS } from "../lib/CONSTANTS"
-import { isEmpty, isUndefined } from "lodash"
-import { DTO } from "src/lib/types"
+import { DTO } from "../lib/types"
+import { isEmpty, isUndefined } from "../lib/cjs/lodash"
 
 
 
@@ -112,6 +112,27 @@ class Payment {
 
         }
         catch (e)
+        {
+            throw new Error("Something went wrong", {
+                cause: (e as RequestError)?.response?.body
+            })
+        }
+    }
+
+
+    async confirmPayment(id: string) {
+        try {
+
+            const result = await got.get(`${PAYMENT_ENDPOINTS.base}/confirm/${id}`, {
+                headers: {
+                    "Authorization": `Bearer ${this.api_key}`
+                }
+            }).json<DTO<string>>()
+
+            return result.data
+
+        }
+        catch(e)
         {
             throw new Error("Something went wrong", {
                 cause: (e as RequestError)?.response?.body
