@@ -1,9 +1,9 @@
 import { clients } from './../../../lib/clients';
 import { HandlerFn } from "../../../lib/handler";
-import { CART } from '../../../lib/db/schema';
+import { CART, CART_ITEM } from '../../../lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { isEmpty } from 'lodash';
 import { generate_dto } from 'generators';
+import { isEmpty } from '../../../lib/cjs/lodash';
 
 
 
@@ -20,10 +20,11 @@ export const getCart: HandlerFn = async (req, res, clients) => {
     ))
 
     try {
+
         const result = await db?.query.CART.findFirst({
             where: eq(CART.id, id),
             with: {
-                cart_items: true
+                items: true
             }
         })
 
@@ -35,6 +36,8 @@ export const getCart: HandlerFn = async (req, res, clients) => {
     }
     catch (e)
     {
+
+        console.log("Here's what's going wrong::", e)
         res.status(500).send({
             status: "error",
             message: "Something went wrong",

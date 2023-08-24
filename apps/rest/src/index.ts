@@ -3,6 +3,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import router from './router'
 import morgan from 'morgan'
+import hookRouter from './router/hooks'
 
 const app_env = process.env.APP_ENV || "development"
 
@@ -14,6 +15,7 @@ app.use(cookieParser())
 
 
 app.use("/api",router)
+app.use("/", hookRouter)
 
 const port = process.env.APP_PORT || 8089
 

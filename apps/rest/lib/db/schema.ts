@@ -15,7 +15,7 @@ export const CUSTOMER = pgTable("Customer", {
 })
 
 
-export const customerRelations = relations(CUSTOMER, ({many})=>{
+export const CUSTOMERRelations = relations(CUSTOMER, ({many})=>{
     return {
         payment_methods: many(PAYMENT_METHOD),
         checkouts: many(CHECKOUT)
@@ -34,9 +34,12 @@ export const PAYMENT_METHOD = pgTable("PaymentMethod", {
     customer_id: text("customer_id").references(()=>CUSTOMER.id)
 })
 
-export const payment_methodRelations = relations(PAYMENT_METHOD, ({one, many})=>{
+export const PAYMENT_METHODRelations = relations(PAYMENT_METHOD, ({one, many})=>{
     return {
-        customer: one(CUSTOMER),
+        customer: one(CUSTOMER, {
+            fields: [PAYMENT_METHOD.customer_id],
+            references: [CUSTOMER.id]
+        }),
         checkouts: many(CHECKOUT)
     }
 })
@@ -57,11 +60,20 @@ export const CHECKOUT = pgTable("Checkout", {
     cart_id: text("cart_id").references(()=>CART.id)
 })
 
-export const checkoutRelations = relations(CHECKOUT, ({one, many})=>{
+export const CHECKOUTRelations = relations(CHECKOUT, ({one, many})=>{
     return {
-        customer: one(CUSTOMER), 
-        payment_method: one(PAYMENT_METHOD),
-        cart: one(CART),
+        customer: one(CUSTOMER, {
+            fields: [CHECKOUT.customer_id],
+            references: [CUSTOMER.id]
+        }), 
+        payment_method: one(PAYMENT_METHOD, {
+            fields: [CHECKOUT.payment_method_id],
+            references: [PAYMENT_METHOD.id]
+        }),
+        cart: one(CART, {
+            fields: [CHECKOUT.cart_id],
+            references: [CART.id]
+        }),
         payments: many(PAYMENT)
     }
 })
@@ -76,7 +88,7 @@ export const PRODUCT = pgTable("Product", {
     updated_at: timestamp("updated_at").defaultNow()
 })
 
-export const productRelations = relations(PRODUCT, ({many})=>{
+export const PRODUCTRelations = relations(PRODUCT, ({many})=>{
     return {
         cart_items: many(CART_ITEM)
     }
@@ -85,14 +97,18 @@ export const productRelations = relations(PRODUCT, ({many})=>{
 export const CART = pgTable("Cart", {
     id: text("id").primaryKey(),
     customer_id: text("customer_id").references(()=>CUSTOMER.id), 
+    status: text("status"),
     create_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow()
 })
 
-export const cartRelations = relations(CART, ({many, one})=>{
+export const CARTRelations = relations(CART, ({many, one})=>{
     return {
-        cart_items: many(CART_ITEM),
-        checkout: one(CHECKOUT)
+        items: many(CART_ITEM),
+        customer: one(CUSTOMER, {
+            fields: [CART.customer_id],
+            references: [CUSTOMER.id]
+        })
     }
 })
 
@@ -105,10 +121,16 @@ export const CART_ITEM = pgTable("CartItem", {
     updated_at: timestamp("updated_at").defaultNow()
 })
 
-export const cartItemRelations = relations(CART_ITEM, ({one})=>{
+export const CART_ITEMRelations = relations(CART_ITEM, ({one})=>{
     return {
-        cart: one(CART),
-        product: one(PRODUCT)
+        cart: one(CART, {
+            fields: [CART_ITEM.cart_id],
+            references: [CART.id]
+        }),
+        product: one(PRODUCT, {
+            fields: [CART_ITEM.product_id],
+            references: [PRODUCT.id]
+        })
     }
 })
 
@@ -126,10 +148,19 @@ export const PAYMENT = pgTable("Payment", {
 })
 
 
-export const paymentRelations = relations(PAYMENT, ({one})=>{
+export const PAYMENTRelations = relations(PAYMENT, ({one})=>{
     return {
-        payment_method: one(PAYMENT_METHOD),
-        checkout: one(CHECKOUT),
-        customer: one(CUSTOMER)
+        payment_method: one(PAYMENT_METHOD, {
+            fields: [PAYMENT.payment_method_id],
+            references: [PAYMENT_METHOD.id]
+        }),
+        checkout: one(CHECKOUT, {
+            fields: [PAYMENT.checkout_id],
+            references: [CHECKOUT.id]
+        }),
+        customer: one(CUSTOMER, {
+            fields: [PAYMENT.customer_id],
+            references: [CUSTOMER.id]
+        })
     }
 })

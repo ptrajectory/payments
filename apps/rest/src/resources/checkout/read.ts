@@ -3,31 +3,32 @@ import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { CHECKOUT } from "../../../lib/db/schema";
 import { eq } from "drizzle-orm";
-import { isEmpty } from "lodash";
+import { isEmpty } from "../../../lib/cjs/lodash";
 
 
 export const getCheckout: HandlerFn = async (req, res, clients) => {
     const {db} = clients
 
-    const parsed = checkout.required({
-        id: true
-    }).safeParse(req.query)
+    const id = req.params.checkout_id 
 
-    if (!parsed.success) {
-        res.status(400).send(parsed.error.formErrors.fieldErrors)
-        return
-    }
-
-    const { id } = parsed.data
+    if(isEmpty(id)) return res.status(400).send(generate_dto(null, "ID is required", "error"))
 
     try {
-        const results = await db?.select().from(CHECKOUT).where(eq(CHECKOUT.id, id)) 
+        const results = await db?.query.CHECKOUT.findFirst({
+            where: eq(CHECKOUT.id, id),
+            with: {
+                cart: true,
+                customer: true,
+                payment_method: true,
+                payments: true
+            }
+        })
 
-        if (isEmpty(results?.at(0))) {
+        if (isEmpty(results)) {
             return res.status(404).send(generate_dto(null, "Checkout not found", "error"))
         }
 
-        return res.status(200).send(generate_dto(results?.at(0), "Checkout found", "success"))
+        return res.status(200).send(generate_dto(results, "Checkout found", "success"))
     }
     catch (e)
     {

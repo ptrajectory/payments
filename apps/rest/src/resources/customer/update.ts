@@ -3,7 +3,7 @@ import { CUSTOMER } from "../../../lib/db/schema";
 import { HandlerFn } from "../../../lib/handler";
 import { customer } from "zodiac"
 import { eq } from "drizzle-orm";
-import { isEmpty, isUndefined } from "lodash";
+import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
 

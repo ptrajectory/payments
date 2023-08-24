@@ -3,7 +3,7 @@ import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { CART, CART_ITEM } from "../../../lib/db/schema";
 import { and, eq } from "drizzle-orm";
-import { isEmpty } from "lodash";
+import { isEmpty } from "../../../lib/cjs/lodash";
 
 
 export const updateCart: HandlerFn = async (req, res, clients) => {
@@ -111,7 +111,7 @@ export const deleteCartItem: HandlerFn = async (req, res, clients) => {
     try {
 
         const result = await db?.delete(CART_ITEM)?.where(
-            and(eq(CART_ITEM.cart_id, cart_id), eq(CART.id, cart_item_id))
+            and(eq(CART_ITEM.cart_id, cart_id), eq(CART_ITEM.id, cart_item_id))
         ).returning()
 
         return res.status(200)

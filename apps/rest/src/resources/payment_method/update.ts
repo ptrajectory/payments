@@ -3,7 +3,7 @@ import { CUSTOMER, PAYMENT_METHOD } from "../../../lib/db/schema";
 import { HandlerFn } from "../../../lib/handler";
 import { customer, payment_method } from "zodiac"
 import { eq } from "drizzle-orm";
-import { isEmpty, isUndefined } from "lodash";
+import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
 

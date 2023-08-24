@@ -2,7 +2,7 @@ import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { NextFunction, Request, Response, Router } from "express";
 import db from "./db";
 import { APPCLIENTS, clients } from "./clients";
-import { isArray, isEmpty, isUndefined } from "lodash";
+import { isEmpty, isUndefined } from "./cjs/lodash";
 
 
 

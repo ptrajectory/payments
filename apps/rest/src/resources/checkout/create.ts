@@ -23,17 +23,22 @@ export const createCheckout: HandlerFn = async (req, res, clients) => {
 
 
     try {
-        await db?.insert(CHECKOUT).values({
+        const result = await db?.insert(CHECKOUT).values({
             id: generate_unique_id("chk"),
-            ...data
-        })
+            ...data,
+            created_at: new Date(),
+            updated_at: new Date(),
+            amount: 0.0, //TODO: this needs to be removed
+            status: "PENDING" // TODO: this also needs to be removed
+        }).returning()
 
-        const dto = generate_dto(null, "Checkout created successfully", "success")
+        const dto = generate_dto(result?.at(0), "Checkout created successfully", "success")
         
         res.status(201).send(dto)
     }
     catch (e)
     {   
+        console.log("Here is the error::", e)
         res.status(500)
         .send(generate_dto(e, "Unable to create checkout", "error"))
     }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import handler, { HandlerObj } from "../../lib/handler";
-import { createPayment, getPayment, updatePayment } from "../resources/payment";
+import { confirmPayment, createPayment, deletePayment, getPayment, updatePayment } from "../resources/payment";
 
 const routes: Array<HandlerObj> = [
     {
@@ -17,6 +17,16 @@ const routes: Array<HandlerObj> = [
         fn: getPayment,
         method: "get",
         path: "/payments/:payment_id"
+    },
+    {
+        fn: deletePayment,
+        method: "delete",
+        path: "/payments/:payment_id"
+    },
+    {
+        fn: confirmPayment,
+        method: "get",
+        path: "/payments/confirm/:payment_id"
     }
 ]
 
@@ -31,6 +41,7 @@ const init_router = () => {
 }
 
 const paymentRouter = init_router()
+
 
 export default paymentRouter
 

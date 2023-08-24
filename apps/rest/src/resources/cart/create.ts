@@ -50,8 +50,10 @@ export const createCartItem: HandlerFn = async (req, res, clients) => {
 
     const data = parsed.data
 
+    console.log("Incoming cart item data::", data)
+
     try {
-        const cart_item = db?.insert(CART_ITEM).values({
+        const result = await db?.insert(CART_ITEM).values({
            id: generate_unique_id("crt_itm"),
            cart_id,
            ...data,
@@ -59,7 +61,7 @@ export const createCartItem: HandlerFn = async (req, res, clients) => {
            created_at: new Date()
         }).returning()
 
-        return res.status(201).send(generate_dto(cart_item, "Something went wrong", "error"))
+        return res.status(201).send(generate_dto(result?.at(0), "Something went wrong", "error"))
 
     }
     catch (e)

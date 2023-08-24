@@ -3,7 +3,7 @@ import { HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { CUSTOMER } from "../../../lib/db/schema";
 import { eq } from "drizzle-orm";
-import { isEmpty, isUndefined } from "lodash";
+import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
 export const getCustomer: HandlerFn = async (req, res, clients) => {

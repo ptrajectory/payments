@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm";
 import { clients } from "../../../lib/clients";
 import { PRODUCT } from "../../../lib/db/schema";
 import { HandlerFn } from "../../../lib/handler";
-import { isEmpty, isUndefined } from "lodash";
 import { generate_dto } from "generators";
+import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
 export const getProduct: HandlerFn =  async (req, res, clients) => {
