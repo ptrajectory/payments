@@ -28,10 +28,13 @@ var payment_request_callback_body_schema = z.object({
       ResultDesc: z.string().optional(),
       CallbackMetadata: z.object({
         Item: z.array(z.object({
-          Name: z.string(),
-          Value: z.string()
+          Name: z.string().optional(),
+          Value: z.custom((val) => true).refine((val) => {
+            const stringified = new String(val);
+            return stringified;
+          }).optional()
         })).optional()
-      }).array().optional()
+      }).optional()
     })
   })
 });
@@ -344,8 +347,10 @@ var ExpressMpesaEvents = class extends EventEmitter {
    */
   async paymentsCallbackHandler(req, res) {
     res.status(200).send("OK");
+    console.log("Incoming body::", req.body);
     const parsed = payment_request_callback_body_schema.safeParse(req.body);
     if (!parsed.success) {
+      console.log("The ERROR", JSON.stringify(parsed.error));
       this.emit("payment:invalid", {
         received: req.body,
         error: parsed.error.formErrors

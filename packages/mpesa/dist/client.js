@@ -62,10 +62,13 @@ var payment_request_callback_body_schema = z.object({
       ResultDesc: z.string().optional(),
       CallbackMetadata: z.object({
         Item: z.array(z.object({
-          Name: z.string(),
-          Value: z.string()
+          Name: z.string().optional(),
+          Value: z.custom((val) => true).refine((val) => {
+            const stringified = new String(val);
+            return stringified;
+          }).optional()
         })).optional()
-      }).array().optional()
+      }).optional()
     })
   })
 });

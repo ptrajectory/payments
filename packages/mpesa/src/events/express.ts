@@ -172,8 +172,12 @@ class ExpressMpesaEvents extends EventEmitter {
      */
     public async paymentsCallbackHandler(req: Request, res: Response) {
         res.status(200).send('OK')
+        console.log("Incoming body::", req.body)
         const parsed = payment_request_callback_body_schema.safeParse(req.body)
         if (!parsed.success){
+
+            console.log("The ERROR", JSON.stringify(parsed.error))
+
             this.emit('payment:invalid', {
                 received: req.body,
                 error: parsed.error.formErrors
@@ -181,7 +185,7 @@ class ExpressMpesaEvents extends EventEmitter {
         }
         else 
         {
-            const data = parsed.data 
+            const data = parsed.data
             try {
                 switch (data.Body?.stkCallback?.ResultCode?.toString()){
                     case '0':{

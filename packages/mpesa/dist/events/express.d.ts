@@ -109,28 +109,28 @@ declare const payment_request_callback_body_schema: z.ZodObject<{
             CheckoutRequestID: z.ZodString;
             ResultCode: z.ZodOptional<z.ZodNumber>;
             ResultDesc: z.ZodOptional<z.ZodString>;
-            CallbackMetadata: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            CallbackMetadata: z.ZodOptional<z.ZodObject<{
                 Item: z.ZodOptional<z.ZodArray<z.ZodObject<{
-                    Name: z.ZodString;
-                    Value: z.ZodString;
+                    Name: z.ZodOptional<z.ZodString>;
+                    Value: z.ZodOptional<z.ZodEffects<z.ZodType<string, z.ZodTypeDef, string>, string, string>>;
                 }, "strip", z.ZodTypeAny, {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }, {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }>, "many">>;
             }, "strip", z.ZodTypeAny, {
                 Item?: {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }[] | undefined;
             }, {
                 Item?: {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }[] | undefined;
-            }>, "many">>;
+            }>>;
         }, "strip", z.ZodTypeAny, {
             MerchantRequestID: string;
             CheckoutRequestID: string;
@@ -138,10 +138,10 @@ declare const payment_request_callback_body_schema: z.ZodObject<{
             ResultDesc?: string | undefined;
             CallbackMetadata?: {
                 Item?: {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }[] | undefined;
-            }[] | undefined;
+            } | undefined;
         }, {
             MerchantRequestID: string;
             CheckoutRequestID: string;
@@ -149,10 +149,10 @@ declare const payment_request_callback_body_schema: z.ZodObject<{
             ResultDesc?: string | undefined;
             CallbackMetadata?: {
                 Item?: {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }[] | undefined;
-            }[] | undefined;
+            } | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         stkCallback: {
@@ -162,10 +162,10 @@ declare const payment_request_callback_body_schema: z.ZodObject<{
             ResultDesc?: string | undefined;
             CallbackMetadata?: {
                 Item?: {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }[] | undefined;
-            }[] | undefined;
+            } | undefined;
         };
     }, {
         stkCallback: {
@@ -175,10 +175,10 @@ declare const payment_request_callback_body_schema: z.ZodObject<{
             ResultDesc?: string | undefined;
             CallbackMetadata?: {
                 Item?: {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }[] | undefined;
-            }[] | undefined;
+            } | undefined;
         };
     }>;
 }, "strip", z.ZodTypeAny, {
@@ -190,10 +190,10 @@ declare const payment_request_callback_body_schema: z.ZodObject<{
             ResultDesc?: string | undefined;
             CallbackMetadata?: {
                 Item?: {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }[] | undefined;
-            }[] | undefined;
+            } | undefined;
         };
     };
 }, {
@@ -205,10 +205,10 @@ declare const payment_request_callback_body_schema: z.ZodObject<{
             ResultDesc?: string | undefined;
             CallbackMetadata?: {
                 Item?: {
-                    Name: string;
-                    Value: string;
+                    Name?: string | undefined;
+                    Value?: string | undefined;
                 }[] | undefined;
-            }[] | undefined;
+            } | undefined;
         };
     };
 }>;
