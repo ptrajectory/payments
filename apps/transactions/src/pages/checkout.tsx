@@ -1,11 +1,11 @@
 import "ptrajectory-mpesa-payments-ui/styles.css"
 import { PaymentForm } from "ptrajectory-mpesa-payments-ui"
-import Cost from '@/componenets/organisms/cost'
-import Header from '@/componenets/organisms/header'
+import Cost from '@/components/organisms/cost'
+import Header from '@/components/organisms/header'
 import React from 'react'
-import CartItem from "@/componenets/organisms/cart-item"
+import CartItem from "@/components/organisms/cart-item"
 import { ArrowLeftIcon } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/componenets/atoms/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/atoms/avatar"
 
 function CheckoutPage() {
   return (
