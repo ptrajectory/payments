@@ -77,6 +77,30 @@ const payment = z.object({
 
 type PAYMENT = z.infer<typeof payment>
 
+const seller = z.object({
+    id: z.string().optional(),
+    uid: z.string().optional(),
+    first_name: z.string().optional(),
+    last_name: z.string().optional(),
+    avatar: z.string().optional(),
+    email: z.string().email().optional(),
+    seller_name: z.string().optional()
+})
+
+type SELLER = z.infer<typeof seller>
+
+const store = z.object({
+    id: z.string().optional(),
+    seller_id: z.string().optional(),
+    name: z.string().optional(),
+    image: z.string().optional(),
+    description: z.string().optional(),
+    secret_key: z.string().optional(),
+    test_key: z.string().optional()
+})
+
+type STORE = z.infer<typeof store>
+
 
 export {
   checkout,
@@ -86,11 +110,15 @@ export {
   cart,
   cart_item,
   payment,
+  seller,
+  store,
   PAYMENT_METHOD,
   CUSTOMER,
   CHECKOUT,
   PRODUCT,
   CART,
   CART_ITEM,
-  PAYMENT
+  PAYMENT,
+  SELLER,
+  STORE
 };
