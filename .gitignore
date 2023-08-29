@@ -4,4 +4,5 @@ node_modules
 .env.test
 .env.local
 .vscode
+*.pem
 dist
