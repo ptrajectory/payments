@@ -209,6 +209,7 @@ export const SELLER = pgTable("Seller", {
     updated_at: timestamp("updated_at").defaultNow(),
     email: text("email"),
     seller_name: text("seller_name"),
+    uid: text("uid")
 })
 
 export const SELLERRelations = relations(SELLER, ({many})=>{

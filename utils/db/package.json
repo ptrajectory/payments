@@ -1,35 +1,42 @@
 {
-    "name": "db",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.ts",
-    "type": "module",
-    "scripts": {
-      "build": "tsc -p tsconfig.json"
+  "name": "db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsup"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
-    "exports": {
-      ".": {
-        "import": "./index.ts",
-        "default": "./index.ts"
-      },
-      "./schema": {
-        "import": "./schema.ts",
-        "default": "./schema.ts"
-      }
+    "./schema": {
+      "import": "./dist/schema.js",
+      "default": "./dist/schema.js",
+      "types": "./dist/schema.d.ts"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "devDependencies": {
-      "@types/jsonwebtoken": "^9.0.2",
-      "@types/node": "^20.2.5",
-      "typescript": "^5.1.6",
-      "drizzle-kit": "^0.19.12"
-    },
-    "dependencies": {
-      "jsonwebtoken": "^9.0.1",
-      "drizzle-orm": "^0.28.2",
-      "postgres": "^3.3.5"
+    "./utils": {
+      "import": "./dist/utils.js",
+      "default": "./dist/utils.js",
+      "types": "./dist/utils.d.ts"
     }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^20.2.5",
+    "drizzle-kit": "^0.19.12",
+    "tsup": "^6.7.0",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.28.2",
+    "jsonwebtoken": "^9.0.1",
+    "postgres": "^3.3.5"
   }
-  
+}
