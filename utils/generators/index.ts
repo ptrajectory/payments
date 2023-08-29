@@ -1,4 +1,6 @@
 import { randomBytes } from "crypto"
+import fs from "fs"
+import jwt from "jsonwebtoken"
 
 /**
  * 
@@ -34,9 +36,59 @@ function generate_dto<T>(data: T, message: string, status: "error" | "success") 
     }
 }
 
+/**
+ * Use this function to generate store secret keys to be used by the node library
+ * @param payload 
+ * @returns token
+ */
+const generate_store_secret = (payload: {
+    store_id: string,
+    seller_id: string,
+    env: "production" | "testing"
+}) => {
+
+    const privateKey = fs.readFileSync("./keys/private-key.pem", 'utf-8')
+
+    const token = jwt.sign({
+        sub: payload.seller_id,
+        aud: payload.store_id,
+        iat: new Date().toTimeString(),
+        data: payload
+    }, privateKey, {
+        algorithm: "RS256"
+    })
+
+    return token 
+
+}
+
+/**
+ * - Use to verify jwt token
+ * @param token 
+ * @returns 
+ */
+const verify_store_secret = (token: string) => {
+
+    const publicKey = fs.readFileSync("./keys/public-key.pem", 'utf-8')
+
+    const payload = jwt.verify(token, publicKey) as jwt.JwtPayload & {
+        data: {
+            store_id: string
+            seller_id: string
+            env: "production" | "testing"
+        }
+    }
+
+
+    return payload
+
+}
+
 
 
 export {
     generate_unique_id,
-    generate_dto
+    generate_dto,
+    generate_store_secret,
+    verify_store_secret
 }

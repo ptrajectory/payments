@@ -2,22 +2,28 @@
   "name": "generators",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsup"
   },
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.2.5",
+    "tsup": "^6.7.0",
     "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.1"
   }
 }
