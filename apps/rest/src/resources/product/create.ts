@@ -28,7 +28,8 @@ export const createProduct: HandlerFn = async (req, res, clients) => {
             description: data.description,
             price: data.price,
             updated_at: new Date(),
-            image: data.image
+            image: data.image,
+            store_id: data.store_id
         }).returning()
 
         res.status(201).send(

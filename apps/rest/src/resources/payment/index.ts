@@ -84,7 +84,8 @@ export const createPayment: HandlerFn = async (req, res, clients) => {
             token: response.CheckoutRequestID,
             status: "PROCESSING",
             created_at: new Date(),
-            updated_at: new Date()
+            updated_at: new Date(),
+            store_id: payment_method?.store_id
         }).returning()
     
         return res.status(201).send(generate_dto(

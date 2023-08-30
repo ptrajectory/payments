@@ -21,7 +21,8 @@ export const createCart: HandlerFn = async (req, res, clients) => {
             id: generate_unique_id("crt"),
             customer_id: data.customer_id,
             updated_at: new Date(),
-            create_at: new Date()
+            create_at: new Date(),
+            store_id: data.store_id
         }).returning()
 
         res.status(201).send(generate_dto(result?.at(0), "Cart created successfully", "success"))

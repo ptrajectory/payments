@@ -29,7 +29,8 @@ export const createCheckout: HandlerFn = async (req, res, clients) => {
             created_at: new Date(),
             updated_at: new Date(),
             amount: 0.0, //TODO: this needs to be removed
-            status: "PENDING" // TODO: this also needs to be removed
+            status: "PENDING", // TODO: this also needs to be removed
+            store_id: data.store_id
         }).returning()
 
         const dto = generate_dto(result?.at(0), "Checkout created successfully", "success")

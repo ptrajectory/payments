@@ -25,8 +25,6 @@ export const createCustomer: HandlerFn = async (req, res, clients) => {
 
 
     try {
-
-        console.log("The data", data)
         const result = await db?.insert(CUSTOMER).values({
             id: generate_unique_id("cus"),
             email: data.email,
@@ -34,6 +32,7 @@ export const createCustomer: HandlerFn = async (req, res, clients) => {
             last_name: data.last_name,
             meta: data.meta,
             updated_at: new Date(),
+            store_id: data.store_id
         }).returning()
 
         const dto = generate_dto(result?.at(0), "Customer created successfully", "success")
