@@ -15,7 +15,7 @@ function DashboardLayout(props: DashboardLayoutProps) {
   const [loading, setLoading] = useState(false)
   const { children, pageProps } = props 
 
-  const { events } = useRouter()
+  const { events, query } = useRouter()
 
   useEffect(()=>{
 
@@ -42,21 +42,21 @@ function DashboardLayout(props: DashboardLayoutProps) {
                 <aside className="flex flex-col justify-start w-max fixed space-y-3">
 
                     <DashboardSideBarButton
-                        path="/dashboard/store1"
+                        path={`/dashboard/${query.store_id}`}
                         icon={HomeIcon}
                     >
                         Home
                     </DashboardSideBarButton>
 
                     <DashboardSideBarButton
-                        path="/dashboard/store1/customers"
+                       path={`/dashboard/${query.store_id}/customers`}
                         icon={UserIcon}
                     >
                         Customers
                     </DashboardSideBarButton>
 
                     <DashboardSideBarButton
-                        path="/dashboard/store1/products"
+                        path={`/dashboard/${query.store_id}/products`}
                         icon={ShirtIcon}
                     >
                         Products

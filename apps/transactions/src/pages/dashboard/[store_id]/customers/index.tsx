@@ -5,6 +5,17 @@ import { Button, Text } from "@tremor/react"
 import { PlusIcon } from "lucide-react"
 import { GetServerSideProps } from "next"
 import { CUSTOMER } from "zodiac"
+import db from "db"
+import { stringify } from "querystring"
+import { stringifyDatesInJSON } from "@/lib/utils"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/atoms/dialog"
+import CreateCustomer from "@/components/organisms/customer-forms/create"
+import { useRouter } from "next/router"
+
+
+interface CustomerPageProps {
+    customers: Array<CUSTOMER> 
+}
 
 
 const fake_customer_data: Array<CUSTOMER> = [
@@ -25,7 +36,9 @@ const fake_customer_data: Array<CUSTOMER> = [
 ]
 
 
-function CustomersPage(){
+function CustomersPage(props: CustomerPageProps){
+    const { customers } = props
+    const { reload, push, asPath } = useRouter()
     return (
         <div className="flex flex-col w-full h-full space-y-5">
 
@@ -33,21 +46,34 @@ function CustomersPage(){
                 <span className="font-semibold text-xl">
                     Customers
                 </span>
-
-                <Button
-                    size="xs"
-                    icon={()=> <PlusIcon
-                        size="16px"
-                    />}
-                >
-                    Create Customers
-                </Button>
+                <Dialog modal onOpenChange={(open)=>{
+                    if(!open) return push(asPath)
+                }} >
+                    <DialogTrigger asChild>
+                        <Button
+                            size="xs"
+                            icon={()=> <PlusIcon
+                                size="16px"
+                            />}
+                        >
+                            Create Customers
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>
+                                Create Customer
+                            </DialogTitle>
+                        </DialogHeader>
+                        <CreateCustomer/>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             <div className="flex flex-col w-full">
 
                 <DataTable
-                    data={fake_customer_data}
+                    data={customers}
                     columns={CustomerColumns}
                 />
 
@@ -60,10 +86,31 @@ function CustomersPage(){
 
 export default CustomersPage 
 
-export const getServerSideProps: GetServerSideProps<PageLayoutProps> = async ()=> {
+
+
+export const getServerSideProps: GetServerSideProps<PageLayoutProps & CustomerPageProps> = async (context)=> {
+
+    const { store_id } = context.query
+    let customers: Array<CUSTOMER> | null = null 
+    let error: string | null = null
+    try {
+
+        customers = await db.query.CUSTOMER.findMany({
+            where: (customers, {and, eq})=> eq(customers.store_id, store_id)
+        })
+
+        customers = stringifyDatesInJSON(customers)
+
+    }
+    catch (e)
+    {
+        error = "SOMETHING WENT WRONG"
+    }
+
     return {
         props: {
             layout: "dashboard",
+            customers: customers ?? []
         }
     }
 }

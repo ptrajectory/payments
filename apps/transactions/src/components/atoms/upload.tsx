@@ -1,6 +1,8 @@
 import { cn } from '@/lib/utils'
+import { isEmpty, isNull, isUndefined } from 'lodash'
 import { Files, PlusIcon } from 'lucide-react'
 import React, { useRef, useState } from 'react'
+import axios from "axios"
 
 type UploadProps = {
     onChange?: (val: string) => void
@@ -32,9 +34,59 @@ function Upload(props: UploadProps) {
         
         const files = e?.dataTransfer?.files
 
-        //TODO: do something with the files
+        if(isEmpty(files) || isUndefined(files) || isNull(files)) return
 
-        onChange?.("https://images.pexels.com/photos/2609537/pexels-photo-2609537.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2")
+        const form = new FormData()
+
+        for (let i =0; i <files?.length; i++){
+            const file = files.item(i)
+
+            if(isNull(file) || isUndefined(file)) continue 
+
+            form.append(`ptrajectory-payments-upload-${i}-${file.name}`,file, file.name)
+            
+        }
+
+        try {
+            const result = (await axios.post("/api/upload", form)).data
+
+            onChange?.(result?.data?.secure_url)
+        }
+        catch (e)
+        {
+            // TODO: display error toasr
+        }
+    }
+
+    const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        setIsActive(true)
+
+        const files = e.target.files 
+        if(isEmpty(files) || isUndefined(files) || isNull(files)) return
+
+        const form = new FormData()
+
+        for (let i =0; i <files?.length; i++){
+            const file = files.item(i)
+
+            if(isNull(file) || isUndefined(file)) continue 
+
+            form.append(`ptrajectory-payments-upload-${i}-${file.name}`,file, file.name)
+            
+        }
+
+        try {
+            const result = (await axios.post("/api/upload", form)).data
+
+            onChange?.(result?.data?.secure_url)
+        }
+        catch (e)
+        {
+            // TODO: display error toasr
+        }
+        finally {
+            setIsActive(false)
+        }
     }
 
 
@@ -43,7 +95,7 @@ function Upload(props: UploadProps) {
   return (
     <div onDragEnter={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop} onClick={()=>{
         input_ref?.current?.click()
-    }} className="flex flex-col items-center justify-center rounded-md border-2 border-dashed space-y-2 w-full p-5 border-gray-400">
+    }} className="flex flex-col items-center justify-center rounded-md border-2 border-dashed space-y-2 w-full p-5 border-gray-400 cursor-pointer">
         <Files
             size="20px"
             className={cn("border-gray-400",isActive ? "animate-bounce" : "")}
@@ -51,12 +103,13 @@ function Upload(props: UploadProps) {
         <span>
             Drag and Drop image(s) here
         </span>
-        <input
+        <input 
+            onChange={handleImageSelect}
             ref={input_ref}
             hidden
             type='file'
             accept='image/*'
-
+            multiple={false}
         />
     </div>
   )

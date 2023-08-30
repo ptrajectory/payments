@@ -9,14 +9,14 @@ type Props = {
   children: string
 }
 
+const matcher = /(customers|products|payments|payment_methods)\/.*/
+
 function DashboardSideBarButton(props: Props) {
   const { path, children } = props
 
   const { pathname, query } = useRouter()
 
-  console.log(pathname, query)
-
-  const active = pathname?.replace("[store_id]", query?.store_id as string) === path
+  const active = pathname?.replace("[store_id]", query?.store_id as string)?.replace(matcher, "$1") === path
 
   return (
     <Link

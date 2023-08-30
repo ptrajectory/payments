@@ -6,33 +6,29 @@ import { PlusIcon } from 'lucide-react'
 import Upload from '@/components/atoms/upload'
 import { isEmpty } from 'lodash'
 import { Button } from '@/components/atoms/button'
-import { useRouter } from 'next/router'
 import axios from 'axios'
 
-function CreateProduct() {
-  const [image, set_image] = useState("")
-  const { query: {store_id} } = useRouter()
+function CreateStore() {
+
+  const [image, setImage] = useState("")
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    const data =  Object.fromEntries(new FormData(e.currentTarget))
+    let data =  Object.fromEntries(new FormData(e.currentTarget))
     e.preventDefault()
 
-    try {
-      console.log("THE IMAGE::", image)
-      const result = (await axios.post("/api/products", {
-        ...data,
-        store_id,
-        image,
-        price: Number(data.price)
-      })).data
 
-      console.log("The result::", result)
+    try {
+        const result = (await axios.post("/api/store", {
+            ...data,
+            image
+        })).data
+
+        console.log("RESULT", result)
 
     }
     catch (e)
     {
-      console.log(e)
-      // TODO: handle error
+        console.log(e)
     }
 
   }
@@ -55,15 +51,15 @@ function CreateProduct() {
           >
             <div className="flex flex-col w-full">
               <Form.Label>
-                Product Name
+                Store Name
               </Form.Label>
               <Form.Control asChild>
                 <Input
-                  placeholder='Product Name'
+                  placeholder='Store Name'
                 />
               </Form.Control>
               <Form.Message className='text-red text-sm font-medium' match={(val)=>isEmpty(val)} >
-                Product Name is Required
+                Store Name is Required
               </Form.Message>
 
             </div>
@@ -81,26 +77,7 @@ function CreateProduct() {
               </Form.Label>
               <Form.Control asChild>
                 <TextArea 
-                  placeholder='Describe the product'
-                />
-              </Form.Control>
-            </div>
-          </Form.Field>
-
-
-          <Form.Field
-            name="price"
-            className='w-full'
-            aria-required
-          >
-            <div className="flex flex-col">
-              <Form.Label>
-                Price
-              </Form.Label>
-              <Form.Control asChild>
-                <Input
-                  placeholder='300'
-                  type="number"
+                  placeholder='Describe the store'
                 />
               </Form.Control>
             </div>
@@ -116,9 +93,7 @@ function CreateProduct() {
           >
             <div className="flex flex-col">
               <Form.Control asChild >
-                <Upload
-                  onChange={set_image}
-                />
+                <Upload onChange={setImage}/>
               </Form.Control>
             </div>
 
@@ -140,4 +115,4 @@ function CreateProduct() {
   )
 }
 
-export default CreateProduct
+export default CreateStore

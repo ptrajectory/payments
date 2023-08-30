@@ -14,7 +14,7 @@ const ActionButton = (props: {row: Row<PRODUCT & { created_at: Date, updated_at:
     console.log(row.id)
     return (
         <div className="flex flex-row items-center justify-center">
-                <Link legacyBehavior href={`/dashboard/${query.store_id}/products/${row.getValue("id")}"}`}  >
+                <Link legacyBehavior href={`/dashboard/${query.store_id}/products/${row.original.id}`}  >
                     <button className=" group border-none rounded-full p-2 hover:bg-gray-200 ">
                         <ArrowRight 
                             className={`text-gray-400 group-hover:text-black`}

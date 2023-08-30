@@ -6,33 +6,30 @@ import { PlusIcon } from 'lucide-react'
 import Upload from '@/components/atoms/upload'
 import { isEmpty } from 'lodash'
 import { Button } from '@/components/atoms/button'
-import { useRouter } from 'next/router'
 import axios from 'axios'
+import { useRouter } from 'next/router'
 
-function CreateProduct() {
-  const [image, set_image] = useState("")
-  const { query: {store_id} } = useRouter()
+function CreateCustomer() {
+
+  const { query } = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    const data =  Object.fromEntries(new FormData(e.currentTarget))
+    let data =  Object.fromEntries(new FormData(e.currentTarget))
     e.preventDefault()
 
-    try {
-      console.log("THE IMAGE::", image)
-      const result = (await axios.post("/api/products", {
-        ...data,
-        store_id,
-        image,
-        price: Number(data.price)
-      })).data
 
-      console.log("The result::", result)
+    try {
+        const result = (await axios.post("/api/customers", {
+            ...data,
+            store_id: query.store_id
+        })).data
+
+        console.log("RESULT", result)
 
     }
     catch (e)
     {
-      console.log(e)
-      // TODO: handle error
+        console.log(e)
     }
 
   }
@@ -50,81 +47,71 @@ function CreateProduct() {
 
           <Form.Field
             className='w-full'
-            name="name"
+            name="first_name"
             aria-required
           >
             <div className="flex flex-col w-full">
               <Form.Label>
-                Product Name
+                First Name
               </Form.Label>
               <Form.Control asChild>
                 <Input
-                  placeholder='Product Name'
+                  placeholder='First Name'
                 />
               </Form.Control>
               <Form.Message className='text-red text-sm font-medium' match={(val)=>isEmpty(val)} >
-                Product Name is Required
+                First Name is Required
               </Form.Message>
-
             </div>
           </Form.Field>
 
-
           <Form.Field
-            name="description"
             className='w-full'
+            name="last_name"
             aria-required
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col w-full">
               <Form.Label>
-                Description
-              </Form.Label>
-              <Form.Control asChild>
-                <TextArea 
-                  placeholder='Describe the product'
-                />
-              </Form.Control>
-            </div>
-          </Form.Field>
-
-
-          <Form.Field
-            name="price"
-            className='w-full'
-            aria-required
-          >
-            <div className="flex flex-col">
-              <Form.Label>
-                Price
+                Last Name
               </Form.Label>
               <Form.Control asChild>
                 <Input
-                  placeholder='300'
-                  type="number"
+                  placeholder='Last Name'
                 />
               </Form.Control>
+              <Form.Message className='text-red text-sm font-medium' match={(val)=>isEmpty(val)} >
+                Last Name is Required
+              </Form.Message>
             </div>
           </Form.Field>
 
-        </div>
-
-        {/* right */}
-
-        <div className="flex flex-col items-center justify-start w-1/2">
           <Form.Field
-            name="image"
+            className='w-full'
+            name="email"
+            aria-required
           >
-            <div className="flex flex-col">
-              <Form.Control asChild >
-                <Upload
-                  onChange={set_image}
+            <div className="flex flex-col w-full">
+              <Form.Label>
+                Email
+              </Form.Label>
+              <Form.Control asChild>
+                <Input
+                  placeholder='Email'
+                  type="email"
                 />
               </Form.Control>
+              <Form.Message className='text-red text-sm font-medium' match={(val)=>isEmpty(val)} >
+                Email is Required
+              </Form.Message>
             </div>
-
           </Form.Field>
 
+
         </div>
+
+  
+
+       
 
 
       </div>
@@ -140,4 +127,4 @@ function CreateProduct() {
   )
 }
 
-export default CreateProduct
+export default CreateCustomer

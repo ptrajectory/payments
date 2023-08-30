@@ -6,11 +6,14 @@ import { PageLayoutProps } from "@/lib/types"
 import { Button } from "@tremor/react"
 import { PlusIcon } from "lucide-react"
 import { GetServerSideProps } from "next"
-import { PRODUCT } from "zodiac"
+import { store, PRODUCT as tPRODUCT } from "zodiac"
+import db from "db"
+import { stringifyDatesInJSON } from "@/lib/utils"
+import { useRouter } from "next/router"
 
 const camera_image = "https://images.pexels.com/photos/414781/pexels-photo-414781.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
 
-const fake_product_data: Array<PRODUCT> = [
+const fake_product_data: Array<tPRODUCT> = [
     {
         id: "1pr_3422",
         image: camera_image,
@@ -38,7 +41,17 @@ const fake_product_data: Array<PRODUCT> = [
 ]
 
 
-function ProductsPage(){
+type ProductsPageProps = {
+    products: Array<tPRODUCT>
+}
+
+function ProductsPage(props: ProductsPageProps){
+
+    const { asPath, push} = useRouter()
+
+    const { products } = props
+
+
     return (
         <div className="flex flex-col w-full h-full space-y-5 ">
 
@@ -47,7 +60,9 @@ function ProductsPage(){
                     Products
                 </span>
 
-                <Dialog modal  >
+                <Dialog modal  onOpenChange={(open)=>{
+                    if(!open) return push(asPath)
+                }} >
                     <DialogTrigger asChild>
                         <Button
                             size="xs"
@@ -75,7 +90,7 @@ function ProductsPage(){
 
 
                 <DataTable
-                    data={fake_product_data}
+                    data={products}
                     columns={ProductColumns}
                 />
                 
@@ -88,10 +103,37 @@ function ProductsPage(){
 
 export default ProductsPage 
 
-export const getServerSideProps: GetServerSideProps<PageLayoutProps> = async ()=> {
+export const getServerSideProps: GetServerSideProps<PageLayoutProps & ProductsPageProps> = async (context)=> {
+
+    let products: Array<tPRODUCT> = []
+    const { store_id, page = "1", size = "10" } = context.query
+    
+    const parsed_page = isNaN(Number(page)) ? 1 : Number(page)
+    const parsed_size = isNaN(Number(size)) ? 10 : Number(size)
+
+    console.log(parsed_size, parsed_page)
+    console.log("THE STORE ID::", store_id)
+    try {
+
+        products = await db.query.PRODUCT.findMany({
+            where: (prods, {eq}) => eq(prods.store_id, store_id),
+            // limit: parsed_size,
+            // offset: ( parsed_page - 0 ) * parsed_size
+        })
+
+        products = stringifyDatesInJSON(products)
+
+
+    }   
+    catch (e)
+    {
+        // TODO: deal with error 
+    }
+
     return {
         props: {
             layout: "dashboard",
+            products
         }
     }
 }
