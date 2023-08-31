@@ -127,6 +127,23 @@ const handler: NextApiHandler = async (req, res) => {
 
             return 
         }
+        case "PUT": {
+
+            if(!isString(product_id) || isEmpty(product_id)) return res.status(400).send(generate_dto(null, "PRODUCT ID IS REQUIRED", "error"))
+
+            try {
+                const updated = await payments.product?.updateProduct(product_id, body) 
+
+
+                return res.status(200).send(generate_dto(updated, "PRODUCT UPDATED SUCCESSFULLY", "success"))
+            }
+            catch (e)
+            {
+                return res.status(500).send(generate_dto(null, "SOMETHING WENT WRONG", "error"))
+            }
+
+            return
+        };
         default: {
             return res.status(405).send(generate_dto(null, "METHOD NOT ALLOWED", "error"))
         }

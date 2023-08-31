@@ -25,7 +25,7 @@ function DashboardTopBar() {
   }, [])
 
   return (
-    <div className={`flex flex-row items-center justify-between w-screen px-5 py-5 border-b-[1px] ${ scrolled ? "fixed bg-opacity-50 backdrop-blur-lg" : "relative "} z-10  bg-white`}>
+    <div className={`flex flex-row items-center justify-between w-screen px-5 py-5 border-b-[1px] transition-all ${ scrolled ? "fixed bg-opacity-50 backdrop-blur-lg" : "relative "} z-10  bg-white`}>
       <div className="flex flex-row items-center justify-start space-x-4 ">
         <Logo/>
         <span className="text-2xl text-gray-200 ">
@@ -39,7 +39,7 @@ function DashboardTopBar() {
       </div>
 
       <div className="flex flex-row items-center justify-end">
-        <UserButton/>
+        <UserButton/> 
       </div>
     </div>
   )

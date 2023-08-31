@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/dialog'
 import { Separator } from '@/components/atoms/separator'
-import CreateProduct from '@/components/organisms/product-forms/create'
+import ProductForm from '@/components/organisms/product-forms/create'
 import payments from '@/lib/resources/payments'
 import { PageLayoutProps } from '@/lib/types'
 import { stringifyDatesInJSON } from '@/lib/utils'
@@ -65,7 +65,7 @@ function index(props: ProductPageProps) {
   return (
     <div className="flex flex-col w-full h-full">
         <div className="flex flex-col p-5 rounded-md shadow-sm space-y-4">
-            <div className="flex flex-row justify-between p-5 rounded-md">
+              <div className="flex flex-row items-start justify-between p-5 rounded-md">
                 
                 {/* left side */}
                 <div className="grid grid-cols-2 gap-x-2 gap-y-1">
@@ -107,7 +107,7 @@ function index(props: ProductPageProps) {
 
                 {/* right side */}
 
-                <div className="flex flex-col items-center justify-center space-y-5 ">
+                  <div className="flex flex-col items-end justify-start space-y-5 ">
 
                         <Dialog modal>
                             <DialogTrigger asChild>
@@ -118,44 +118,19 @@ function index(props: ProductPageProps) {
                             <DialogContent>
                                 <DialogHeader>
                                     <DialogTitle>
-                                        
-                                    </DialogTitle>
-                                    Edit Product
+                                      Edit Product
+                                  </DialogTitle>
                                 </DialogHeader>
-                                <CreateProduct/>
+                                <>
+                                    <ProductForm
+                                        action='edit'
+                                        {...product}
+                                    />
+                                </>
                             </DialogContent>
                         </Dialog>
-                        
-                        <Dialog modal>
-                            <DialogTrigger asChild>
-                                <Button  className='w-full' >
-                                    Delete
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>  
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Delete Product
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <div className="flex flex-row items-center justify-start p-2">
-                                    Are you sure?
-                                </div>
-                                <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button>
-                                            Yes
-                                        </Button>
-                                    </DialogClose>
 
-                                    <DialogClose asChild>
-                                        <Button>
-                                            Cancel
-                                        </Button>
-                                    </DialogClose>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+
 
                 </div>
 
@@ -241,6 +216,8 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & ProductPag
 
         product = stringifyDatesInJSON(product)
 
+        console.log("THE PRODUC::", product)
+
         const sales = isString(product_id) ?  (await db.execute(get_total_sales(product_id)) as Array<{
             total_sales: null | string
         }> 
@@ -261,6 +238,8 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & ProductPag
     }
     catch (e) {
         //TODO: handle this error
+
+        console.log("SOMething went wrong::", e)
     }
 
 

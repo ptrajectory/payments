@@ -2,15 +2,16 @@ import { authMiddleware } from "@clerk/nextjs";
 
 
 export default authMiddleware({
-    ignoredRoutes: [
-        "/api/hooks/clerk"
-    ]
+    publicRoutes: [
+        "/api/hooks/clerk",
+        "/api/purchase",
+        "/purchase",
+        "/checkout",
+        "/purchase/error"
+    ],
+    ignoredRoutes: ["/(.*\\..*)(.*)", "/(_next)(.*)"],
 })
 
 export const config = {
-    mathcher: [
-        "/((?!.*\\..*|_next).*)", 
-        "/", 
-        "/(api|trpc)(.*)"
-    ]
+    mathcher: ["/((?!.*\\..*|_next/static|_next/image|favicon.ico).*)","/","/(api|trpc)(.*)"]
 }

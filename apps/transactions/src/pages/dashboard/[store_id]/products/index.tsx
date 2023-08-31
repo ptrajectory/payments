@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/atoms/dialog"
 import { DataTable } from "@/components/headless/data-table"
 import ProductColumns from "@/components/headless/data-tables/products/columns"
-import CreateProduct from "@/components/organisms/product-forms/create"
+import ProductForm from "@/components/organisms/product-forms/create"
 import { PageLayoutProps } from "@/lib/types"
 import { Button } from "@tremor/react"
 import { PlusIcon } from "lucide-react"
@@ -79,7 +79,7 @@ function ProductsPage(props: ProductsPageProps){
                                 Create Product
                             </DialogTitle>
                         </DialogHeader>
-                        <CreateProduct/>
+                        <ProductForm />
                     </DialogContent>
                 </Dialog>
 

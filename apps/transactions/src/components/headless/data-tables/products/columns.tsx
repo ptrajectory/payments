@@ -3,7 +3,7 @@ import { PRODUCT } from 'zodiac'
 import { DataTableColumnHeader } from '../../data-table-column-header'
 import Image from 'next/image'
 import { DataTableRowActions } from '../../data-table-row-actions'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -67,6 +67,23 @@ const ProductColumns: ColumnDef<PRODUCT & { created_at: Date, updated_at: Date }
         accessorKey: "price",
         header: ({column}) => <DataTableColumnHeader column={column} title="Price" />,
         cell: ({row}) => <span className='text-sm font-medium text-left' > {row.getValue("price")} </span>
+    },
+    {
+        accessorKey: "id",
+        header: "Purchase Link",
+        cell: ({row}) => (
+            <div className="flex flex-row items-center justify-center">
+                <Link legacyBehavior href={`/purchase/${row.original.id}?store_id=${row.original.store_id}`}>
+                    <button className="group flex flex-row items-center justify-center p-2 rounded-full overflow-hidden hover:bg-slate-200">
+                        <ExternalLink
+                            className='text-slate-400 group-hover:text-black'
+                            size="16px"
+                        />
+                    </button>
+                </Link>
+
+            </div>
+        )
     },
     {
         id: "actions",
