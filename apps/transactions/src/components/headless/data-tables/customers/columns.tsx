@@ -17,12 +17,6 @@ const ActionButton = (props: {row: Row<CUSTOMER & { created_at: Date, updated_at
     const { row } = props
     const { query } = useRouter()
 
-    console.log(row.id)
-
-    console.log(row.getValue("id"))
-
-    console.log(row.original)
-
     return (
         <div className="flex flex-row items-center justify-center">
                 <Link legacyBehavior href={`/dashboard/${query.store_id}/customers/${row.original.id}`}  >
@@ -61,7 +55,7 @@ const CustomerColumns: ColumnDef<CUSTOMER & { created_at: Date, updated_at: Date
     },
     {
         id: "actions",
-        accessorKey: "id",
+        header: "",
         cell: ({row}) => (
             <ActionButton row={row} />
         )

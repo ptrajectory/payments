@@ -84,3 +84,9 @@ export const get_today_start = () =>  new Date(new Date().getFullYear(), new Dat
  * @returns 
  */
 export const get_today_end = () => new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(),23, 59, 49, 999)
+
+const matcher = /(customers|products|payments|payment_methods)\/.*/
+
+export const route_matches = (path_name: string, store_id: string, base: string) => {
+    return path_name?.replace("[store_id]", store_id)?.replace(matcher, "$1") === base
+}

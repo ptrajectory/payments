@@ -8,7 +8,7 @@ import { GetServerSideProps } from 'next'
 import { PageLayoutProps } from '@/lib/types'
 import { useRouter } from 'next/router'
 import db from "db"
-import { gt, lt, sql } from 'db/utils'
+import { gt, inArray, lt, sql } from 'db/utils'
 import { CART, CART_ITEM, CHECKOUT, PAYMENT, PRODUCT } from 'db/schema'
 import { CUSTOMER, PRODUCT as tPRODUCT, PAYMENT as tPAYMENT } from 'zodiac'
 import { stringifyDatesInJSON } from '@/lib/utils'
@@ -91,41 +91,24 @@ function StorePage(props: {
                             </span>
 
                             <List className='w-full' >
-                                <ListItem>
+                                {
+                                    props.dashboard?.successful_payments?.map((payment, i)=>{
+                                        return (
 
-                                    <span>
-                                        James Dean
-                                    </span>
+                                            <ListItem key={i} >
 
-                                    <span>
-                                        KES 400
-                                    </span>
+                                                <span>
+                                                    {payment.id}
+                                                </span>
 
-                                </ListItem>
+                                                <span>
+                                                    KES {payment?.amount}
+                                                </span>
 
-                                <ListItem>
-
-                                    <span>
-                                        James Dean
-                                    </span>
-
-                                    <span>
-                                        KES 400
-                                    </span>
-
-                                </ListItem>
-
-                                <ListItem>
-
-                                    <span>
-                                        James Dean
-                                    </span>
-
-                                    <span>
-                                        KES 400
-                                    </span>
-
-                                </ListItem>
+                                            </ListItem>
+                                        )
+                                    })
+                                }
                             </List>
                         </div>
 
@@ -135,7 +118,7 @@ function StorePage(props: {
                                 Daily total purchases
                             </Title>
                             <LineChart
-                                data={chart_data}
+                                data={props.dashboard.chart}
                                 index='day'
                                 categories={['total_purchased']}
                                 colors={['amber']}
@@ -147,138 +130,86 @@ function StorePage(props: {
 
                     </div>
 
-                    <div className="flex flex-row items-center justify-between w-full">
+                    <div className="flex flex-row items-center justify-between w-full flex-wrap gap-x-5 gapy-y-5">
 
-                        <div className="flex flex-col w-[30%] space-y-2">
+                        <div className="flex flex-col w-[45%] space-y-2 rounded-md shadow-sm p-5">
                             <span className='text-sm font-medium' >
                                 Failed Payments
                             </span>
 
                             <List className='w-full' >
-                                <ListItem>
+                                {
+                                    props.dashboard.failed_payments?.map((payment, i)=>{
+                                        return (
+                                            <ListItem key={i} >
 
-                                    <span>
-                                        James Dean
-                                    </span>
+                                                <span>
+                                                    {payment?.id}
+                                                </span>
 
-                                    <span>
-                                        KES 400
-                                    </span>
+                                                <span>
+                                                    KES {payment?.amount}
+                                                </span>
 
-                                </ListItem>
+                                            </ListItem>
 
-                                <ListItem>
-
-                                    <span>
-                                        James Dean
-                                    </span>
-
-                                    <span>
-                                        KES 400
-                                    </span>
-
-                                </ListItem>
-
-                                <ListItem>
-
-                                    <span>
-                                        James Dean
-                                    </span>
-
-                                    <span>
-                                        KES 400
-                                    </span>
-
-                                </ListItem>
+                                        )
+                                    })
+                                }
                             </List>
                         </div>
 
-                        <div className="flex flex-col w-[30%] space-y-2">
+                        <div className="flex flex-col w-[45%] space-y-2 rounded-md shadow-sm p-5">
                             <span className='text-sm font-medium' >
                                 Most Purchased Products
                             </span>
 
                             <List className='w-full' >
-                                <ListItem>
+                                {
+                                    props.dashboard.products?.map((product, i)=>{
+                                        return (
+                                        <ListItem key={i} >
 
-                                    <span>
-                                        James Dean
-                                    </span>
+                                            <span>
+                                                {product?.name}
+                                            </span>
 
-                                    <span>
-                                        KES 400
-                                    </span>
+                                            <span>
+                                                KES {product?.price}
+                                            </span>
 
-                                </ListItem>
+                                        </ListItem>
 
-                                <ListItem>
-
-                                    <span>
-                                        James Dean
-                                    </span>
-
-                                    <span>
-                                        KES 400
-                                    </span>
-
-                                </ListItem>
-
-                                <ListItem>
-
-                                    <span>
-                                        James Dean
-                                    </span>
-
-                                    <span>
-                                        KES 400
-                                    </span>
-
-                                </ListItem>
+                                        )
+                                    })
+                                }
                             </List>
                         </div>
 
 
-                        <div className="flex flex-col w-[30%] space-y-2">
+                        <div className="flex flex-col w-[45%] space-y-2 rounded-md shadow-sm p-5">
                             <span className='text-sm font-medium' >
                                 New Customers
                             </span>
 
                             <List className='w-full' >
-                                <ListItem>
+                                {
+                                    props.dashboard.customers?.map((customer, i)=>{
+                                        return (
+                                            <ListItem  key={i}> 
 
-                                    <span>
-                                        James Dean
-                                    </span>
+                                                <span>
+                                                    {customer?.id}
+                                                </span>
 
-                                    <span>
-                                        KES 400
-                                    </span>
+                                                <span>
+                                                    {customer?.first_name} {customer?.last_name}
+                                                </span>
 
-                                </ListItem>
-
-                                <ListItem>
-
-                                    <span>
-                                        James Dean
-                                    </span>
-
-                                    <span>
-                                        KES 400
-                                    </span>
-
-                                </ListItem>
-
-                                <ListItem>
-
-                                    <span>
-                                        James Dean
-                                    </span>
-
-                                    <span>
-                                        KES 400
-                                    </span>
-
-                                </ListItem>
+                                            </ListItem>
+                                        )
+                                    })
+                                }
                             </List>
                         </div>
 
@@ -381,10 +312,10 @@ interface DashboardPageData {
     failed_payments: Array<tPAYMENT>
     customers: Array<CUSTOMER>
     products: Array<tPRODUCT>
-    chart: {
-        total_purchaed?: number
+    chart: Array<{
+        total_purchased?: number
         day?: number
-    }
+    }>
 }
 
 export const getServerSideProps: GetServerSideProps<PageLayoutProps & {
@@ -398,6 +329,8 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & {
         to?: string
         store_id: string
     }
+
+    console.log("__store_id::", store_id)
 
     const dates_between = getAllDaysBetweenDates(from, to)
 
@@ -416,7 +349,7 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & {
             gt(payments.created_at, new Date(from)),
             lt(payments.created_at, new Date(to)),
             eq(payments.store_id, store_id),
-            eq(payments.status, "FAILED")
+            inArray(payments.status, ["FAILED", "PROCESSING"])
         ),
         limit: 5
     })
@@ -432,12 +365,13 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & {
     const most_purchased_products_result = await db.execute(most_purchased_products(new Date(from).toISOString(), new Date(to).toISOString()))
 
 
+    console.log("HERE IS THE STORE ID", store_id)
     
     let total_purchases_for_range = await db.query.PAYMENT?.findMany({
         where: (payments, { and, eq }) => and(
             eq(payments.store_id, store_id),
-            gt(payments?.created_at, new Date(from)),
-            lt(payments?.created_at, new Date(to))
+            gt(payments?.created_at, from),
+            lt(payments?.created_at, to)
         )
     })
 
@@ -462,7 +396,7 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & {
         }, 0)
 
         return {
-            total_purchases: correct_values,
+            total_purchased: correct_values,
             day: dayjs(date).format(
                 dates_between?.is_same_date ? "hh A" :"MMM D"
             )
@@ -474,6 +408,7 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & {
 
 
 
+    console.log("MOST PURCHASED PRODUCTS::", most_purchased_products_result)
 
 
     return {
@@ -483,8 +418,10 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & {
                 chart: stringifyDatesInJSON(ready_for_graph),
                 customers: stringifyDatesInJSON(todays_new_customers),
                 successful_payments: stringifyDatesInJSON(todays_successful_payments),
-                failed_payments: stringifyDatesInJSON(todays_failed_payments)
-            }
+                failed_payments: stringifyDatesInJSON(todays_failed_payments),
+                products: stringifyDatesInJSON(most_purchased_products_result)
+            },
+            skeleton: "dashboard-store-home"
         }
     }
 }

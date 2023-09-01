@@ -1,16 +1,17 @@
 import Logo from '@/components/atoms/logo'
 import { UserButton, useUser } from '@clerk/nextjs'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 
 function DashboardTopBar() {
   const [scrolled, setScrolled] = useState(false)
-  const { query } = useRouter()
+  const { query, push } = useRouter()
   const { user } = useUser()
 
   useEffect(()=>{
     const handleScroll = () => {
-      if(window.scrollY > 60) {
+      if(window.scrollY > 50) {
         setScrolled(true)
       }else{
         setScrolled(false)
@@ -25,23 +26,30 @@ function DashboardTopBar() {
   }, [])
 
   return (
-    <div className={`flex flex-row items-center justify-between w-screen px-5 py-5 border-b-[1px] transition-all ${ scrolled ? "fixed bg-opacity-50 backdrop-blur-lg" : "relative "} z-10  bg-white`}>
-      <div className="flex flex-row items-center justify-start space-x-4 ">
-        <Logo/>
-        <span className="text-2xl text-gray-200 ">
-          /
-        </span>
-        <h4 className="text-md font-medium">
-          {
-            query?.store_id
-          }
-        </h4>
-      </div>
+    <>
+      <div className={`flex flex-row items-center justify-between w-screen px-5 py-5 border-b-[1px] transition-all ${ scrolled ? "fixed bg-opacity-50 backdrop-blur-lg" : "relative "} z-10  bg-white`}>
+        <div className="flex flex-row items-center justify-start space-x-4 ">
+            <div role='button' onClick={()=>push("/dashboard")} className="flex flex-row">
+              <Logo/>
+            </div>
+          <span className="text-2xl text-gray-200 ">
+            /
+          </span>
+          <h4 className="text-md font-medium">
+            {
+              query?.store_id
+            }
+          </h4>
+        </div>
 
-      <div className="flex flex-row items-center justify-end">
-        <UserButton/> 
+        <div className="flex flex-row items-center justify-end">
+          <UserButton/> 
+        </div>
       </div>
-    </div>
+      {
+        scrolled && <div className="flex flex-row w-full h-[80px]"></div>
+      }
+    </>
   )
 }
 

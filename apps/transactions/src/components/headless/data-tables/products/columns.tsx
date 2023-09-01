@@ -11,7 +11,6 @@ const ActionButton = (props: {row: Row<PRODUCT & { created_at: Date, updated_at:
     const { row } = props
     const { query } = useRouter()
 
-    console.log(row.id)
     return (
         <div className="flex flex-row items-center justify-center">
                 <Link legacyBehavior href={`/dashboard/${query.store_id}/products/${row.original.id}`}  >

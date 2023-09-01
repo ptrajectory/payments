@@ -5,8 +5,8 @@ import { PlusIcon, ShirtIcon, User } from "lucide-react";
 import { GetServerSideProps } from "next";
 import { SELLER as tSELLER, STORE as tSTORE } from "zodiac";
 import db from "db"
-import { eq } from "db/utils";
-import { SELLER, STORE } from "db/schema";
+import { eq, sql } from "db/utils";
+import { CUSTOMER, PRODUCT, SELLER, STORE } from "db/schema";
 import { isEmpty } from "lodash";
 import Upload from "@/components/atoms/upload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/atoms/dialog";
@@ -16,7 +16,10 @@ import Link from "next/link";
 
 
 export default function DashboardPage (props: {
-    stores: Array<tSTORE> | null
+    stores: Array<tSTORE & {
+        customers: number 
+        products: number
+    }> | null
 }) {
     const { stores } = props
     console.log(stores)
@@ -68,13 +71,13 @@ export default function DashboardPage (props: {
                                                 <div className="flex flex-row items-end justify-start gap-x-4">
                                                     <User className="text-xs" />
                                                     <span>
-                                                        20 customers
+                                                        {store?.customers} customers
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-row items-end justify-start gap-x-4">
                                                     <ShirtIcon className="text-xs" />
                                                     <span>
-                                                        10 products
+                                                        {store?.products} products
                                                     </span>
                                                 </div>
 
@@ -110,11 +113,21 @@ export const getServerSideProps: GetServerSideProps<PageLayoutProps & {
             where: eq(SELLER.uid, auth?.userId)
         })
 
-        // console.log("SELLER", JSON.stringify(seller))
+        console.log("SELLER", JSON.stringify(seller))
 
-        stores = await db.query.STORE.findMany({
-            where: eq(STORE.seller_id, seller?.id)
-        })
+        stores = await db.select({
+            id: STORE.id,
+            name: STORE.name,
+            customers: sql<number>`count(distinct ${CUSTOMER.id})`.mapWith(Number),
+            products: sql<number>`count(distinct ${PRODUCT.id})`.mapWith(Number)
+        }).from(STORE)
+        .where(eq(STORE.seller_id, seller?.id))
+        .innerJoin(PRODUCT, eq(PRODUCT.store_id, STORE.id))
+        .innerJoin(CUSTOMER, eq(CUSTOMER.store_id, STORE.id))
+        .groupBy(STORE.id)
+
+
+        console.log("THE SRTORES", stores)
 
         // console.log("STORES::", JSON.stringify(stores, (k, v)=> {
         //     if(v instanceof Date) return v.toISOString()
