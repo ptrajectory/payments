@@ -99,7 +99,7 @@ class Product {
         }
         catch (e) 
         {
-            throw new Error("UNABLE TO GET PAYMENT METHOD", {
+            throw new Error("UNABLE TO GET PRODUCT", {
                 cause: (e as RequestError).response?.body
             })
         }
@@ -126,7 +126,7 @@ class Product {
         }
         catch (e) 
         {
-            throw new Error("UNABLE TO GET PAYMENT METHOD", {
+            throw new Error("UNABLE TO GET PRODUCT", {
                 cause: (e as RequestError).response?.body
             })
         }
