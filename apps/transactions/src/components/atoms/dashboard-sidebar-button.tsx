@@ -1,7 +1,8 @@
+"use client"
 import { cn } from '@/lib/utils'
 import { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import React, { cloneElement } from 'react'
 
 type Props = {
@@ -16,7 +17,8 @@ const matcher = /(customers|products|payments|payment_methods)\/.*/
 function DashboardSideBarButton(props: Props) {
   const { path, children, loading } = props
 
-  const { pathname, query } = useRouter()
+  const pathname = usePathname()
+  const query = useParams()
 
   const active = pathname?.replace("[store_id]", query?.store_id as string)?.replace(matcher, "$1") === path
 

@@ -72,13 +72,7 @@ function StorePage(props: {
                             Your Overview
                         </h1>
 
-                        <DateRangePicker
-                            onValueChange={(range)=>{
-                                setCurrentDateRange(range)
-                                handleDateRangeChange(range)
-                            }}
-                            value={currentDateRange}
-                        />
+                        
                     </div>
 
 

@@ -10,7 +10,8 @@ import { stringify } from "querystring"
 import { stringifyDatesInJSON } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/atoms/dialog"
 import CreateCustomer from "@/components/organisms/customer-forms/create"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
+// import { useRouter } from "next/router"
 
 
 interface CustomerPageProps {
@@ -33,12 +34,13 @@ const fake_customer_data: Array<CUSTOMER> = [
         first_name: "Tony",
         last_name: "Stark"
     }
-]
+] 
 
 
 function CustomersPage(props: CustomerPageProps){
     const { customers } = props
-    const { reload, push, asPath } = useRouter()
+
+    const { push } = useRouter()
     return (
         <div className="flex flex-col w-full h-full space-y-5">
 
@@ -47,7 +49,6 @@ function CustomersPage(props: CustomerPageProps){
                     Customers
                 </span>
                 <Dialog modal onOpenChange={(open)=>{
-                    if(!open) return push(asPath)
                 }} >
                     <DialogTrigger asChild>
                         <Button
@@ -75,6 +76,7 @@ function CustomersPage(props: CustomerPageProps){
                 <DataTable
                     data={customers}
                     columns={CustomerColumns}
+
                 />
 
             </div>
