@@ -8,6 +8,7 @@ import dayjs from 'dayjs'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useParams } from 'next/navigation'
 dayjs.extend(relativeTime)
 
 const columnHelper = createColumnHelper<CUSTOMER>()
@@ -15,11 +16,11 @@ const columnHelper = createColumnHelper<CUSTOMER>()
 
 const ActionButton = (props: {row: Row<CUSTOMER & { created_at: Date, updated_at: Date } >}) => {
     const { row } = props
-    const { query } = useRouter()
+    const params = useParams()
 
     return (
         <div className="flex flex-row items-center justify-center">
-                <Link legacyBehavior href={`/dashboard/${query.store_id}/customers/${row.original.id}`}  >
+                <Link legacyBehavior href={`/dashboard/${params?.store_id}/customers/${row.original.id}`}  >
                     <button className=" group border-none rounded-full p-2 hover:bg-gray-200 ">
                         <ArrowRight 
                             className={`text-gray-400 group-hover:text-black`}

@@ -1,8 +1,10 @@
+"use client"
 import { get_today_end, get_today_start } from '@/lib/utils'
 import { DateRangePicker, DateRangePickerValue, LineChart } from '@tremor/react'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import { isUndefined } from 'lodash'
+import { useParams } from 'next/navigation'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 
@@ -49,7 +51,7 @@ type CHART_DATA = {
 function ProductPurchaseOverview() {
 
     const [range, set_range] = useState<DateRangePickerValue>()
-    const { query: {product_id, store_id} } = useRouter()
+    const params = useParams()
     const [chart_data, set_chart_data]= useState<Array<CHART_DATA>>([])
 
     const handleRangeChange = async (new_range?: DateRangePickerValue) => {
@@ -57,19 +59,22 @@ function ProductPurchaseOverview() {
         if(isUndefined(new_range)) return 
 
         try {
-            const result = (await axios.get(`/api/products/${product_id}`, {
+            const result = (await axios.get(`/api/graphs/products/purchase-overview`, {
                 params: {
                     from: new_range.from?.toISOString(),
                     to: new_range.to?.toISOString(),
-                    section: "product_purchase_overview"
+                    product_id: params?.product_id
                 }
             })).data
+
+            console.log("HERE IS THE DATA::",result)
             
             set_chart_data(result.data)
 
         }
         catch (e)
         {
+            console.log("HERE IS THE ERROR::", e)
             // TODO: handle this error
         }
     }

@@ -3,13 +3,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { DataTable } from '@/components/headless/data-table'
 import CustomerColumns from '@/components/headless/data-tables/customers/columns'
 import CreateCustomer from '@/components/organisms/customer-forms/create'
+import Modal from '@/components/organisms/modal'
 import { fetch_table_customers } from '@/lib/server_actions'
-import { PaginationState } from '@tanstack/react-table'
+import { PaginationState, TableState } from '@tanstack/react-table'
 import { Button } from '@tremor/react'
+import axios from 'axios'
 import { isString, isUndefined } from 'lodash'
 import { PlusIcon } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useState } from 'react'
 import { CUSTOMER } from 'zodiac'
+import TestServerComponent from './testserver'
 
 interface PageProps {
     params: Partial<{
@@ -17,29 +20,83 @@ interface PageProps {
     }>
 }
 
+const page_state = (state: any, action: {type: "pending" | "fullfilled" | "rejected", payload?: any})=>{
+
+    switch(action.type){
+        case "pending": {
+            return {
+                ...state,
+                loading: true,
+                rejected: false
+            }
+        }
+        case "rejected": {
+            return {
+                ...state,
+                loading: false,
+                rejected: true
+            }
+        }
+        case "fullfilled": {
+            return {
+                ...state,
+                loading: false,
+                rejected: false,
+                data: action.payload
+            }
+        }
+        default:
+            return state
+    }
+}
+
+
+
 function CustomerPage(props: PageProps) {
-    const [customers, setCustomers ] = useState<Array<CUSTOMER>>([])
-    const { params: { store_id } } = props
-    const [loading, setLoading] = useState<boolean>(false)
+    const [pageState, updater] = useReducer(page_state, {})
+    const { params: { store_id } } = props 
 
-    const handlePaginationChange = async (pagination?: PaginationState) => {
-        if(!isString(store_id)) return 
-        const pag: PaginationState = isUndefined(pagination) ? {
-            pageIndex: 0,
-            pageSize: 10
-        } : pagination
+    const fetch_customers = async (pagination?: PaginationState) => {
 
-        setLoading(true)
-        const new_customers = await fetch_table_customers(pag, store_id)
-        setCustomers(new_customers)
-        setLoading(false)
+        updater({
+            type: "pending"
+        })
+
+        try {
+            const results = (await axios.get("/api/customers", {
+                params: {
+                    page: (pagination?.pageIndex ?? 0) + 1 ,
+                    size: (pagination?.pageSize ?? 10),
+                    store_id
+                }
+            })).data
+
+            console.log("CUSTOMER RESULTS",results)
+
+            updater({
+                type: "fullfilled",
+                payload: results.data
+            })
+
+        }
+        catch (e) 
+        {
+            console.log("Something went wrong::", e)
+            updater({type: "rejected"})
+        }
+
 
     }
 
+    const handlePaginationChange = useCallback((state: PaginationState) => {
+        console.log("Pagination changed::", state)
+        fetch_customers(state)
+    }, [])   
 
     useEffect(()=>{
-        handlePaginationChange()
+        fetch_customers()
     },[])
+    
 
   return (
     <div className="flex flex-col w-full h-full space-y-5">
@@ -47,37 +104,22 @@ function CustomerPage(props: PageProps) {
                 <span className="font-semibold text-xl">
                     Customers
                 </span>
-                <Dialog modal onOpenChange={(open)=>{
-                    
-                }} >
-                    <DialogTrigger asChild>
-                        <Button
-                            size="xs"
-                            icon={()=> <PlusIcon
-                                size="16px"
-                            />}
-                        >
-                            Create Customers
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>
-                                Create Customer
-                            </DialogTitle>
-                        </DialogHeader>
+                    <Modal
+                        action='create'
+                        button_title='Create Customer'
+                        modal_title='Create Customer'
+                    >
                         <CreateCustomer/>
-                    </DialogContent>
-                </Dialog>
+                    </Modal>
             </div>
 
             <div className="flex flex-col w-full">
 
                 <DataTable
-                    data={customers}
+                    data={pageState.data ?? []}
                     columns={CustomerColumns}
+                    loading={pageState.loading}
                     onPaginationStateChanged={handlePaginationChange}
-                    loading={loading}
                 />
 
             </div>

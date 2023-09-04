@@ -6,14 +6,15 @@ import { DataTableRowActions } from '../../data-table-row-actions'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useParams } from 'next/navigation'
 
 const ActionButton = (props: {row: Row<PRODUCT & { created_at: Date, updated_at: Date } >}) => {
     const { row } = props
-    const { query } = useRouter()
+    const params = useParams()
 
     return (
         <div className="flex flex-row items-center justify-center">
-                <Link legacyBehavior href={`/dashboard/${query.store_id}/products/${row.original.id}`}  >
+                <Link legacyBehavior href={`/dashboard/${params?.store_id}/products/${row.original.id}`}  >
                     <button className=" group border-none rounded-full p-2 hover:bg-gray-200 ">
                         <ArrowRight 
                             className={`text-gray-400 group-hover:text-black`}
