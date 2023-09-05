@@ -1,6 +1,10 @@
+import { UploadApiResponse } from "cloudinary"
 import { clsx, type ClassValue } from "clsx"
 import dayjs from "dayjs"
+import formidable from "formidable"
+import { isEmpty } from "lodash"
 import { twMerge } from "tailwind-merge"
+import { v2 as cloudinary } from "cloudinary"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -108,4 +112,12 @@ export const formatChartDate = (data: {date: Date | string, is_same_date: boolea
         dayjs(from).isSame(to, "month") ? "D" :
         "MMM D"
     )
+}
+
+
+
+
+
+export const getUploadTimestamp = () => {
+    return Math.round((new Date).getTime()/1000)
 }

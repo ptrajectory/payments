@@ -10,7 +10,7 @@ import { PRODUCT } from "db/schema"
 
 
 
-export const GET = async (request: Request, params: { products_slug: Array<string>  }) => {
+export const GET = async (request: Request, {params}:{params: { products_slug: Array<string>  }}) => {
 
     const { products_slug } = params
     const { userId } = auth()
@@ -57,7 +57,8 @@ export const GET = async (request: Request, params: { products_slug: Array<strin
                 name: true,
                 image: true,
                 description: true,
-                price: true
+                price: true,
+                store_id: true
             },
             limit: Number(size),
             offset: (Number(page) - 1) * Number(size)

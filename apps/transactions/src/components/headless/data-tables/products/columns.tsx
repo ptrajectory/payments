@@ -12,6 +12,8 @@ const ActionButton = (props: {row: Row<PRODUCT & { created_at: Date, updated_at:
     const { row } = props
     const params = useParams()
 
+    console.log("HERE AEE THE PARAMS", params )
+
     return (
         <div className="flex flex-row items-center justify-center">
                 <Link legacyBehavior href={`/dashboard/${params?.store_id}/products/${row.original.id}`}  >
@@ -71,7 +73,9 @@ const ProductColumns: ColumnDef<PRODUCT & { created_at: Date, updated_at: Date }
     {
         accessorKey: "id",
         header: "Purchase Link",
-        cell: ({row}) => (
+        cell: ({row}) => {
+        console.log(row)
+        return (
             <div className="flex flex-row items-center justify-center">
                 <Link legacyBehavior href={`/purchase/${row.original.id}?store_id=${row.original.store_id}`}>
                     <button className="group flex flex-row items-center justify-center p-2 rounded-full overflow-hidden hover:bg-slate-200">
@@ -83,7 +87,7 @@ const ProductColumns: ColumnDef<PRODUCT & { created_at: Date, updated_at: Date }
                 </Link>
 
             </div>
-        )
+        )}
     },
     {
         id: "actions",

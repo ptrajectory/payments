@@ -7,7 +7,8 @@ export default authMiddleware({
         "/api/purchase",
         "/purchase",
         "/checkout",
-        "/purchase/error"
+        "/purchase/error",
+        "/api/uploader"
     ],
     ignoredRoutes: ["/(.*\\..*)(.*)", "/(_next)(.*)"],
 })
