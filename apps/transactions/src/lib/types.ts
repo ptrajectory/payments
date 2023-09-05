@@ -1,3 +1,4 @@
+import { ReactNode } from "react"
 
 export type tSkeleton = 'dashboard' | 
 'dashboard-store-home' | 
@@ -10,4 +11,9 @@ export type PageLayoutProps = {
     layout?: "dashboard" | "main"
     hide_sidebar?: boolean
     skeleton?: tSkeleton
+}
+
+export type LayoutProps<T = any> = {
+    children: ReactNode,
+    params: T
 }

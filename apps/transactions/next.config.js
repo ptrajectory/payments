@@ -6,6 +6,9 @@ const nextConfig = {
       "images.pexels.com",
       "res.cloudinary.com"
     ]
+  },
+  experimental: {
+    serverActions: true
   }
 }
 

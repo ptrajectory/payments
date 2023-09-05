@@ -1,3 +1,4 @@
+"use client"
 import { Button } from '@/components/atoms/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/dialog'
 import { DataTable } from '@/components/headless/data-table'
@@ -5,8 +6,8 @@ import { CustomerPaymentMethodsColumns } from '@/components/headless/data-tables
 import React, { useEffect, useState } from 'react'
 import { PAYMENT_METHOD as tPAYMENT_METHOD } from 'zodiac'
 import CreatePaymentMethod from './create-payment-method-form'
-import { useRouter } from 'next/router'
 import axios from 'axios'
+import { useParams } from 'next/navigation'
 
 const fake_payment_method_data: Array<tPAYMENT_METHOD> = [
     {
@@ -38,15 +39,16 @@ const fake_payment_method_data: Array<tPAYMENT_METHOD> = [
 
 function PaymentMethodsTable() {
     const [payment_methods, set_payment_methods] = useState<Array<tPAYMENT_METHOD>>([])
-    const { query: {customer_id, store_id} } = useRouter()
+    const [loading, setLoading] = useState(false)
+    const params = useParams()
 
     const fetch_payment_methods = async () => {
-
+        setLoading(true)
 
         try {
             const data = (await axios.get("/api/payment_methods", {
                 params: {
-                    customer_id
+                    customer_id: params?.customer_id
                 }
             })).data.data
 
@@ -58,6 +60,10 @@ function PaymentMethodsTable() {
         {
             console.log("something went wrong")
             // TODO: handle this error
+        }
+        finally
+        {
+            setLoading(false)
         }
 
 
@@ -97,6 +103,8 @@ function PaymentMethodsTable() {
         <DataTable
             data={payment_methods}
             columns={CustomerPaymentMethodsColumns}
+            paginationEnabled={false}
+            loading={loading}
         />
     </div>
   )

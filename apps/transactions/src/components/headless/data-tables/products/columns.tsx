@@ -6,14 +6,17 @@ import { DataTableRowActions } from '../../data-table-row-actions'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useParams } from 'next/navigation'
 
 const ActionButton = (props: {row: Row<PRODUCT & { created_at: Date, updated_at: Date } >}) => {
     const { row } = props
-    const { query } = useRouter()
+    const params = useParams()
+
+    console.log("HERE AEE THE PARAMS", params )
 
     return (
         <div className="flex flex-row items-center justify-center">
-                <Link legacyBehavior href={`/dashboard/${query.store_id}/products/${row.original.id}`}  >
+                <Link legacyBehavior href={`/dashboard/${params?.store_id}/products/${row.original.id}`}  >
                     <button className=" group border-none rounded-full p-2 hover:bg-gray-200 ">
                         <ArrowRight 
                             className={`text-gray-400 group-hover:text-black`}
@@ -70,7 +73,9 @@ const ProductColumns: ColumnDef<PRODUCT & { created_at: Date, updated_at: Date }
     {
         accessorKey: "id",
         header: "Purchase Link",
-        cell: ({row}) => (
+        cell: ({row}) => {
+        console.log(row)
+        return (
             <div className="flex flex-row items-center justify-center">
                 <Link legacyBehavior href={`/purchase/${row.original.id}?store_id=${row.original.store_id}`}>
                     <button className="group flex flex-row items-center justify-center p-2 rounded-full overflow-hidden hover:bg-slate-200">
@@ -82,7 +87,7 @@ const ProductColumns: ColumnDef<PRODUCT & { created_at: Date, updated_at: Date }
                 </Link>
 
             </div>
-        )
+        )}
     },
     {
         id: "actions",

@@ -1,12 +1,20 @@
+"use client";
 import Logo from '@/components/atoms/logo'
 import { UserButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
-function DashboardTopBar() {
+interface DashboardProps {
+  store_id?: string
+  customer_id?: string
+  product_id?: string
+}
+
+function DashboardTopBar(props: DashboardProps) {
+  const query = useParams()
   const [scrolled, setScrolled] = useState(false)
-  const { query, push } = useRouter()
+  const { push } = useRouter()
   const { user } = useUser()
 
   useEffect(()=>{
