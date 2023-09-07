@@ -1,13 +1,13 @@
 import { generate_dto, generate_unique_id } from "generators";
 import { CUSTOMER } from "db/schema";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { customer } from "zodiac"
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
 
-export const updateCustomer: HandlerFn = async (req, res, clients) => {
+export const updateCustomer: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     // clients
     const { db } = clients
 
@@ -39,7 +39,12 @@ export const updateCustomer: HandlerFn = async (req, res, clients) => {
         var result = await db?.update(CUSTOMER).set({
             ...data,
             updated_at: new Date()
-        }).where(eq(CUSTOMER.id, id)).returning()
+        }).where(and(
+            eq(CUSTOMER.id, id),
+            // @ts-ignore
+            eq(CUSTOMER.store_id, req.store.id),
+            eq(CUSTOMER.environment, req.env)
+        )).returning()
         var cus = result?.at(0)
         const dto = generate_dto(cus, "Customer updated successfully", "success")
         
@@ -53,7 +58,7 @@ export const updateCustomer: HandlerFn = async (req, res, clients) => {
     
 }
 
-export const deleteCustomer: HandlerFn = async (req, res, clients) => {
+export const archiveCustomer: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const {db} = clients 
 
@@ -69,7 +74,13 @@ export const deleteCustomer: HandlerFn = async (req, res, clients) => {
 
     try {
 
-        const result = await db?.delete(CUSTOMER).where(eq(CUSTOMER.id, id)).returning()
+        const result = await db?.update(CUSTOMER).set({
+            status: "ARCHIVED"
+        }).where(and(
+            eq(CUSTOMER.id, id),
+            // @ts-ignore
+            eq(CUSTOMER.store_id, req.store?.id)
+        )).returning()
 
         return res.status(200)
         .send(

@@ -3,6 +3,10 @@ import db from "db";
 import { PAYMENT } from "db/schema";
 import { sleep } from "functions"
 import { isUndefined } from "./cjs/lodash";
+import { STORE } from "zodiac";
+import jwt from "jsonwebtoken"
+import fs from "fs"
+import path from "path";
 
 
 /**
@@ -12,7 +16,7 @@ import { isUndefined } from "./cjs/lodash";
  * @description - this function's job is to validate a payment by making multiple repeated checks on the payment over the course of 20 seconds
  * @returns 
  */
-async function validatePayment(payment_id: string, iteration: number = 0){
+export async function validatePayment(payment_id: string, iteration: number = 0){
 
     try {
         const payment = await db.query.PAYMENT.findFirst({
@@ -35,7 +39,108 @@ async function validatePayment(payment_id: string, iteration: number = 0){
     }
 }
 
+type environment = "production" | "testing"
 
-export {
-    validatePayment
+
+export function generatePublishableKey(store: STORE, env: environment){
+    const privateKey = fs.readFileSync("./keys/privateKey.pem", {
+        encoding: 'utf-8'
+    })
+    const publishableKey = jwt.sign({
+        ...store,
+        env
+    }, privateKey, {
+        algorithm: 'RS256'
+    })
+
+    return publishableKey
+
+}
+
+
+
+export function generateSecretKey(store: STORE, env: environment){
+
+    const privateKey = fs.readFileSync("./keys/secretKey.txt",{
+        encoding: 'utf-8'
+    })
+
+    const secretKey = jwt.sign({
+        ...store,
+        env
+    }, privateKey, {
+        algorithm: 'HS256'
+    })
+
+    return secretKey
+
+}
+
+
+export function verifyPublishableKey(token: string): Promise<STORE & { env: environment } >{
+    
+    const publicKey = fs.readFileSync("./keys/publicKey.pem",{
+        encoding: 'utf-8'
+    })
+
+    return new Promise((res, rej)=>{
+        jwt.verify(token, publicKey, (err, store)=>{
+            
+            if(err) return rej("Unable to verify")
+
+            return res(store as any)
+        }) 
+
+    })
+
+}
+
+export function verifySecretKey(token: string): Promise<STORE & {env: environment}>{
+    
+    const privateKey = fs.readFileSync("./keys/secretKey.txt",{
+        encoding: 'utf-8'
+    })
+
+    return new Promise((res, rej)=>{
+        jwt.verify(token, privateKey, (err, store)=>{
+            
+            if(err) return rej("Unable to verify")
+
+            return res(store as any)
+        }) 
+
+    })
+
+}
+
+export const generateCheckoutEphemeralKey = (checkout_id: string) => {
+
+    const privateKey = fs.readFileSync("./keys/privateKey.pem", {
+        encoding: 'utf-8'
+    })
+    const publishableKey = jwt.sign({
+        checkout_id
+    }, privateKey, {
+        algorithm: 'RS256'
+    })
+
+    return publishableKey
+
+}
+
+
+export const verifyCheckoutEphemeralKey = (token: string) => {
+    const publicKey = fs.readFileSync("./keys/publicKey.pem", {
+        encoding: 'utf-8'
+    })
+
+    return new Promise((res, rej)=>{
+        jwt.verify(token, publicKey, (err, store)=>{
+            
+            if(err) return rej("Unable to verify")
+
+            return res(store as any)
+        }) 
+
+    })
 }

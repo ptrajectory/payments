@@ -1,11 +1,11 @@
 import { generate_dto, generate_unique_id } from "generators";
 import { CUSTOMER, PAYMENT_METHOD } from "db/schema";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { customer, payment_method } from "zodiac"
 
 
 
-export const createPaymentMethod: HandlerFn = async (req, res, clients) => {
+export const createPaymentMethod: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     // clients
     const { db } = clients
 
@@ -27,7 +27,10 @@ export const createPaymentMethod: HandlerFn = async (req, res, clients) => {
         const result = await db?.insert(PAYMENT_METHOD).values({
             id: generate_unique_id("pm"),
             ...data,
-            updated_at: new Date()
+            updated_at: new Date(),
+            created_at: new Date(),
+            store_id: req.store.id,
+            environment: req.env
         }).returning()
 
         const dto = generate_dto(result?.at(0), "Payment Method created successfully", "success")

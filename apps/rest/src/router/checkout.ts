@@ -1,29 +1,42 @@
 import { Router } from "express";
 import handler, { HandlerObj } from "../../lib/handler";
 import { createCheckout } from "../resources/checkout/create";
-import { deleteCheckout, updateCheckout } from "../resources/checkout/update";
+import { archiveCheckout, updateCheckout } from "../resources/checkout/update";
 import { getCheckout } from "../resources/checkout/read";
+import { storePublicAuth } from "../../lib/middleware/auth";
 
 const routes: Array<HandlerObj> = [
     {
         fn: createCheckout,
         method: "post",
-        path: "/checkouts"
+        path: "/checkouts",
+        middlewares: [
+            storePublicAuth
+        ]
     },
     {
         fn: updateCheckout,
         method: "put",
-        path: "/checkouts/:checkout_id"
+        path: "/checkouts/:checkout_id",
+        middlewares: [
+            storePublicAuth
+        ]
     },
     {
         fn: getCheckout,
         method: "get",
-        path: "/checkouts/:checkout_id"
+        path: "/checkouts/:checkout_id",
+        middlewares: [
+            storePublicAuth
+        ]
     },
     {
-        fn: deleteCheckout,
-        method: "delete",
-        path: "/checkouts/:checkout_id"
+        fn: archiveCheckout,
+        method: "patch",
+        path: "/checkouts/:checkout_id", 
+        middlewares: [
+            storePublicAuth
+        ]
     }
 ]
 

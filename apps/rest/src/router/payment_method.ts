@@ -3,29 +3,42 @@ import handler, { HandlerObj } from "../../lib/handler";
 import { createCheckout } from "../resources/checkout/create";
 import { updateCheckout } from "../resources/checkout/update";
 import { createPaymentMethod } from "../resources/payment_method/create";
-import { deletePaymentMethod, updatePaymentMethod } from "../resources/payment_method/update";
+import { archivePaymentMethod, updatePaymentMethod } from "../resources/payment_method/update";
 import { getPaymentMethod } from "../resources/payment_method/read";
+import { storeSecretAuth } from "../../lib/middleware/auth";
 
 const routes: Array<HandlerObj> = [
     {
         fn: createPaymentMethod,
         method: "post",
-        path: "/payment_methods"
+        path: "/payment_methods",
+        middlewares: [
+            storeSecretAuth
+        ]
     },
     {
         fn: updatePaymentMethod,
         method: "put",
-        path: "/payment_methods/:payment_method_id"
+        path: "/payment_methods/:payment_method_id",
+        middlewares: [
+            storeSecretAuth
+        ]
     },
     {
         fn: getPaymentMethod,
         method: "get",
-        path: "/payment_methods/:payment_method_id"
+        path: "/payment_methods/:payment_method_id",
+        middlewares: [
+            storeSecretAuth
+        ]
     },
     {
-        fn: deletePaymentMethod,
-        method: "delete",
-        path: "/payment_methods/:payment_method_id"
+        fn: archivePaymentMethod,
+        method: "patch",
+        path: "/payment_methods/:payment_method_id",
+        middlewares: [
+            storeSecretAuth
+        ]
     }
 ]
 

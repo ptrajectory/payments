@@ -1,12 +1,12 @@
 import { cart, cart_item } from "zodiac";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { CART, CART_ITEM } from "db/schema";
 import { and, eq } from "drizzle-orm";
 import { isEmpty } from "../../../lib/cjs/lodash";
 
 
-export const updateCart: HandlerFn = async (req, res, clients) => {
+export const updateCart: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients 
 
@@ -30,7 +30,12 @@ export const updateCart: HandlerFn = async (req, res, clients) => {
         const result = await db?.update(CART).set({
             ...parsedData
         })
-        .where(eq(CART.id, id)).returning()
+        .where(and(
+            eq(CART.id, id),
+            // @ts-ignore
+            eq(CART.store_id, req.store.id),
+            eq(CART.environment, req.env)
+        )).returning()
 
         const dto = generate_dto(result?.at(0), "Cart updated successfully", "success")
 
@@ -44,7 +49,7 @@ export const updateCart: HandlerFn = async (req, res, clients) => {
 
 }
 
-export const updateCartItem: HandlerFn = async (req, res, clients) => {
+export const updateCartItem: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
@@ -70,7 +75,13 @@ export const updateCartItem: HandlerFn = async (req, res, clients) => {
             ...data
         })
         .where(
-            and(eq(CART_ITEM.id, cart_item_id), eq(CART_ITEM.cart_id, cart_id))
+            and(
+                eq(CART_ITEM.id, cart_item_id), 
+                eq(CART_ITEM.cart_id, cart_id),
+                //@ts-ignore
+                eq(CART_ITEM.store_id, req.store.id),
+                eq(CART_ITEM.environment, req.env)
+            )
         ).returning()
 
         res.status(200)
@@ -92,7 +103,7 @@ export const updateCartItem: HandlerFn = async (req, res, clients) => {
 }
 
 
-export const deleteCartItem: HandlerFn = async (req, res, clients) => {
+export const deleteCartItem: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
@@ -111,7 +122,13 @@ export const deleteCartItem: HandlerFn = async (req, res, clients) => {
     try {
 
         const result = await db?.delete(CART_ITEM)?.where(
-            and(eq(CART_ITEM.cart_id, cart_id), eq(CART_ITEM.id, cart_item_id))
+            and(
+                eq(CART_ITEM.cart_id, cart_id), 
+                eq(CART_ITEM.id, cart_item_id),
+                // @ts-ignore
+                eq(CART_ITEM.store_id, req.store?.id),
+                eq(CART_ITEM.environment, req.env)
+            )
         ).returning()
 
         return res.status(200)
@@ -137,7 +154,7 @@ export const deleteCartItem: HandlerFn = async (req, res, clients) => {
 }
 
 
-export const deleteCart: HandlerFn = async (req, res, clients) => {
+export const archiveCart: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
@@ -154,9 +171,9 @@ export const deleteCart: HandlerFn = async (req, res, clients) => {
 
     try {
 
-        await db?.delete(CART_ITEM).where(eq(CART_ITEM.id, cart_id)).returning()
-
-        const result = await db?.delete(CART).where(eq(CART.id, cart_id)).returning()
+        const result = await db?.update(CART).set({
+            status: "ARCHIVED"
+        }).where(eq(CART.id, cart_id)).returning()
 
 
         return res.status(200)

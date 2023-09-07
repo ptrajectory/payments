@@ -1,13 +1,11 @@
 import { generate_dto, generate_unique_id } from "generators";
 import { CUSTOMER } from "db/schema";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { customer } from "zodiac"
 
 
 
-export const createCustomer: HandlerFn = async (req, res, clients) => {
-
-    console.log("Invoming", req.body)
+export const createCustomer: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     // clients
     const { db } = clients
 
@@ -32,7 +30,8 @@ export const createCustomer: HandlerFn = async (req, res, clients) => {
             last_name: data.last_name,
             meta: data.meta,
             updated_at: new Date(),
-            store_id: data.store_id
+            store_id: req.store.id,
+            environment: req.env
         }).returning()
 
         const dto = generate_dto(result?.at(0), "Customer created successfully", "success")

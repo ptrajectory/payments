@@ -1,21 +1,123 @@
-import { payment } from "zodiac";
-import { HandlerFn } from "../../../lib/handler";
+import { PAYMEN_INPUT, payment, payment_input } from "zodiac";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto, generate_unique_id } from "generators";
-import { CHECKOUT, PAYMENT, PAYMENT_METHOD } from "db/schema";
-import { eq } from "drizzle-orm";
+import { CART, CART_ITEM, CHECKOUT, PAYMENT, PAYMENT_METHOD, PRODUCT } from "db/schema";
+import { and, eq, sql } from "drizzle-orm";
 import mpesaExpressClient from "./mpesa";
-import { isEmpty, isNull, isUndefined } from "../../../lib/cjs/lodash";
+import { isEmpty, isNull, isNumber, isString, isUndefined } from "../../../lib/cjs/lodash";
 import { validatePayment } from "../../../lib/functions";
+import db from "db";
+import { TEST_PHONE_NUMBERS } from "../../../lib/CONSTANTS";
+
+
+const determinPaymentDetails = async (body: PAYMEN_INPUT) => {
+
+    const parsed = payment_input.safeParse(body)
+
+    if(!parsed.success) throw new Error("INVALID PAYMENT INPUT")
+
+    const { amount, payment_method_id, phone_number, checkout_id, payment_option, customer_id } = parsed.data
+
+    if(isNumber(amount) && isString(phone_number) && !isEmpty(amount) && !isEmpty(phone_number)) return  {  amount, phone_number: phone_number, payment_option }
+    
+    if(isUndefined(payment_method_id) && !isUndefined(checkout_id)){
+
+        const checkout = await db.select({
+            product_id: PRODUCT.id,
+            amount: sql<number>`${CART_ITEM.quantity} * ${PRODUCT.price}`.mapWith(Number),
+            phone_number: PAYMENT_METHOD.phone_number
+        })
+        .from(CHECKOUT)
+        .innerJoin(PAYMENT_METHOD, eq(PAYMENT_METHOD.id, CHECKOUT.payment_method_id))
+        .innerJoin(CART, eq(CART.id, CHECKOUT.cart_id))
+        .innerJoin(CART_ITEM, eq(CART_ITEM.cart_id, CART.id))
+        .innerJoin(PRODUCT, eq(PRODUCT.id, CART_ITEM.product_id))
+        .orderBy(PRODUCT.id)
+
+        const agg_total = checkout?.reduce((prev, cur)=> prev + cur.amount, 0)
+
+
+        return {
+            amount: agg_total,
+            phone_number: checkout?.at(0)?.phone_number,
+            payment_option
+        }
+
+    }
+
+    if(!isUndefined(payment_method_id) && !isUndefined(checkout_id)) {
+
+        const checkout = await db.select({
+            product_id: PRODUCT.id,
+            amount: sql<number>`${CART_ITEM.quantity} * ${PRODUCT.price}`.mapWith(Number),
+            phone_number: PAYMENT_METHOD.phone_number
+        })
+        .from(CHECKOUT)
+        .innerJoin(PAYMENT_METHOD, eq(PAYMENT_METHOD.id, payment_method_id))
+        .innerJoin(CART, eq(CART.id, CHECKOUT.cart_id))
+        .innerJoin(CART_ITEM, eq(CART_ITEM.cart_id, CART.id))
+        .innerJoin(PRODUCT, eq(PRODUCT.id, CART_ITEM.product_id))
+        .orderBy(PRODUCT.id)
+
+        const agg_total = checkout?.reduce((prev, cur)=> prev + cur.amount, 0)
+
+        return {
+            amount: agg_total,
+            phone_number: checkout?.at(0)?.phone_number,
+            payment_option
+        }
+
+    }
+
+    if(!isUndefined(payment_method_id) && !isUndefined(amount)){
+
+        const payment_method = await db.query.PAYMENT_METHOD.findFirst({
+            where: (pm, { eq }) => eq(pm.id, payment_method_id)
+        })
+
+        return {
+            amount,
+            phone_number: payment_method?.phone_number,
+            payment_option
+        }
+
+    }
+
+    if(!isUndefined(customer_id) && !isUndefined(amount)){
+
+        const payment_method = await db.query.PAYMENT_METHOD.findFirst({
+            where: (pm, {eq, and})=> and(
+                eq(pm.customer_id, customer_id),
+                eq(pm.is_default, true)
+            ),
+            columns: {
+                phone_number: true
+            }
+        })
+
+        if(isUndefined(payment_method?.phone_number) || isNull(payment_method?.phone_number)) throw new Error("Customer has no payment method")
+
+        return {
+            amount,
+            phone_number: payment_method?.phone_number,
+            payment_option
+        }
+
+    }
+
+    throw new Error("Unable to determin payment details")
+
+}
 
 
 
-export const createPayment: HandlerFn = async (req, res, clients) => {
+export const createPayment: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
     const body = req.body
 
-    const parsed = payment.safeParse(body)
+    const parsed = payment_input.safeParse(body)
 
     if(!parsed.success) return res.status(400).send(generate_dto(
         parsed.error.formErrors.fieldErrors,
@@ -28,72 +130,94 @@ export const createPayment: HandlerFn = async (req, res, clients) => {
 
     try {
 
+        const paymentDetails = await determinPaymentDetails(data)
+        const { amount, payment_option, phone_number } = paymentDetails
 
-        const payment_method = await db?.query.PAYMENT_METHOD.findFirst({
-            where: eq(PAYMENT_METHOD.id, data.payment_method_id ?? "")
-        })
 
-        const checkout = isUndefined(data?.checkout_id) ? null : await db?.query.CHECKOUT.findFirst({
-            where: eq(CHECKOUT.id, data.checkout_id),
-            with: {
-                cart: {
-                    with: {
-                        items: {
-                            with: {
-                                product: true
-                            }
-                        }
-                    }
+
+        switch(payment_option){
+            case "MPESA": {
+                if(req.env === "production") { // PRODUCTION ENV
+                    const response = await mpesaExpressClient.client.send_payment_request({
+                        amount: 2,//TODO: remove me
+                        phone_number: Number(phone_number),
+                        transaction_type: "CustomerPayBillOnline",
+                        transaction_desc: "Online Purchase"
+                    })
+
+                    const result = await db?.insert(PAYMENT).values({
+                        id: generate_unique_id("pay"),
+                        amount: amount,
+                        token: response.CheckoutRequestID,
+                        status: "PROCESSING",
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                        store_id: req.store.id,
+                        environment: req.env,
+                        checkout_id: parsed.data.checkout_id,
+                        payment_method_id: parsed.data.payment_method_id,
+                        customer_id: parsed.data.customer_id
+                    }).returning()
+
+
+                    return res.status(201).send(generate_dto(result?.at(0), "success", "success"))
+
                 }
+
+                if(req.env === "testing") { // TESTING ENV
+
+                    const result = await db?.insert(PAYMENT).values({
+                        id: generate_unique_id("pay"),
+                        amount: amount,
+                        token: generate_unique_id("test_payment_token"),
+                        status: "PROCESSING",
+                        store_id: req.store.id,
+                        environment: req.env,
+                        checkout_id: parsed.data.checkout_id,
+                        payment_method_id: parsed.data.payment_method_id,
+                        customer_id: parsed.data.customer_id
+                    }).returning()
+
+
+                    // check phone numbers
+
+                    if(phone_number === TEST_PHONE_NUMBERS?.[payment_option].error || phone_number !== TEST_PHONE_NUMBERS?.[payment_option].success){
+
+                        mpesaExpressClient.emit("payment:error", {
+                            Body: {
+                                stkCallback: {
+                                    // @ts-ignore
+                                    CheckoutRequestID: result?.at(0)?.token,
+                                    ResultCode: 1123,
+                                    MerchantRequestID: "mrch",
+                                }
+                            }
+                        })
+
+                    }
+
+                    if(phone_number === TEST_PHONE_NUMBERS?.[payment_option].success){
+
+                        mpesaExpressClient.emit("payment:success", {
+                            // @ts-ignore
+                            CheckoutRequestID: result?.at(0)?.token,
+                            ResponseCode: "0",
+                            CustomerMessage: "success",
+                            MerchantRequestID: "mrch_some_id",
+                            ResponseDescription: "success"
+                        })
+
+                    }
+
+                    return res.status(201).send(generate_dto(result?.at(0), "success", "success"))
+
+                }
+            };
+            default: {
+                return
             }
-        })
 
-        const total_amount = checkout?.cart?.items?.reduce((prev, curr, i)=> {
-            return prev + (curr.product?.price ?? 0)
-        }, 0) ?? 0
-
-        if(isNull(payment_method)) return res.status(404)
-        .send(
-            generate_dto(
-                null,
-                "Payment Method is invalid",
-                "error"
-            )
-        )
-
-        const response = await mpesaExpressClient.client.send_payment_request({
-            amount: 2,//TODO: remove me
-            phone_number: Number(payment_method?.phone_number),
-            transaction_type: "CustomerPayBillOnline",
-            transaction_desc: "Online Purchase"
-        })
-
-        if(response.ResponseCode !== '0') return res.status(500)
-        .send(
-            generate_dto(
-                null,
-                "Unable to make payment request",
-                "error"
-            )
-        )
-
-        const result = await db?.insert(PAYMENT).values({
-            id: generate_unique_id("pay"),
-            ...parsed.data,
-            amount: total_amount,
-            token: response.CheckoutRequestID,
-            status: "PROCESSING",
-            created_at: new Date(),
-            updated_at: new Date(),
-            store_id: payment_method?.store_id
-        }).returning()
-    
-        return res.status(201).send(generate_dto(
-            result?.at(0),
-            "Successfully created payment",
-            "success"
-        ))
-
+        }
     }
     catch (e)
     {
@@ -108,9 +232,7 @@ export const createPayment: HandlerFn = async (req, res, clients) => {
 
 }
 
-
-
-export const getPayment: HandlerFn = async (req, res, clients) => {
+export const getPayment: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
@@ -126,7 +248,12 @@ export const getPayment: HandlerFn = async (req, res, clients) => {
 
     try {
         const result = (await db?.query.PAYMENT.findFirst({
-            where: eq(PAYMENT.id, payment_id)
+            where: and(
+                eq(PAYMENT.id, payment_id),
+                // @ts-ignore
+                eq(PAYMENT.store_id, req.store?.id),
+                eq(PAYMENT.environment, req.env)
+            )
         }))
 
         if(isUndefined(result) || isEmpty(result)) return res.status(404).send(
@@ -160,7 +287,7 @@ export const getPayment: HandlerFn = async (req, res, clients) => {
 }
 
 
-export const updatePayment: HandlerFn = async (req, res, clients) => {
+export const updatePayment: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
@@ -192,7 +319,12 @@ export const updatePayment: HandlerFn = async (req, res, clients) => {
 
         const result = await db?.update(PAYMENT).set({
             ...parsed.data
-        }).where(eq(PAYMENT.id, id)).returning()
+        }).where(and(
+            eq(PAYMENT.id, id)),
+            // @ts-ignore
+            eq(PAYMENT.store_id, req.store.id),
+            eq(PAYMENT.environment, req.env)
+        ).returning()
 
         return res.status(200).send(
             generate_dto(
@@ -219,7 +351,7 @@ export const updatePayment: HandlerFn = async (req, res, clients) => {
 }
 
 
-export const deletePayment: HandlerFn = async (req, res, clients) =>{
+export const archivePayment: HandlerFn<AuthenticatedRequest> = async (req, res, clients) =>{
     const { db } = clients
 
     const payment_id = req.params.payment_id
@@ -234,7 +366,14 @@ export const deletePayment: HandlerFn = async (req, res, clients) =>{
 
     try {
 
-        const result = await db?.delete(PAYMENT).where(eq(PAYMENT.id, payment_id)).returning()
+        const result = await db?.delete(PAYMENT).where(
+            and(
+                eq(PAYMENT.id, payment_id),
+                // @ts-ignore
+                eq(PAYMENT.store_id, req.store.id),
+                eq(PAYMENT.environment, req.env)
+            ),
+        ).returning()
 
         res.status(200).send(generate_dto(
             result?.at(0),
@@ -257,7 +396,7 @@ export const deletePayment: HandlerFn = async (req, res, clients) =>{
 }
 
 
-export const confirmPayment: HandlerFn = async (req, res, clients) => {
+export const confirmPayment: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
@@ -273,6 +412,19 @@ export const confirmPayment: HandlerFn = async (req, res, clients) => {
 
 
     try {
+
+        const payment = await db?.query.PAYMENT.findFirst({
+            where: (pm, { eq, and }) => and(
+                // @ts-ignore
+                eq(pm.store_id, req.store.id),
+                eq(pm.environment, req.env)
+            ),
+            columns: {
+                id: true
+            }
+        })
+
+        if(isUndefined(payment)) return res.status(404).send(generate_dto(null, "No such payment exists", "error"))
 
         const status = await validatePayment(id)
 
