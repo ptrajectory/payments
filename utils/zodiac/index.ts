@@ -8,7 +8,8 @@ const customer = z.object({
     meta: z.any().nullable(),
     created_at: z.string().optional(),
     updated_at: z.string().optional(),
-    store_id: z.string().optional()
+    store_id: z.string().optional(),
+    status: z.string().optional()
 })
 
 type CUSTOMER = z.infer<typeof customer>;
@@ -21,7 +22,9 @@ const payment_method = z.object({
     phone_number: z.string().optional(),
     created_at: z.string().optional(),
     updated_at: z.string().optional(),
-    store_id: z.string().optional()
+    store_id: z.string().optional(),
+    is_default: z.boolean().optional(),
+    status: z.string().optional()
 })
 
 type PAYMENT_METHOD = z.infer<typeof payment_method>; 
@@ -35,7 +38,8 @@ const checkout = z.object({
     cart_id: z.string().optional(),
     created_at: z.string().optional(),
     updated_at: z.string().optional(),
-    store_id: z.string().optional()
+    store_id: z.string().optional(),
+    purchase_type: z.enum(['one_time', 'monthly_subscription']).optional()
 })
 
 type CHECKOUT = z.infer<typeof checkout>;
@@ -46,7 +50,8 @@ const product = z.object({
     description: z.string().optional(),
     price: z.number().optional(), 
     image: z.string().optional(),
-    store_id: z.string().optional()
+    store_id: z.string().optional(),
+    status: z.string().optional()
 })
 
 type PRODUCT = z.infer<typeof product>;
@@ -65,7 +70,8 @@ const cart_item = z.object({
     cart_id: z.string().optional(),
     product_id: z.string().optional(),
     quantity: z.number().optional(),
-    store_id: z.string().optional()
+    store_id: z.string().optional(),
+    status: z.string().optional()
 })
 
 type CART_ITEM = z.infer<typeof cart_item>;
@@ -102,11 +108,21 @@ const store = z.object({
     name: z.string().optional(),
     image: z.string().optional(),
     description: z.string().optional(),
-    secret_key: z.string().optional(),
-    test_key: z.string().optional()
+    status: z.string().optional()
 })
 
 type STORE = z.infer<typeof store>
+
+const payment_input = z.object({
+    checkout_id: z.string().optional(),
+    payment_method_id: z.string().optional(),
+    amount: z.number().optional(),
+    phone_number: z.string().optional(),
+    payment_option: z.enum(['MPESA']).default("MPESA"),
+    customer_id: z.string().optional()
+})
+
+type PAYMEN_INPUT = z.infer<typeof payment_input>
 
 
 export {
@@ -119,6 +135,7 @@ export {
   payment,
   seller,
   store,
+  payment_input,
   PAYMENT_METHOD,
   CUSTOMER,
   CHECKOUT,
@@ -127,5 +144,6 @@ export {
   CART_ITEM,
   PAYMENT,
   SELLER,
-  STORE
+  STORE,
+  PAYMEN_INPUT
 };
