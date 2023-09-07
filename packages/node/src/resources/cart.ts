@@ -1,205 +1,227 @@
-import got, { RequestError } from "got"
-import { CART, CART_ITEM, cart, cart_item } from "zodiac"
-import { CART_ENDPOINTS } from "../lib/CONSTANTS"
-import { DTO } from "../lib/types"
+import { CART, CART_ITEM, cart as schema, cart_item as sub_schema } from "zodiac";
+import PaymentsHttpClient, { ParamsError, PaymentsClientHttpError, PaymentsClientParseError } from "../lib/net";
+import { DTO, UNKNOWN_ERROR } from "../lib/types";
+import { CART_ENDPOINTS } from "../lib/CONSTANTS";
+import { isEmpty } from "../lib/cjs/lodash";
 
 
+export default class Cart {
 
-class Cart {
-    private api_key: string = ""
-    constructor(API_KEY: string){
-        this.api_key = API_KEY 
+    client: PaymentsHttpClient 
+
+
+    constructor(client: PaymentsHttpClient){
+        this.client = client
     }
 
 
-    async createCart(data: CART){
+    /**
+     * @name create
+     * @param cart 
+     * @description create a cart
+     * @returns 
+     */
+    async create(cart: CART) {
 
-        const parsed = cart.safeParse(data)
+        const parsed = schema.safeParse(cart)
 
-        if(!parsed.success) throw new Error("Invalid Cart body", {
-            cause: parsed.error.formErrors.fieldErrors
-        })
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "cart")
 
 
-        try {
-            const result = await got.post(CART_ENDPOINTS.base, {
-                json:(parsed.data),
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                }
-            }).json<DTO<CART>>()
-
-            return result.data
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: e
+            const result = await this.client.post(CART_ENDPOINTS.base, {
+                body: parsed.data
             })
-        }
+
+            const data = await result.toJSON<DTO<CART>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result,'carts')
 
     }
 
+    /**
+     * @name retrieve
+     * @param id 
+     * @description retrieve a cart
+     * @returns 
+     */
+    async retrieve(id: string){
 
-    async updateCart(id: string, data: CART){
-        const parsed = cart.safeParse(data)
+        if(isEmpty(id)) return new ParamsError("Invalid ID", "ID")
 
-        if(!parsed.success) throw new Error("Invalid Cart body", {
-            cause: parsed.error.formErrors.fieldErrors
-        })
-
-        try {
-
-            const result = await got.put(`${CART_ENDPOINTS.base}/${id}`, {
-                json: parsed.data,
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                }
-            }).json<DTO<CART>>()
-
-            return result.data
-
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: (e as RequestError)?.response?.body
-            })
-        }
-    }
-
-
-    async getCart(id: string) {
-
-
-        try {
-
-            const result = await got.get(`${CART_ENDPOINTS.base}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                }
-            }).json<DTO<CART & {
-                items: CART_ITEM[]
-            }>>()
-
-            return result.data
-
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: (e as RequestError)?.response?.body
-            })
-        }
-
-    }
-
-    async addCartItem(id: string, data: CART_ITEM){
-        const parsed = cart_item.safeParse(data)
-
-        if(!parsed.success) throw new Error("Unable to add cart item.", {
-            cause: parsed.error.formErrors.fieldErrors
-        })
-
-
-        try {
-            const result = await got.post(`${CART_ENDPOINTS.base}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                },
-                json: {
-                    ...parsed.data,
+            const result = await this.client.get(CART_ENDPOINTS.retrieve, {
+                pathSegments: {
                     cart_id: id
                 }
-            }).json<DTO<CART_ITEM>>()
-
-            return result.data
-        }
-        catch (e)
-        {
-            throw new Error("Somthing went wrong", {
-                cause: (e as RequestError)?.response?.body
             })
-        }
+
+            const data = await result.toJSON<DTO<CART & { items: Array<CART_ITEM> }>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "carts")
+ 
+
+
     }
 
+    /**
+     * @name update
+     * @param id 
+     * @param cart
+     * @description update a cart 
+     * @returns 
+     */
+    async update(id: string, cart: CART){
 
-    async updateCartItem(id: string, cart_id: string, data: CART_ITEM){
-        const parsed = cart_item.safeParse(data)
+        if(isEmpty(id)) return new ParamsError("Invalid ID", "ID")
 
-        if(!parsed.success) throw new Error("Unable to add cart item.", {
-            cause: parsed.error.formErrors.fieldErrors
-        })
+        const parsed = schema.safeParse(cart)
 
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "cart")
 
-        try {
-            const result = await got.put(`${CART_ENDPOINTS.base}/${cart_id}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
+            const result = await this.client.put(CART_ENDPOINTS.update, {
+                pathSegments: {
+                    cart_id: id
                 },
-                json: parsed.data
-            }).json<DTO<CART_ITEM>>()
-
-            return result.data
-        }
-        catch (e)
-        {
-            throw new Error("Somthing went wrong", {
-                cause: (e as RequestError)?.response?.body
+                body: parsed.data
             })
-        }
+
+            const data = await result.toJSON<DTO<CART>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "carts")
+
+
     }
 
 
-    async deleteCart(id: string) {
+    /**
+     * @name archive
+     * @param id 
+     * @description archive a cart
+     * @returns 
+     */
+    async archive(id: string){
 
-        try {
+        if(isEmpty(id)) return new ParamsError("Invalid ID", "ID")
 
-            const result = await got.delete(`${CART_ENDPOINTS.base}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
+            const result = await this.client.patch(CART_ENDPOINTS.retrieve, {
+                pathSegments: {
+                    cart_id: id
                 }
-            }).json<DTO<CART>>()
-
-            return result.data
-
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: (e as RequestError)?.response?.body
             })
-        }
+
+            const data = await result.toJSON<DTO<CART>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "carts")
 
     }
 
-    async deleteCartItem(id: string, cart_id: string) {
+    /**
+     * @name addCartItem
+     * @param cart_id 
+     * @param cart_item 
+     * @description add an item to the cart
+     * @returns 
+     */
+    async addCartItem(cart_id: string, cart_item: CART_ITEM) {
 
-        try {
+        if(isEmpty(cart_id)) return new ParamsError("Invalid CART ID", "CART ID")
 
-            const result = await got.delete(`${CART_ENDPOINTS.base}/${cart_id}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
+        const parsed = sub_schema.safeParse(cart_item)
+
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "cart_items")
+
+            const result = await this.client.post(CART_ENDPOINTS.add_item, {
+                pathSegments: {
+                    cart_id
+                },
+                body: {
+                    ...parsed.data,
+                    cart_id
                 }
-            }).json<DTO<CART_ITEM>>()
-
-            return result.data
-
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: (e as RequestError)?.response?.body
             })
-        }
+
+
+            const data = await result.toJSON<DTO<CART_ITEM>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "carts")
 
     }
 
 
+    /**
+     * @name updateCartItem
+     * @param cart_id 
+     * @param cart_item_id 
+     * @param cart_item 
+     * @description update a cart item
+     * @returns 
+     */
+    async updateCartItem(cart_id: string, cart_item_id: string, cart_item: CART_ITEM){
+
+        if(isEmpty(cart_id)) return new ParamsError("Invalid CART ID", "CART ID")
+
+        if(isEmpty(cart_item_id)) return new ParamsError("Invalid CART ITEM ID", "CART ITEM ID")
+
+        const parsed = sub_schema.safeParse(cart_item)
+
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "cart_items")
+
+            const result = await this.client.put(CART_ENDPOINTS.update_item, {
+                pathSegments: {
+                    cart_id,
+                    cart_item_id
+                },
+                body: parsed.data
+            })
+
+            const data = await result.toJSON<DTO<CART_ITEM>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "payments")
 
 
+    }
+
+
+    /**
+     * @name deleteCartItem
+     * @param cart_id 
+     * @param cart_item_id 
+     * @description delete a cart item
+     * @returns 
+     */
+    async deleteCartItem(cart_id: string, cart_item_id: string){
+
+        if(isEmpty(cart_id)) return new ParamsError("Invalid CART ID", "CART ID")
+
+        if(isEmpty(cart_item_id)) return new ParamsError("Invalid CART ITEM ID", "CART ITEM ID")
+  
+
+            const result = await this.client.delete(CART_ENDPOINTS.delete_item, {
+                pathSegments: {
+                    cart_id,
+                    cart_item_id
+                }
+            })
+
+            const data = await result.toJSON<DTO<CART_ITEM>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "cart_items")
+
+
+
+    }
 
 }
-
-
-export default Cart

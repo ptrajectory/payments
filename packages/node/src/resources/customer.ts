@@ -1,149 +1,129 @@
-import { CUSTOMER_ENDPOINTS } from "../lib/CONSTANTS"
-import { CUSTOMER, customer } from "zodiac"
-import got, { RequestError } from "got"
-import { DTO } from "../lib/types"
-import { isEmpty, isNull, isUndefined } from "../lib/cjs/lodash"
+import { CUSTOMER, customer as schema } from "zodiac";
+import PaymentsHttpClient, { ParamsError, PaymentsClientHttpError, PaymentsClientParseError } from "../lib/net";
+import { DTO, UNKNOWN_ERROR } from "../lib/types";
+import { CUSTOMER_ENDPOINTS } from "../lib/CONSTANTS";
+import { isEmpty } from "../lib/cjs/lodash";
 
-class Customer {
-    private api_key: string = ""
-    constructor(API_KEY: string){
-        this.api_key = API_KEY
+
+
+export default class Customer {
+
+    client: PaymentsHttpClient
+
+    constructor(client: PaymentsHttpClient){
+        this.client = client
     }
 
 
-    async createCustomers(data: CUSTOMER){
-        const parsed = customer.safeParse(data)
+    /**
+     * @name create
+     * @param {CUSTOMER} customer 
+     * @description create a new customer
+     * @returns 
+     */
+    async create(customer: CUSTOMER){
 
-        if (!parsed.success) {
-            throw new Error("INVALID BODY", {
-                cause: parsed.error.formErrors.fieldErrors
+            const parsed = schema.safeParse(customer)
+
+            if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "customer")
+
+            const result = await this.client.post(CUSTOMER_ENDPOINTS.base, {
+                body: parsed.data
             })
-        }
-        const {created_at, updated_at,...parsedData} = parsed.data
+
+            const data = await result.toJSON<DTO<CUSTOMER>>()
+
+            if(result._res.ok) return data?.data
 
 
-        const url = CUSTOMER_ENDPOINTS.base
+            throw new PaymentsClientHttpError(result, "customers")
 
 
-        try {
-            const customer = await got(url, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                },
-                body: JSON.stringify(parsedData),
-                method: "POST"
-            }).json<DTO<CUSTOMER>>()
-
-            return customer.data 
-
-        }
-        catch (e) 
-        {   
-            throw new Error("UNABLE TO CREATE CUSTOMER", {
-                cause: (e as RequestError).response?.body
-            })
-        }
     }
 
 
-    async updateCustomer(id: string, data: CUSTOMER): Promise<CUSTOMER> {
-        const parsed = customer.safeParse(data)
+    /**
+     * @name retrieve
+     * @param {string} id
+     * @description retrieve a customer
+     * @returns 
+     */
+    async retrieve(id: string){
 
-        if(isEmpty(id)) throw new Error("ID NOT PROVIDED")
-
-        if (!parsed.success) {
-            throw new Error("INVALID BODY", {
-                cause: parsed.error.formErrors.fieldErrors
-            })
-        }
-        const {created_at, updated_at,...parsedData} = parsed.data
-
-        const url = CUSTOMER_ENDPOINTS.base
-
-        try{
-            const customer = await got.put(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(parsedData),
-                method: "PUT"
-            }).json<DTO<CUSTOMER>>()
-
-            return customer.data
-        }
-        catch (e)
-        {
-            throw new Error("UNABLE TO UPDATE CUSTOMER", {
-                cause: (e as RequestError).response?.body
-            })
-        }
-    }
+            if(isEmpty(id)) throw new ParamsError("INVALID ID", "id")
 
 
-    async getCustomer(id: undefined | string | null = null): Promise<CUSTOMER>{
-        
-        const url = CUSTOMER_ENDPOINTS.base
-
-        if(isUndefined(id) || isNull(id) ) throw new Error("ID NOT PROVIDED")
-
-        try {
-
-            const customer = await got.get(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
+            const result = await this.client.get(CUSTOMER_ENDPOINTS.retrieve, {
+                pathSegments: {
+                    customer_id: id
                 }
-            }).json<DTO<CUSTOMER>>()
-
-            return customer.data
-
-        }
-        catch (e)
-        {
-            throw new Error("UNABLE TO GET CUSTOMER", {
-                cause: (e as RequestError).response?.body
             })
-        }
+
+            const data = await result.toJSON<DTO<CUSTOMER>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "customers")
+
     }
 
 
-    async deleteCustomer(id: undefined | string | null = null): Promise<CUSTOMER>{
-        
-        const url = CUSTOMER_ENDPOINTS.base
+    /**
+     * @name update
+     * @param {string } id
+     * @param {CUSTOMER} customer 
+     * @description update customer
+     * @returns 
+     */
+    async update(id: string, customer: CUSTOMER){
 
-        if(isUndefined(id) || isNull(id) ) throw new Error("ID NOT PROVIDED")
+        if(isEmpty(id)) return new ParamsError("INVALID ID", "id")
 
-        try {
+        const parsed = schema.safeParse(customer)
 
-            const customer = await got.delete(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
+        if(!parsed.success) return new PaymentsClientParseError(parsed.error, "customers")
+
+            
+            const result = await this.client.put(CUSTOMER_ENDPOINTS.update, {
+                pathSegments: {
+                    customer_id: id
+                },
+                body: parsed.data
+            })
+
+            const data = await result.toJSON<DTO<CUSTOMER>>()
+
+            if(result._res.ok) return data
+
+            throw new PaymentsClientHttpError(result, "customers")
+
+    }
+
+    /**
+     * @name archive
+     * @param id
+     * @description arvhive customer 
+     * @returns 
+     */
+    async archive(id: string){
+
+        if(isEmpty(id)) return new ParamsError("INVALID ID", "id")
+
+
+
+            const result = await this.client.patch(CUSTOMER_ENDPOINTS.archive, {
+                pathSegments: {
+                    customer_id: id
                 }
-            }).json<DTO<CUSTOMER>>()
-
-            return customer.data
-
-        }
-        catch (e)
-        {
-            throw new Error("UNABLE TO DELETE CUSTOMER", {
-                cause: (e as RequestError).response?.body
             })
-        }
+
+            const data = await result.toJSON<DTO<CUSTOMER>>()
+            
+            if(result._res.ok) return data
+
+            throw new PaymentsClientHttpError(result, "customer")
+ 
+
     }
-
-
-
-
-    
-
-
 
 }
-
-
-export default Customer
