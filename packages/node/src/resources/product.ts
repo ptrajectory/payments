@@ -1,142 +1,98 @@
-import got, { RequestError } from "got"
-import { PRODUCT, product } from "zodiac"
-import { PRODUCT_ENDPOINTS } from "../lib/CONSTANTS"
-import { DTO } from "../lib/types"
+import { PRODUCT, product as schema  } from "zodiac";
+import PaymentsHttpClient, { PaymentsClientHttpError, PaymentsClientParseError } from "../lib/net";
+import { PRODUCT_ENDPOINTS } from "../lib/CONSTANTS";
+import { DTO, UNKNOWN_ERROR } from "../lib/types";
 
 
-class Product {
-    api_key: string = "" 
 
-    constructor(API_KEY: string){
-        this.api_key = API_KEY 
+type CREATE_PRODUCT_DATA = Omit<PRODUCT, "id" | "created_at" | "updated_at" | "store_id" | "status">
+
+type UPDATE_PRODUCT_DATA = Omit<PRODUCT, "id" | "created_at" | "updated_at" | "store_id">
+
+export default class Product {
+
+    client: PaymentsHttpClient 
+
+
+    constructor(client: PaymentsHttpClient){
+        this.client = client
     }
 
 
-    async createProduct(data: PRODUCT) {
-        console.log("Ingoing data::", data)
-        const parsed = product.safeParse(data)
+    async create(product: CREATE_PRODUCT_DATA){
 
-        if(!parsed.success) throw new Error("Invalid body", {
-            cause: parsed.error.formErrors.fieldErrors
-        })
+        const parsed = schema.safeParse(product)
 
-        const parsedData = parsed.data
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "products")
 
-        try {
-
-            const result = await got.post(PRODUCT_ENDPOINTS.base, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                },
-                json: parsedData
-            }).json<DTO<PRODUCT>>()
-
-            return result.data
-
-        }
-        catch (e)
-        {
-
-            console.log((e as RequestError)?.code)
-            console.log((e as RequestError)?.message)
-            console.log((e as RequestError)?.response?.body)
-            throw new Error("Something went wrong", {
-                cause: e
+            const result = await  this.client.post(PRODUCT_ENDPOINTS.base, {
+                body: parsed.data
             })
-        }
+
+            const data = await result.toJSON<DTO<PRODUCT>>()
+
+            if(result._res.ok) return data?.data 
+
+            throw new PaymentsClientHttpError(result, "products")
 
     }
 
 
+    async retrieve(id: string){
 
-    async updateProduct(id: string, data: PRODUCT) {
 
-        const parsed = product.safeParse(data)
-
-        if(!parsed.success) throw new Error("Invalid body", {
-            cause: parsed.error.formErrors.fieldErrors
-        })
-
-        const parsedData = parsed.data
-
-        try {
-
-            const result = await got.put(`${PRODUCT_ENDPOINTS.base}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(parsedData)
-            }).json<DTO<PRODUCT>>()
-
-            return result.data
-
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: e
+            const result = await this.client.get(PRODUCT_ENDPOINTS.retrieve, {
+                pathSegments: {
+                    product_id: id
+                }
             })
-        }
+
+
+            const data = await result.toJSON<DTO<PRODUCT>>() 
+
+            if(result._res.ok) return data?.data 
+
+            throw new PaymentsClientHttpError(result, "product")
 
     }
 
-    async getProduct(id: string) {
-        
-        const url = PRODUCT_ENDPOINTS.base 
 
-        try {
+    async update(id: string, data: UPDATE_PRODUCT_DATA) {
 
-            const product = await got.get(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
+        const parsed = schema.safeParse(data)
+
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "products")
+
+            const result = await this.client.put(PRODUCT_ENDPOINTS.update, {
+                pathSegments: {
+                    product_id: id
                 },
-            }).json<DTO<PRODUCT>>()
-
-            return product.data
-
-        }
-        catch (e) 
-        {
-            throw new Error("UNABLE TO GET PRODUCT", {
-                cause: (e as RequestError).response?.body
+                body: parsed.data
             })
-        }
-
+    
+            const json = await result.toJSON<DTO<PRODUCT>>()
+    
+            if(result._res.ok) return json?.data
+    
+            throw new PaymentsClientHttpError(result, "product")
 
     }
 
+    async archive(id: string){
 
-    async deleteProduct(id: string) {
-        
-        const url = PRODUCT_ENDPOINTS.base 
-
-        try {
-
-            const product = await got.delete(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
-                },
-            }).json<DTO<PRODUCT>>()
-
-            return product.data
-
-        }
-        catch (e) 
-        {
-            throw new Error("UNABLE TO GET PRODUCT", {
-                cause: (e as RequestError).response?.body
+            const result = await this.client.patch(PRODUCT_ENDPOINTS.patch, {
+                pathSegments: {
+                    product_id: id
+                }
             })
-        }
 
+            const json = await result.toJSON<DTO<PRODUCT>>()
+    
+            if(result._res.ok) return json?.data 
+    
+            throw new PaymentsClientHttpError(result, "product")
 
     }
-
 
 
 }
-
-
-export default Product

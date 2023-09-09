@@ -1,6 +1,10 @@
+import { UploadApiResponse } from "cloudinary"
 import { clsx, type ClassValue } from "clsx"
 import dayjs from "dayjs"
+import formidable from "formidable"
+import { isEmpty } from "lodash"
 import { twMerge } from "tailwind-merge"
+import { v2 as cloudinary } from "cloudinary"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -89,4 +93,31 @@ const matcher = /(customers|products|payments|payment_methods)\/.*/
 
 export const route_matches = (path_name: string, store_id: string, base: string) => {
     return path_name?.replace("[store_id]", store_id)?.replace(matcher, "$1") === base
+}
+
+
+export const isSameHour = (date: Date | string, comp: Date | string) => dayjs(date).isSame(comp, "hour")
+
+export const isSameDate = (date: Date | string, comp: Date | string) => {
+    const d = new Date(date)
+    const c = new Date(comp)
+    return d.getFullYear() === c.getFullYear() && d.getMonth() === c.getMonth() && d.getDate() === c.getDate()
+}
+
+
+export const formatChartDate = (data: {date: Date | string, is_same_date: boolean, from: Date | string, to: Date| string}) => {
+    const { date, is_same_date, from, to } = data
+    return dayjs(date).format(
+        is_same_date ? "hh A" :
+        dayjs(from).isSame(to, "month") ? "D" :
+        "MMM D"
+    )
+}
+
+
+
+
+
+export const getUploadTimestamp = () => {
+    return Math.round((new Date).getTime()/1000)
 }

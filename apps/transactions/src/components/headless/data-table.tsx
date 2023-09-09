@@ -4,7 +4,10 @@ import * as React from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
   SortingState,
+  TableState,
+  Updater,
   VisibilityState,
   flexRender,
   getCoreRowModel,
@@ -26,23 +29,40 @@ import {
 } from "@/components/headless/table-ui"
 
 import { DataTablePagination } from "./data-table-pagination"
+import { CogIcon } from "lucide-react"
+import { isFunction } from "lodash"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  onPaginationStateChanged?: (pagination: PaginationState) => void
+  loading?: boolean
+  onStateChanged?: (state: TableState) => void
+  state?: TableState
+  paginationEnabled?: boolean
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onPaginationStateChanged,
+  loading,
+  onStateChanged,
+  state,
+  paginationEnabled
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [rowSelection, setRowSelection] = React.useState(state?.rowSelection ?? {})
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<VisibilityState>(state?.columnVisibility ?? {})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>(state?.sorting ?? [])
+  const [pagination, setPagination] = React.useState<PaginationState>(state?.pagination ?? {pageIndex: 0, pageSize: 10})
+
+  React.useEffect(()=>{
+    onPaginationStateChanged?.(pagination)
+  }, [pagination.pageIndex, pagination.pageSize])
 
   const table = useReactTable({
     data,
@@ -52,6 +72,7 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -64,12 +85,13 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    onPaginationChange: setPagination
   })
 
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
-        <Table>
+        <Table >
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -88,7 +110,12 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="relative" >
+            {
+              loading && <div className=" absolute flex flex-row w-full h-full items-center justify-center bg-white opacity-60">
+                <CogIcon className="animate-spin" />
+              </div>
+            }
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -118,7 +145,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      {paginationEnabled !== false && <DataTablePagination  table={table} />}
     </div>
   )
 }

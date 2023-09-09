@@ -1,153 +1,156 @@
-import { PAYMENT_METHOD, payment_method } from "zodiac"
-import { PAYMENT_METHOD_ENDPOINTS } from "../lib/CONSTANTS"
-import got, { RequestError } from "got"
-import { DTO } from "../lib/types"
-import { isEmpty } from "../lib/cjs/lodash"
+import { PAYMENT_METHOD, payment_method as schema } from "zodiac";
+import PaymentsHttpClient, { ParamsError, PaymentsClientHttpError, PaymentsClientParseError } from "../lib/net";
+import { PAYMENT_METHOD_ENDPOINTS } from "../lib/CONSTANTS";
+import { DTO, UNKNOWN_ERROR } from "../lib/types";
+import { isEmpty } from "../lib/cjs/lodash";
 
 
 
+type CREATE_PAYMENT_METHOD_DATA = Omit<PAYMENT_METHOD, "id" | "created_at" | "updated_at" | "status" | "store_id">
 
-class PaymentMethod {
+type UPDATE_PAYMENT_METHOD_DATA = Omit<PAYMENT_METHOD, "id" | "created_at" | "updated_at" | "store_id">
 
-    private api_key: string = ""
+export default class PaymentMethod {
 
-    constructor(API_KEY: string) {
-        this.api_key = API_KEY
+    private client: PaymentsHttpClient
+
+    constructor(client: PaymentsHttpClient){
+        this.client = client
     }
 
 
-    async createPaymentMethod(data: PAYMENT_METHOD): Promise<PAYMENT_METHOD> {
-        const parsed = payment_method.safeParse(data)
 
-        if (!parsed.success) {
-            throw new Error("INVALID BODY", { 
-                cause: parsed.error.formErrors.fieldErrors
-            })
+    /**
+     * @name create
+     * @param {CREATE_PAYMENT_METHOD_DATA} payment_method 
+     * @param description add a payment method for a customer
+     * @returns 
+     */
+    async create(payment_method: CREATE_PAYMENT_METHOD_DATA) {
+
+        const parsed = schema.safeParse(payment_method)
+
+
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "payment_methods")
+
+
+        try {
+            const result = await this.client.post(PAYMENT_METHOD_ENDPOINTS.base, {
+                body: parsed.data
+            }) 
+
+            const data = await result.toJSON<DTO<PAYMENT_METHOD>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "payment_method")
         }
-        const { created_at, updated_at, ...parsedData } = parsed.data
+        catch(e)
+        {
+            throw new Error(UNKNOWN_ERROR)
+        }
 
-        const url = PAYMENT_METHOD_ENDPOINTS.base 
+    }
+
+
+    /**
+     * @name retrieve
+     * @param id 
+     * @description retrieve a specific payment method
+     * @returns 
+     */
+    async retrieve(id: string){
+
+        if(isEmpty(id)) throw new ParamsError("INVALID ID", "id")
 
         try {
 
-            const payment_method = await got.post(url, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(parsedData),
-            }).json<DTO<PAYMENT_METHOD>>()
+            const result = await this.client.get(PAYMENT_METHOD_ENDPOINTS.retrieve, {
+                pathSegments: {
+                    payment_method_id: id
+                }
+            })
 
-            return payment_method.data
+            const data = await result.toJSON<DTO<PAYMENT_METHOD>>()
 
-        } 
+            if(result._res.ok) return data?.data 
+
+            throw new PaymentsClientHttpError(result, "payment_methods")
+
+        }
         catch (e)
         {
-
-            console.log("The error::", (e as RequestError)?.code, (e as RequestError)?.cause, (e as RequestError)?.message )
-            throw new Error("UNABLE TO CREATE PAYMENT METHOD", {
-                cause: (e as RequestError).response?.body
-            })
+            throw new Error(UNKNOWN_ERROR)
         }
 
-    }   
+    }
 
-    async updatePaymentMethod(id: string, data: PAYMENT_METHOD): Promise<PAYMENT_METHOD> {
 
-        if(isEmpty(id)) throw Error("ID CANNT BE EMPTY")
+    /**
+     * @name update
+     * @param id 
+     * @param payment_method 
+     * @description update a payment method
+     * @returns 
+     */
+    async update(id: string, payment_method: UPDATE_PAYMENT_METHOD_DATA){
 
-        const parsed = payment_method.safeParse(data)
+        if(isEmpty(id)) throw new ParamsError("INVALID ID", "id")
 
-        if (!parsed.success) {
-            throw new Error("INVALID BODY", {
-                cause: parsed.error.formErrors.fieldErrors
-            }) 
-        }
+        const parsed = schema.safeParse(payment_method)
 
-        const { created_at, updated_at, ...parsedData } = parsed.data
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "payment_methods")
 
-        const url = PAYMENT_METHOD_ENDPOINTS.base
 
-        try {
+        try{
 
-            const payment_method = await got.put(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json", 
+            const result = await this.client.put(PAYMENT_METHOD_ENDPOINTS.update, {
+                pathSegments: {
+                    payment_method_id: id
                 },
-                body: JSON.stringify(parsedData)
-            }).json<DTO<PAYMENT_METHOD>>()
-
-            return payment_method.data
-
-        }
-        catch (e) 
-        {
-            throw new Error("UNABLE TO UPDATE PAYMENT METHOD", {
-                cause: (e as RequestError).response?.body
+                body: parsed.data
             })
+
+
+            const data = await result.toJSON<DTO<PAYMENT_METHOD>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "payment_methods")
+
+
         }
+        catch (e)
+        {
+            throw new Error(UNKNOWN_ERROR)
+        }
+
+
     }
 
 
-    async getPaymentMethod(id: string): Promise<PAYMENT_METHOD> {
+    /**
+     * 
+     * @param id 
+     * @description archive a payment method
+     * @returns 
+     */
+    async archive(id: string){
 
-        if(isEmpty(id)) throw new Error("ID CANNT BE EMPTY")
-        
-        const url = PAYMENT_METHOD_ENDPOINTS.base 
+        if(isEmpty(id)) throw new ParamsError("INVALID ID", "id")
 
-        try {
-
-            const payment_method = await got.get(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
+            const result = await this.client.patch(PAYMENT_METHOD_ENDPOINTS.archive, {
+                pathSegments: {
+                    payment_method_id: id
                 }
-            }).json<DTO<PAYMENT_METHOD>>()
-
-            return payment_method.data
-
-        }
-        catch (e) 
-        {
-            throw new Error("UNABLE TO GET PAYMENT METHOD", {
-                cause: (e as RequestError).response?.body
             })
-        }
 
+            const data = await result.toJSON<DTO<PAYMENT_METHOD>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "payment_methods")
 
     }
 
-
-    async deletePaymentMethod(id: string): Promise<PAYMENT_METHOD> {
-
-        if(isEmpty(id)) throw new Error("ID CANNT BE EMPTY")
-        
-        const url = PAYMENT_METHOD_ENDPOINTS.base 
-
-        try {
-
-            const payment_method = await got.delete(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
-                }
-            }).json<DTO<PAYMENT_METHOD>>()
-
-            return payment_method.data
-
-        }
-        catch (e) 
-        {
-            throw new Error("UNABLE TO GET PAYMENT METHOD", {
-                cause: (e as RequestError).response?.body
-            })
-        }
-
-
-    }
-
-}   
-
-
-export default PaymentMethod
+}

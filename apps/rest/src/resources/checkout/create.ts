@@ -1,11 +1,12 @@
 import { generate_dto, generate_unique_id } from "generators";
-import { CHECKOUT, CUSTOMER } from "db/schema";
-import { HandlerFn } from "../../../lib/handler";
+import { CHECKOUT, CUSTOMER, EphemeralPaymentKeys } from "db/schema";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { checkout } from "zodiac"
+import { generateCheckoutEphemeralKey } from "../../../lib/functions";
 
 
 
-export const createCheckout: HandlerFn = async (req, res, clients) => {
+export const createCheckout: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     // clients
     const { db } = clients
 
@@ -30,10 +31,22 @@ export const createCheckout: HandlerFn = async (req, res, clients) => {
             updated_at: new Date(),
             amount: 0.0, //TODO: this needs to be removed
             status: "PENDING", // TODO: this also needs to be removed
-            store_id: data.store_id
+            store_id: req.store.id,
+            environment: req.env
         }).returning()
 
-        const dto = generate_dto(result?.at(0), "Checkout created successfully", "success")
+        // @ts-ignore
+        const ephemeralKey = generateCheckoutEphemeralKey(result?.at(0)?.id)
+
+        await db?.insert(EphemeralPaymentKeys).values({
+            id: ephemeralKey,
+            created_at: new Date()
+        })
+
+        const dto = generate_dto({
+            ...result?.at(0),
+            ephemeralKey
+        }, "Checkout created successfully", "success")
         
         res.status(201).send(dto)
     }

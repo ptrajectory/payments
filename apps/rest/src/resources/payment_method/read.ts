@@ -1,13 +1,13 @@
 import { payment_method } from "zodiac";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { PAYMENT_METHOD } from "db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
 
-export const getPaymentMethod: HandlerFn = async (req, res, clients) => {
+export const getPaymentMethod: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     const { db } = clients
 
 
@@ -21,7 +21,12 @@ export const getPaymentMethod: HandlerFn = async (req, res, clients) => {
 
     try {
 
-        const result = await db?.select().from(PAYMENT_METHOD).where(eq(PAYMENT_METHOD.id, id))
+        const result = await db?.select().from(PAYMENT_METHOD).where(and(
+            eq(PAYMENT_METHOD.id, id)),
+            // @ts-ignore
+            eq(PAYMENT_METHOD.store_id, req.store.id),
+            eq(PAYMENT_METHOD.environment, req.env)
+        )
 
         if(isEmpty(result?.at(0)))
         {

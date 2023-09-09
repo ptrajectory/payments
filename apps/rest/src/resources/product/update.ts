@@ -1,17 +1,15 @@
 import { product } from "zodiac";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { PRODUCT } from "db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
-export const updateProduct: HandlerFn = async (req, res, clients) => {
+export const updateProduct: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     const { db } = clients
 
     const body = req.body 
-
-    console.log("Here is the body::", body)
 
     const id = req.params.product_id
 
@@ -31,14 +29,15 @@ export const updateProduct: HandlerFn = async (req, res, clients) => {
 
     const data = parsed.data
 
-    console.log("Here is the data:", data)
-
-    console.log("The iD::", id)
-
     try {
         var result = await db?.update(PRODUCT).set({
             ...data
-        }).where(eq(PRODUCT.id, id)).returning()
+        }).where(and(
+            eq(PRODUCT.id, id),
+            // @ts-ignore
+            eq(PRODUCT.store_id, req.store.id),
+            eq(PRODUCT.environment, req.env)
+        )).returning()
 
         const dto = generate_dto(result?.at(0), "Product updated successfully", "success")
 
@@ -52,7 +51,7 @@ export const updateProduct: HandlerFn = async (req, res, clients) => {
 }
 
 
-export const deleteProduct: HandlerFn =  async (req, res, clients) => {
+export const archiveProduct: HandlerFn<AuthenticatedRequest> =  async (req, res, clients) => {
     const { db } = clients
 
 
@@ -67,7 +66,14 @@ export const deleteProduct: HandlerFn =  async (req, res, clients) => {
     )
 
     try {
-        const result = await db?.delete(PRODUCT).where(eq(PRODUCT.id, id)).returning()
+        const result = await db?.update(PRODUCT).set({
+            status: "ARCHIVED"
+        }).where(and(
+            eq(PRODUCT.id, id),
+            // @ts-ignore
+            eq(PRODUCT.store_id, req.store.id),
+            eq(PRODUCT.environment, req.env)
+        )).returning()
 
         if (isEmpty(result?.at(0))) {
             return res.status(404).send(generate_dto(null, "Product not found", "error"))

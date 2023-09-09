@@ -5,7 +5,8 @@ const config: Config = {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     './.storybook/**/*.{js,ts,jsx,tsx,mdx}',
-    "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}"
+    "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
+    "./src/app/**/*.{ts,tsx}"
   ],
   theme: {
     transparent: "transparent",

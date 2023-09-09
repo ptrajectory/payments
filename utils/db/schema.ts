@@ -1,5 +1,7 @@
 import { relations } from "drizzle-orm"
-import { date, doublePrecision, json, pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { boolean, date, doublePrecision, json, pgTable, text, timestamp } from "drizzle-orm/pg-core"
+
+const environment = text('environment', { enum: ["production", "testing"] })
 
 /**
  * Customer
@@ -12,7 +14,9 @@ export const CUSTOMER = pgTable("Customer", {
     meta: json("meta"),
     created_at: timestamp("created_at").defaultNow(), 
     updated_at: timestamp("updated_at").defaultNow(),
-    store_id: text("store_id").references(()=>STORE.id)
+    store_id: text("store_id").references(()=>STORE.id),
+    environment,
+    status: text("status")
 })
 
 
@@ -37,7 +41,10 @@ export const PAYMENT_METHOD = pgTable("PaymentMethod", {
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
     customer_id: text("customer_id").references(()=>CUSTOMER.id),
-    store_id: text("store_id").references(()=>STORE.id)
+    store_id: text("store_id").references(()=>STORE.id),
+    environment,
+    is_default: boolean("is_default").default(false),
+    status: text("status")
 })
 
 export const PAYMENT_METHODRelations = relations(PAYMENT_METHOD, ({one, many})=>{
@@ -68,7 +75,9 @@ export const CHECKOUT = pgTable("Checkout", {
     customer_id: text("customer_id").references(()=>CUSTOMER.id),
     payment_method_id: text("payment_method_id").references(()=>PAYMENT_METHOD.id),
     cart_id: text("cart_id").references(()=>CART.id),
-    store_id: text("store_id").references(()=>STORE.id)
+    store_id: text("store_id").references(()=>STORE.id),
+    environment,
+    purchase_type: text("purchase_type", {enum: [ "one_time", "monthly_subscription" ]})
 })
 
 export const CHECKOUTRelations = relations(CHECKOUT, ({one, many})=>{
@@ -101,7 +110,9 @@ export const PRODUCT = pgTable("Product", {
     image: text("image"),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
-    store_id: text("store_id").references(()=>STORE.id)
+    store_id: text("store_id").references(()=>STORE.id),
+    environment,
+    status: text("status")
 })
 
 export const PRODUCTRelations = relations(PRODUCT, ({many, one})=>{
@@ -120,7 +131,8 @@ export const CART = pgTable("Cart", {
     status: text("status"),
     create_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
-    store_id: text("store_id").references(()=>STORE.id)
+    store_id: text("store_id").references(()=>STORE.id),
+    environment
 })
 
 export const CARTRelations = relations(CART, ({many, one})=>{
@@ -144,7 +156,9 @@ export const CART_ITEM = pgTable("CartItem", {
     quantity: doublePrecision("quantity"), 
     created_at: timestamp("created_at").defaultNow(), 
     updated_at: timestamp("updated_at").defaultNow(),
-    store_id: text("store_id").references(()=>STORE.id)
+    store_id: text("store_id").references(()=>STORE.id),
+    environment,
+    status: text("status")
 })
 
 export const CART_ITEMRelations = relations(CART_ITEM, ({one})=>{
@@ -175,7 +189,8 @@ export const PAYMENT = pgTable("Payment", {
     payment_method_id: text("payment_method_id").references(()=>PAYMENT_METHOD.id),
     checkout_id: text("checkout_id").references(()=>CHECKOUT.id),
     customer_id: text("customer_id").references(()=>CUSTOMER.id),
-    store_id: text("store_id").references(()=>STORE.id)
+    store_id: text("store_id").references(()=>STORE.id),
+    environment
 })
 
 export const PAYMENTRelations = relations(PAYMENT, ({one})=>{
@@ -225,10 +240,13 @@ export const STORE = pgTable("Store", {
     name: text("name"),
     image: text("image"),
     description: text("description"),
-    secret_key: text("secret_key"),
-    test_key: text("test_key"),
+    prod_secret_key: text("prod_secret_key"),
+    test_secret_key: text("test_secret_key"),
+    prod_publishable_key: text("prod_publishable_key"),
+    test_publishable_key: text("test_publishable_key"),
     created_at: timestamp("created_at").defaultNow(),
-    updated_at: timestamp("updated_at").defaultNow()
+    updated_at: timestamp("updated_at").defaultNow(),
+    status: text("status")
 })
 
 export const STORERelations = relations(STORE, ({many, one})=>{
@@ -247,3 +265,8 @@ export const STORERelations = relations(STORE, ({many, one})=>{
     }
 })
 
+
+export const EphemeralPaymentKeys = pgTable("EphemeralPaymentKeys",{
+    id: text("id").primaryKey(),
+    created_at: timestamp("created_at").defaultNow()
+})

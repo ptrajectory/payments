@@ -5,38 +5,54 @@ export const API_HOST = (process.env.API_HOST || "http://localhost:8089") + "/ap
 
 // CUSTOMER SPECIFIC ENDPOINTS 
 export const CUSTOMER_ENDPOINTS = {
-    base: API_HOST + "/customers",
-    create: API_HOST + "/customer/create",
-    update: API_HOST + "/customer/update",
-}
+    base: "/api/customers",
+    retrieve:  "/api/customers/{customer_id}",
+    update:"/api/customers/{customer_id}",
+    archive: "/api/customers/{customer_id}",
+} as const
 
 
 // CHECKOUT SPECIFIC ENDPOINTS
 export const CHECKOUT_ENDPOINTS = {
-    base: API_HOST + "/checkouts",
-    create: API_HOST + "/checkout/create",
-    update: API_HOST + "/checkout/update",
-}
+    base: "/api/checkouts",
+    retrieve: "/api/checkouts/{checkout_id}",
+    update: "/api/checkouts/{checkout_id}",
+    archive: "/api/checkouts/{checkout_id}"
+} as const
 
 // PAYMENT_METHOD SPECIFIC ENDPOINTS
 export const PAYMENT_METHOD_ENDPOINTS = {
-    base: API_HOST + "/payment_methods",
-    create: API_HOST + "/payment_method/create",
-    update: API_HOST + "/payment_method/update",
-}
+    base: "/api/payment_methods",
+    retrieve: "/api/payment_methods/{payment_method_id}",
+    update:"/api/payment_methods/{payment_method_id}",
+    archive: "/api/payment_methods/{payment_method_id}",
+} as const
 
 // CART SPECIFIC ENDPOINTS
 export const CART_ENDPOINTS = {
-    base: API_HOST + "/carts"
-}
+    base: "/api/carts",
+    retrieve: "/api/carts/{cart_id}",
+    update: "/api/carts/{cart_id}",
+    archive: "/api/carts/{cart_id}",
+    add_item: "/api/carts/{cart_id}",
+    update_item: "/api/carts/{cart_id}/{cart_item_id}",
+    delete_item: "/api/carts/{cart_id}/{cart_item_id}"
+} as const
 
 // PRODUCT SPECIFIC ENDPOINTS
 export const PRODUCT_ENDPOINTS = {
-    base: API_HOST + "/products"
-}
+    base: "/api/products",
+    retrieve: "/api/products/{product_id}",
+    update: "/api/products/{product_id}",
+    patch: "/api/products/{product_id}",
+} as const
 
 
 // PAYMENT SPECIFIC ENDPOINTS
 export const PAYMENT_ENDPOINTS = {
-    base: API_HOST + "/payments"
-}
+    base: "/api/payments",
+    retrieve: "/api/payments/{payment_id}",
+    update:  "/api/payments/{payment_id}",
+    patch: "/api/payments/{payment_id}",
+    confirm: "/api/payments/confirm/{payment_id}"
+} as const

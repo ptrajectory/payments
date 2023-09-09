@@ -1,10 +1,10 @@
 import { cart, cart_item } from "zodiac";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto, generate_unique_id } from "generators";
 import { CART, CART_ITEM } from "db/schema";
 
 
-export const createCart: HandlerFn = async (req, res, clients) => {
+export const createCart: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients 
 
@@ -22,7 +22,8 @@ export const createCart: HandlerFn = async (req, res, clients) => {
             customer_id: data.customer_id,
             updated_at: new Date(),
             create_at: new Date(),
-            store_id: data.store_id
+            store_id: req.store.id,
+            environment: req.env
         }).returning()
 
         res.status(201).send(generate_dto(result?.at(0), "Cart created successfully", "success"))
@@ -37,7 +38,7 @@ export const createCart: HandlerFn = async (req, res, clients) => {
 
 }
 
-export const createCartItem: HandlerFn = async (req, res, clients) => {
+export const createCartItem: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
@@ -59,7 +60,9 @@ export const createCartItem: HandlerFn = async (req, res, clients) => {
            cart_id,
            ...data,
            updated_at: new Date(),
-           created_at: new Date()
+           created_at: new Date(),
+           store_id: req.store.id,
+           environment: req.env
         }).returning()
 
         return res.status(201).send(generate_dto(result?.at(0), "Something went wrong", "error"))

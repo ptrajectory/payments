@@ -1,10 +1,11 @@
 import { product } from "zodiac";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto, generate_unique_id } from "generators";
 import { PRODUCT } from "db/schema";
 
 
-export const createProduct: HandlerFn = async (req, res, clients) => {
+export const createProduct: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
+
     const { db } = clients
 
     const body = req.body
@@ -29,7 +30,8 @@ export const createProduct: HandlerFn = async (req, res, clients) => {
             price: data.price,
             updated_at: new Date(),
             image: data.image,
-            store_id: data.store_id
+            store_id: req.store.id,
+            environment: req.env
         }).returning()
 
         res.status(201).send(

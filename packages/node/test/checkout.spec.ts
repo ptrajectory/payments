@@ -1,167 +1,194 @@
-import { isNull } from "../src/lib/cjs/lodash.ts"
-import Payments from "../src/index.ts"
-import assert from "assert"
+import assert from "assert";
+import { PaymentsClientHttpError, createPaymentClient } from "../src";
+import { isNull } from "../src/lib/cjs/lodash";
+import db from "db";
+import { CART, CART_ITEM, CHECKOUT, CUSTOMER, PAYMENT, PAYMENT_METHOD, PRODUCT } from "db/schema";
+import { eq } from "db/utils";
 
 
-const payments = new Payments("")
+
+const client = createPaymentClient(process.env.URL as string, process.env.PUBLISHABLE_KEY as string)
+
+
 let customer_id: string | null = null 
 let product_id: string | null = null
 let cart_id: string | null = null
-let cart_item_id: string | null = null
 let payment_method_id: string | null = null
-let checkout_id: string | null = null 
-const camera_image = "https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-
+let ephemeralKey: string | null = null
+let checkout_id: string | null = null
+let payment_id: string | null = null
 
 describe("CHECKOUT", ()=>{
 
-
     before(async ()=>{
 
-        const customer = await payments.customer?.createCustomers({
-            email: "janedoe@email.com",
-            first_name: "Jane",
-            last_name: "Doe",
+        const customer = await client.customers.create({
+            email: "someone@email.com",
+            first_name: "Jon",
+            last_name: "Snow"
+
         })
 
         customer_id = customer?.id ?? null 
 
-        const product = await payments.product?.createProduct({
-            image: camera_image,
-            name: "camera",
-            price: 450.99,
-            description: "Capture the universe"
+        const payment_method = customer_id ? await client.paymentMethods.create({
+            customer_id,
+            phone_number: "254711111111",
+            type: "MPESA"
+        }) : null
+
+
+        payment_method_id = payment_method?.id ?? null
+
+
+        const product = await client.products.create({
+            name: "product_one",
+            image: "NO IMAGE"
         })
 
         product_id = product?.id ?? null
 
-        const cart = await payments.cart?.createCart({
-            customer_id: customer_id ?? ""
+
+        const cart = await client.carts.create({
+            customer_id: customer?.id
         })
 
         cart_id = cart?.id ?? null
 
-        const cart_item = await payments.cart?.addCartItem((cart_id ?? ""), {
-            product_id: product_id ?? "",
-            quantity: 5
+        
+        cart?.id && await client.carts.addCartItem(cart?.id, {
+            product_id: product?.id,
+            quantity: 1
         })
 
-        cart_item_id = cart_item?.id ?? null
-
-        const payment_method = await payments.payment_method?.createPaymentMethod({
-            customer_id: customer_id ?? "",
-            phone_number: "0795622390",
-            type: "MPESA"
-        })
-
-        payment_method_id = payment_method?.id ?? null
     })
 
 
+    it("Create checkout", (done)=>{
 
-    describe("BASIC CRUD", ()=>{
+        if(isNull(cart_id) || isNull(customer_id) || isNull(payment_method_id)) return done(new Error("ID INVALID"))
 
-        it("Create a checkout", (done)=>{
 
-            if(isNull(cart_id) || isNull(payment_method_id) || isNull(customer_id)) return done(Error("THE IDS cannt be null"))
-
-            payments.checkout?.createCheckout({
-                cart_id,
-                payment_method_id,
-                customer_id,
-                currency: "KES",
-            }).then((data)=>{
-                console.log("CHECKOUT", data)
-                assert.strictEqual(data.payment_method_id, payment_method_id)
-                assert.strictEqual(data.cart_id, cart_id)
-                assert.strictEqual(data?.customer_id, customer_id)
-                checkout_id = data?.id ?? null 
-                done()
-            })
-            .catch((e)=>{
-                console.error("ERROR", e)
-                done(e)
-            })
-
+        client.checkouts.create({
+            cart_id: cart_id,
+            currency: "KES",
+            customer_id,
+            purchase_type: 'one_time',
+            payment_method_id
         })
-
-
-        it("Gets the checkout", (done)=>{
-
-            payments.checkout?.getCheckout(checkout_id ?? "")
-            .then((data)=>{
-                console.log("CHECKOUT", data)
-                assert.strictEqual(data.id, checkout_id)
-                done()
-            })
-            .catch((e)=>{
-                console.error("ERROR", e)
-                done(e)
-            })
-
+        .then((checkout)=>{
+            checkout_id = checkout?.id ?? null
+            ephemeralKey = checkout?.ephemeralKey ?? null
+            assert.strictEqual(checkout?.customer_id, customer_id)
+            done()
         })
-
-
-        it("UPDATE the checkout", (done)=>{
-
-            if(isNull(checkout_id)) return done(Error("CHECKOUT ID cannt be empty"))
-
-            payments.checkout?.updateCheckout(checkout_id, {
-                status: "IN PROGRESS"
-            }).then((data)=>{
-                console.log("CHECKOUT::", data)
-                assert.strictEqual(data.id, checkout_id)
-
-                done()
-            })
-            .catch((e)=>{
-                console.error("ERROR", e)
-                done(e)
-            })
-
+        .catch((e)=>{
+            if(e instanceof PaymentsClientHttpError){
+                console.log("Server Error::", e.code)
+            }
+            done(e)
         })
-
-        it("DELETE the checkout", (done)=>{
-
-            if(isNull(checkout_id)) return done(Error("CHECKOUT ID cannt be empty"))
-
-            payments.checkout?.deleteCheckout(checkout_id)
-            .then((data)=>{
-                console.log("CHECKOUT::", data)
-                assert.strictEqual(data.id, checkout_id)
-
-                done()
-            })
-            .catch((e)=>{
-                console.error("ERROR", e)
-                done(e)
-            })
-
-        })
-
 
 
     })
 
 
+    it("Makes the payment", (done)=>{
+
+        if(isNull(ephemeralKey) || isNull(checkout_id)) return done(new Error('Ephemeral Key'))
+
+        client.checkouts.pay(ephemeralKey, {
+            checkout_id
+        }).then((payment)=>{
+            payment_id = payment?.id ?? null
+            done()
+        })
+        .catch((e)=>{
+            if(e instanceof PaymentsClientHttpError){
+                console.log("Server Error::", e.code)
+            }
+            done(e)
+        })
+
+    })
+
+
+    it("Check payment status", (done)=>{
+
+        if(isNull(payment_id)) return done(new Error("PAYMENT ID IS NULL"))
+
+
+        client.payments.confirm(payment_id).then((status)=>{
+            assert.strictEqual(status, "SUCCESS")
+            done()
+        })
+        .catch((e)=>{
+            if(e instanceof PaymentsClientHttpError){
+                console.log("Server Error::", e.code)
+            }
+            done(e)
+        })   
+
+    })
+
+
+    it("Archive checkout", (done)=>{
+
+        if(isNull(checkout_id)) return done(new Error("Checkout ID is null"))
+
+        client.checkouts.archive(checkout_id) 
+        .then((checkout)=>{
+            assert.strictEqual(checkout?.status, "ARCHIVED") 
+            done()
+        })
+        .catch((e)=>{
+            if(e instanceof PaymentsClientHttpError){
+                console.log("Server Error::", e.code)
+            }
+            done(e)
+        })
+
+    })
+
+
+    
 
 
     after(async ()=>{
 
- 
-        // delete the customer
-        await payments.customer?.deleteCustomer(customer_id)
+        // delete all cart items for the current cart
 
-        // delete the product
-        await payments.product?.deleteProduct(product_id ?? "")
+        cart_id && await db.delete(CART_ITEM)
+        .where(eq(CART_ITEM.cart_id, cart_id))
 
-        // delete the cart item
-        await payments.cart?.deleteCartItem((cart_item_id ?? ""), (cart_id ?? ""))
 
-        // delete the cart
-        await payments.cart?.deleteCart(cart_id ?? "")
+        // delete product
+
+        product_id && await db.delete(PRODUCT)
+        .where(eq(PRODUCT.id, product_id))
+
+        // delete cart
+
+        cart_id && await db.delete(CART)
+        .where(eq(CART.id, cart_id))
+
+        // delete checkout
+
+        checkout_id && await db.delete(CHECKOUT)
+        .where(eq(CHECKOUT.id, checkout_id)) 
+
+        // delete payment_method
+        payment_method_id && await db.delete(PAYMENT_METHOD)
+        .where(eq(PAYMENT_METHOD.id, payment_method_id))
+
+        // delete  customer
+        customer_id && await db.delete(CUSTOMER)
+        .where(eq(CUSTOMER.id, customer_id))
+
+        // delete payment
+        payment_id && await db.delete(PAYMENT)
+        .where(eq(PAYMENT.id, payment_id))
 
     })
-    
 
 })

@@ -11,11 +11,22 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
+enum ENVIRONMENT {
+  production
+  testing
+}
+
+enum PURCHASE_TYPE {
+  monthly_subscription
+  one_time
+}
+
 model Customer {
   id              String          @id
   first_name      String
   last_name       String
   email           String
+  status          String?
   meta            Json?
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
@@ -25,12 +36,14 @@ model Customer {
   payments        Payment[]
   store           Store           @relation(fields: [store_id], references: [id])
   store_id        String
+  environment     ENVIRONMENT @default(testing)
 }
 
 model PaymentMethod {
   id           String     @id
   customer     Customer?  @relation(fields: [customer_id], references: [id])
   customer_id  String?
+  status       String?
   type         String
   phone_number String
   created_at   DateTime   @default(now())
@@ -39,13 +52,16 @@ model PaymentMethod {
   payments     Payment[]
   store        Store      @relation(fields: [store_id], references: [id])
   store_id     String
+  environment  ENVIRONMENT @default(testing)
+  is_default   Boolean     @default(false)
 }
 
 model Checkout {
   id                String         @id
   amount            Float
   currency          String
-  status            String
+  status            String?
+  purchase_type     PURCHASE_TYPE  @default(one_time)
   customer          Customer?      @relation(fields: [customer_id], references: [id])
   customer_id       String?
   payment_method    PaymentMethod? @relation(fields: [payment_method_id], references: [id])
@@ -57,6 +73,7 @@ model Checkout {
   payments          Payment[]
   store             Store          @relation(fields: [store_id], references: [id])
   store_id          String
+  environment       ENVIRONMENT    @default(testing)
 }
 
 model Product {
@@ -64,12 +81,14 @@ model Product {
   name        String?
   description String?
   price       Float?     @default(0.0)
+  status      String?
   image       String?
   created_at  DateTime   @default(now())
   updated_at  DateTime   @updatedAt
   carts       CartItem[]
   store       Store      @relation(fields: [store_id], references: [id])
   store_id    String
+  environment       ENVIRONMENT @default(testing)
 }
 
 model Cart {
@@ -83,6 +102,7 @@ model Cart {
   updated_at  DateTime   @updatedAt
   store       Store      @relation(fields: [store_id], references: [id])
   store_id    String
+  environment       ENVIRONMENT @default(testing)
 }
 
 model CartItem {
@@ -91,11 +111,13 @@ model CartItem {
   cart_id    String?
   product    Product? @relation(fields: [product_id], references: [id])
   product_id String?
+  status     String?
   quantity   Int      @default(1)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   store      Store    @relation(fields: [store_id], references: [id])
   store_id   String
+  environment       ENVIRONMENT @default(testing)
 }
 
 model Payment {
@@ -105,14 +127,15 @@ model Payment {
   status            String
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
-  payment_method    PaymentMethod @relation(fields: [payment_method_id], references: [id])
-  payment_method_id String
-  checkout_id       String
-  checkout          Checkout      @relation(fields: [checkout_id], references: [id])
-  customer_id       String
-  customer          Customer      @relation(fields: [customer_id], references: [id])
+  payment_method    PaymentMethod? @relation(fields: [payment_method_id], references: [id])
+  payment_method_id String?
+  checkout_id       String?
+  checkout          Checkout?      @relation(fields: [checkout_id], references: [id])
+  customer_id       String?
+  customer          Customer?      @relation(fields: [customer_id], references: [id])
   store             Store         @relation(fields: [store_id], references: [id])
   store_id          String
+  environment       ENVIRONMENT @default(testing)
 }
 
 model Seller {
@@ -135,8 +158,11 @@ model Store {
   name            String?
   image           String?
   description     String?
-  secret_key      String? // formatted JWT
-  test_key        String? // formatted JWT
+  prod_secret_key      String? // formatted JWT
+  test_secret_key      String? // formatted JWT
+  prod_publishable_key String?
+  test_publishable_key String?
+  status          String?
   customers       Customer[]
   payment_methods PaymentMethod[]
   products        Product[]
@@ -146,4 +172,9 @@ model Store {
   checkouts       Checkout[]
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
+}
+
+model EphemeralPaymentKeys {
+  id  String  @id
+  created_at DateTime @default(now())
 }
