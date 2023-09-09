@@ -127,8 +127,8 @@ model Payment {
   status            String
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
-  payment_method    PaymentMethod @relation(fields: [payment_method_id], references: [id])
-  payment_method_id String
+  payment_method    PaymentMethod? @relation(fields: [payment_method_id], references: [id])
+  payment_method_id String?
   checkout_id       String?
   checkout          Checkout?      @relation(fields: [checkout_id], references: [id])
   customer_id       String?
