@@ -1,13 +1,13 @@
 import { generate_dto, generate_unique_id } from "generators";
 import { CUSTOMER, PAYMENT_METHOD } from "db/schema";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { customer, payment_method } from "zodiac"
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
 
-export const updatePaymentMethod: HandlerFn = async (req, res, clients) => {
+export const updatePaymentMethod: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     // clients
     const { db } = clients
 
@@ -38,8 +38,13 @@ export const updatePaymentMethod: HandlerFn = async (req, res, clients) => {
     try {
         var result = await db?.update(PAYMENT_METHOD).set({
             ...data,
-            updated_at: new Date()
-        }).where(eq(PAYMENT_METHOD.id, id)).returning()
+            updated_at: new Date(),
+        }).where(and(
+            eq(PAYMENT_METHOD.id, id),
+            // @ts-ignore
+            eq(PAYMENT_METHOD.store_id, req.store.id),
+            eq(PAYMENT_METHOD.environment, req.env)
+        )).returning()
 
         const dto = generate_dto(result?.at(0), "Payment method updated successfully", "success")
         
@@ -54,7 +59,7 @@ export const updatePaymentMethod: HandlerFn = async (req, res, clients) => {
 }
 
 
-export const deletePaymentMethod: HandlerFn = async (req, res, clients) => {
+export const archivePaymentMethod: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     const { db } = clients
 
 
@@ -68,7 +73,14 @@ export const deletePaymentMethod: HandlerFn = async (req, res, clients) => {
 
     try {
 
-        const result = await db?.delete(PAYMENT_METHOD).where(eq(PAYMENT_METHOD.id, id)).returning()
+        const result = await db?.update(PAYMENT_METHOD).set({
+            status: "ARCHIVED"
+        }).where(and(
+            eq(PAYMENT_METHOD.id, id)),
+            // @ts-ignore
+            eq(PAYMENT_METHOD.store_id, req.store.id),
+            eq(PAYMENT_METHOD.environment, req.env)
+        ).returning()
 
         if(isEmpty(result?.at(0)))
         {

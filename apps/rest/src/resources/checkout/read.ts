@@ -1,12 +1,12 @@
 import { checkout } from "zodiac";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { CHECKOUT } from "db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isEmpty } from "../../../lib/cjs/lodash";
 
 
-export const getCheckout: HandlerFn = async (req, res, clients) => {
+export const getCheckout: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     const {db} = clients
 
     const id = req.params.checkout_id 
@@ -15,7 +15,10 @@ export const getCheckout: HandlerFn = async (req, res, clients) => {
 
     try {
         const results = await db?.query.CHECKOUT.findFirst({
-            where: eq(CHECKOUT.id, id),
+            where: and(eq(CHECKOUT.id, id), 
+            // @ts-ignore
+            eq(CHECKOUT.store_id, req.store.id), 
+            eq(CHECKOUT.environment, req.env)),
             with: {
                 cart: true,
                 customer: true,

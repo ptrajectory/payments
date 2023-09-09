@@ -1,145 +1,129 @@
-import got, { RequestError } from "got"
-import { CART, CART_ITEM, PAYMENT, cart, cart_item, payment } from "zodiac"
-import { CART_ENDPOINTS, PAYMENT_ENDPOINTS } from "../lib/CONSTANTS"
-import { DTO } from "../lib/types"
-import { isEmpty, isUndefined } from "../lib/cjs/lodash"
+import { PAYMENT, PAYMEN_INPUT, payment as schema, payment_input } from "zodiac"
+import PaymentsHttpClient, { ParamsError, PaymentsClientHttpError, PaymentsClientParseError } from "../lib/net"
+import { PAYMENT_ENDPOINTS } from "../lib/CONSTANTS"
+import { DTO, UNKNOWN_ERROR } from "../lib/types"
+import { isEmpty } from "../lib/cjs/lodash"
 
 
+type UPDATE_PAYMENT_METHOD_DATA = Omit<PAYMENT, "id" | "updated_at" | "created_at" | "token" | "amount" | "payment_method_id" | "customer_id" | "checkout_id" | "store_id">
 
-class Payment {
-    private api_key: string = ""
-    constructor(API_KEY: string){
-        this.api_key = API_KEY 
+
+export default class Payment {
+    private _httpClient
+
+
+    constructor(client: PaymentsHttpClient){
+        this._httpClient = client
     }
 
 
-    async createPayment(data: PAYMENT){
-
-        const parsed = payment.safeParse(data)
-
-        if(!parsed.success) throw new Error("Invalid Payment body", {
-            cause: parsed.error.formErrors.fieldErrors
-        })
-
-
-        try {
-            const result = await got.post(PAYMENT_ENDPOINTS.base, {
-                json: parsed.data,
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                }
-            }).json<DTO<PAYMENT>>()
-
-            return result.data
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: e
-            })
-        }
-
-    }
-
-
-    async updatePayment(id: string, data: PAYMENT){
-        const parsed = payment.safeParse(data)
-
-        if(!parsed.success) throw new Error("Invalid Payment body", {
-            cause: parsed.error.formErrors.fieldErrors
-        })
-
-
-        if(isEmpty(id) || isUndefined(id)) throw new Error("ID not specified", {
-            cause: "The ID is either an empty string or and undefined value"
-        })
+    /**
+     * @name start
+     * @param {PAYMENT} body
+     * @description initialize a checkout payment
+     */
+    async start(body: PAYMEN_INPUT){
         
+        const parsed = payment_input.safeParse(body)
 
-        try {
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "payments")
 
-            const result = await got.put(`${PAYMENT_ENDPOINTS.base}/${id}`, {
-                json: parsed.data,
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                }
-            }).json<DTO<PAYMENT>>()
-
-            return result.data
-
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: (e as RequestError)?.response?.body
+            const result = await this._httpClient.post(PAYMENT_ENDPOINTS.base, {
+                body: parsed.data
             })
-        }
+
+            const data = await result.toJSON<DTO<PAYMENT>>()
+
+            if(result._res.ok) return data?.data
+
+
+            throw new PaymentsClientHttpError(result, "payments")
+
     }
 
 
-    async getPayment(id: string) {
+    /**
+     * @name retrieve
+     * @param {string} id
+     * @description - retrieves a payment object
+     */
+    async retrieve(id: string){
 
-
-        try {
-
-            const result = await got.get(`${PAYMENT_ENDPOINTS.base}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
+            const result = await this._httpClient.get(PAYMENT_ENDPOINTS.retrieve, {
+                pathSegments: {
+                    payment_id: id
                 }
-            }).json<DTO<PAYMENT>>()
-
-            return result.data
-
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: (e as RequestError)?.response?.body
             })
-        }
+
+
+            const data = await result.toJSON<DTO<PAYMENT>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "payments")
 
     }
 
-    async deletePayment(id: string) {
-        try {
 
-            const result = await got.delete(`${PAYMENT_ENDPOINTS.base}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                }
-            }).json<DTO<PAYMENT>>()
+    /**
+     * @name update
+     * @param {string} id 
+     * @param {UPDATE_PAYMENT_METHOD_DATA} payment 
+     * @returns 
+     * @description - update a payment
+     */
+    async update(id: string, payment: UPDATE_PAYMENT_METHOD_DATA){ 
+        const { status } = payment
+        const parsed = schema.required({
+            status: true
+        }).safeParse({
+            status
+        })
 
-            return result.data
 
-        }
-        catch (e)
-        {
-            throw new Error("Something went wrong", {
-                cause: (e as RequestError)?.response?.body
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "payments")
+
+            const result = await this._httpClient.put(PAYMENT_ENDPOINTS.update, {
+                pathSegments: {
+                    payment_id: id
+                },
+                body: parsed.data
             })
-        }
+
+            
+            const data =  await result.toJSON<DTO<PAYMENT>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "payments")
+
     }
 
 
-    async confirmPayment(id: string) {
-        try {
+    /**
+     * @name confirm
+     * @param id 
+     * @description confirm if a payment was successful receive back the payment status
+     * @returns 
+     */
+    async confirm(id: string){
 
-            const result = await got.get(`${PAYMENT_ENDPOINTS.base}/confirm/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`
-                }
-            }).json<DTO<string>>()
+        if(isEmpty(id)) throw new ParamsError("ID is required", "payments")
 
-            return result.data
+        const result = await this._httpClient.get(PAYMENT_ENDPOINTS.confirm, {
+            pathSegments: {
+                payment_id: id
+            }
+        })
 
-        }
-        catch(e)
-        {
-            throw new Error("Something went wrong", {
-                cause: (e as RequestError)?.response?.body
-            })
-        }
+
+        const data = await result.toJSON<DTO<string>>()
+
+        if(result._res.ok) return data?.data
+
+        throw new PaymentsClientHttpError(result, "payments")
+
     }
+
+
 }
-
-
-export default Payment

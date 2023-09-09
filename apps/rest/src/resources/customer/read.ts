@@ -1,12 +1,12 @@
 import { customer } from "zodiac";
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto } from "generators";
 import { CUSTOMER } from "db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isEmpty, isUndefined } from "../../../lib/cjs/lodash";
 
 
-export const getCustomer: HandlerFn = async (req, res, clients) => {
+export const getCustomer: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
     // clients
     const { db } = clients
 
@@ -21,7 +21,12 @@ export const getCustomer: HandlerFn = async (req, res, clients) => {
     )
 
     try {
-        const results = db?.select().from(CUSTOMER).where(eq(CUSTOMER.id, id))
+        const results = db?.select().from(CUSTOMER).where(and(
+            eq(CUSTOMER.id, id),
+            // @ts-ignore
+            eq(CUSTOMER.store_id, req.store.id),
+            eq(CUSTOMER.environment, req.env)
+        ))
 
         if (isEmpty(results)) {
             res.status(404).send(generate_dto(null, "Customer not found", "error"))

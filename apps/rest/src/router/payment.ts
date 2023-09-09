@@ -1,32 +1,40 @@
 import { Router } from "express";
 import handler, { HandlerObj } from "../../lib/handler";
-import { confirmPayment, createPayment, deletePayment, getPayment, updatePayment } from "../resources/payment";
+import { confirmPayment, createPayment, getPayment, updatePayment } from "../resources/payment";
+import { storePublicAuth, storeSecretAuth, withEphemeralKey } from "../../lib/middleware/auth";
 
 const routes: Array<HandlerObj> = [
     {
         fn: createPayment,
         method: "post",
-        path: "/payments"
+        path: "/payments",
+        middlewares: [
+            withEphemeralKey
+        ]
     },
     {
         fn: updatePayment,
         method: "put",
-        path: "/payments/:payment_id"
+        path: "/payments/:payment_id",
+        middlewares: [
+            storeSecretAuth
+        ]
     },
     {
         fn: getPayment,
         method: "get",
-        path: "/payments/:payment_id"
-    },
-    {
-        fn: deletePayment,
-        method: "delete",
-        path: "/payments/:payment_id"
+        path: "/payments/:payment_id",
+        middlewares: [
+            storeSecretAuth
+        ]
     },
     {
         fn: confirmPayment,
         method: "get",
-        path: "/payments/confirm/:payment_id"
+        path: "/payments/confirm/:payment_id", // this way we can support client side polling without introducing a security vulnerability
+        middlewares: [
+            storePublicAuth
+        ]
     }
 ]
 

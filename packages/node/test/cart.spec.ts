@@ -1,179 +1,199 @@
-import assert from "assert"
-import Payments from "../src/index.ts"
-import { isEmpty, isNull } from "../src/lib/cjs/lodash.ts"
+import assert from "assert";
+import { PaymentsClientHttpError, createPaymentClient } from "../src";
+import { isNull, isUndefined } from "../src/lib/cjs/lodash";
+import db from "db"
+import { CART, CUSTOMER, PRODUCT } from "db/schema";
+import { eq, and } from "db/utils"
 
-const payments = new Payments("")
+
+
+const client = createPaymentClient(process.env.URL as string, process.env.PUBLISHABLE_KEY as string)
+
 let customer_id: string | null = null 
 let product_id: string | null = null
-let cart_id: string | null = null
+let cart_id: string | null = null 
 let cart_item_id: string | null = null 
-const camera_image = "https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
 
-describe("CART", ()=>{
+
+describe("CART", ()=> {
 
     before(async ()=>{
 
-        const customer = await payments.customer?.createCustomers({
-            email: "janedoe@email.com",
-            first_name: "Jane",
-            last_name: "Doe",
+        const customer = await client.customers.create({
+            last_name: "bob",
+            first_name: "bob",
+            email: "bob@builder.com",  
         })
 
-        customer_id = customer?.id ?? null 
+        customer_id = customer?.id ?? null
 
-        const product = await payments.product?.createProduct({
-            image: camera_image,
-            name: "camera",
-            price: 450.99,
-            description: "Capture the universe"
+
+        const product = await client.products.create({
+            name: "Cool Product",
+            description: "A cool product",
+            image: "NO IMAGE",
+            price: 300,
         })
 
         product_id = product?.id ?? null
 
+
     })
 
 
-    describe("BASIC CRUD", ()=>{
+    it("CREATE A CART", (done)=>{
+        if(isNull(customer_id)) return done(new Error("CUSTOMER ID IS INVALID"))
 
+        client.carts.create({
+            customer_id
+        }).then((cart)=>{
+            assert(!isUndefined(cart?.id))
+            cart_id = cart?.id ?? null
+            done()
+        })
+        .catch((e)=>{
+            if(e  instanceof PaymentsClientHttpError){
+                console.log("SERVER RESPONDED WITH", e.code)
 
-        it("Create a cart", (done)=>{
+            }
 
-            payments.cart?.createCart({
-                customer_id: customer_id ?? ""
-            }).then((cart)=>{
-                console.log("CART::", cart)
-                assert.match((cart.id ?? ""), /crt/)
-                assert.strictEqual(cart?.customer_id, customer_id)
-                cart_id = cart?.id ?? null
-                done()
-            })
-            .catch((e)=>{
-                console.log("Error:", e)
-                done(e)
-            })
-
+            done(e)
         })
 
-
-        it("Add an item to the cart", (done)=>{
-
-            if(isNull(cart_id)) return done(Error("CART ID is EMPTY"))
-
-            payments.cart?.addCartItem(cart_id, {
-                product_id: product_id ?? "",
-                quantity: 2
-            })
-            .then((cart_item)=>{
-                console.log("CART ITEM", cart_item)
-                cart_item_id = cart_item?.id ?? null
-                done()
-            })
-            .catch((e)=>{
-                console.log("Error:", e)
-                done(e)
-            })
-            
-        })
+    })
 
 
-        it("Get the cart", (done)=>{
+    it("Add a cart item", (done)=> {
 
-            if(isNull(cart_id)) return done(Error("CART ID is EMPTY"))
+        if(isNull(cart_id) || isNull(product_id)) return done(new Error("Invalid ID specified"))
 
-            payments.cart?.getCart(cart_id).then((cart)=>{
-                console.log("CART", cart)
-                assert.strictEqual(cart.items.length, 1)
-                assert.strictEqual(cart.id, cart_id)
-                done()
-            })
-            .catch((e)=>{
-                console.log("Error:", e)
-                done(e)
-            })
+        client.carts.addCartItem(cart_id, {
+            product_id,
+            quantity: 5
+        }).then((cart_item)=>{
+
+            assert.strictEqual(cart_item?.cart_id, cart_id)
+            cart_item_id = cart_item?.id ?? null
+            done()
 
         })
+        .catch((e)=>{
+            if(e  instanceof PaymentsClientHttpError){
+                console.log("SERVER RESPONDED WITH", e.code)
 
-        it("Update a cart items", (done)=>{
+            }
 
-            if(isNull(cart_item_id) || isNull(cart_id)) return done(Error("Cart Item ID or CART ID is empty"))
-
-            payments.cart?.updateCartItem(cart_item_id, cart_id, {
-                quantity: 5
-            }).then((data)=>{
-                console.log("CART ITEM::", data)
-
-                assert.strictEqual(data.quantity, 5)
-                done()
-            })
-            .catch((e)=>{
-                console.log("Error:", e)
-                done(e)
-            })
+            done(e)
         })
 
-        it("Update a cart", (done)=>{
+    })
 
-            if(isNull(cart_id)|| isEmpty(cart_id)) return done(Error("Cart ID is empty"))
 
-            payments.cart?.updateCart(cart_id, {
-                status: "PURCHASED"
-            }).then((data)=>{
-                assert.strictEqual(data.status, "PURCHASED")
-                done()
-            })
-            .catch((e)=>{
-                console.log("Error:", e)
-                done(e)
-            })
+    it("Get the cart with items", (done)=>{
 
+        if(isNull(cart_id)) return done(new Error("Invalid cart id"))
+
+        client.carts.retrieve(cart_id)
+        .then((cart_data)=>{
+
+            assert.strictEqual(cart_data?.id, cart_id)
+            assert.strictEqual(cart_data?.items?.length, 1)
+
+            done()
 
         })
+        .catch((e)=>{
+            if(e  instanceof PaymentsClientHttpError){
+                console.log("SERVER RESPONDED WITH", e.code)
 
+            }
 
-        it("Delete cart item", (done)=>{
-
-            if(isNull(cart_id) || isNull(cart_item_id)) return done(Error("CART ID or CART ITEM ID is empty"))
-
-            payments.cart?.deleteCartItem(cart_item_id, cart_id)
-            .then((data)=>{
-                assert.strictEqual(data.id, cart_item_id)
-                done()
-            })
-            .catch((e)=>{
-                console.log("Error:", e)
-                done(e)
-            })
+            done(e)
         })
 
+    })
 
-        it("Delete cart", (done)=>{
 
-            if(isNull(cart_id)) return done(Error("CART ID is empty"))
+    it("Update the cart", (done)=>{
 
-            payments.cart?.deleteCart(cart_id)
-            .then((data)=>{
-                assert.strictEqual(data.id, cart_id)
-                done()
-            })
-            .catch((e)=>{
-                console.log("Error:", e)
-                done(e)
-            })
+        if(isNull(cart_id)) return done(new Error("Invalid cart id"))
+
+        client.carts.update(cart_id, {
+            status: "ACTIVE"
+        }).then((cart)=>{
+            assert.strictEqual(cart?.id, cart_id)
+            assert.strictEqual(cart?.status, "ACTIVE")
+            done()
+        })
+        .catch((e)=>{
+            if(e  instanceof PaymentsClientHttpError){
+                console.log("SERVER RESPONDED WITH", e.code)
+
+            }
+            done(e)
         })
 
+    })
 
-    
+    it("Update cart item", (done)=>{
+
+        if(isNull(cart_id) || isNull(cart_item_id)) return done(new Error("Invalid ID"))
+
+        client.carts.updateCartItem(cart_id,cart_item_id, {
+            quantity: 10
+        }).then((cart_item)=>{
+            assert.strictEqual(cart_item?.cart_id, cart_id)
+            assert.strictEqual(cart_item_id, cart_item?.id) 
+            assert.strictEqual(cart_item?.quantity, 10)
+            done()
+        })
+        .catch((e)=>{
+            if(e  instanceof PaymentsClientHttpError){
+                console.log("SERVER RESPONDED WITH", e.code)
+
+            }
+            done(e)
+        })
+
+    })
+
+    it("Delete cart item", (done)=> {
+
+        if(isNull(cart_id) || isNull(cart_item_id)) return done(new Error("Invalid ID"))
+
+        client.carts.deleteCartItem(cart_id, cart_item_id)
+        .then((cart_item)=>{
+            assert.strictEqual(cart_item?.cart_id, cart_id)
+            assert.strictEqual(cart_item_id, cart_item?.id) 
+            done()
+        })
+        .catch((e)=>{
+            if(e  instanceof PaymentsClientHttpError){
+                console.log("SERVER RESPONDED WITH", e.code)
+
+            }
+            done(e)
+        })
 
     })
 
 
     after(async ()=>{
 
-        // delete the customer
-        await payments.customer?.deleteCustomer(customer_id)
+        // cart item already deleted
 
-        // delete the product
-        await payments.product?.deleteProduct(product_id ?? "")
+        // delete cart
+        cart_id && await db.delete(CART)
+        .where(eq(CART.id, cart_id))
+
+
+        // delete product
+        product_id && await db.delete(PRODUCT)
+        .where(eq(PRODUCT.id, product_id ))
+
+        // delete customer
+        customer_id && await db.delete(CUSTOMER)
+        .where(eq(CUSTOMER.id, customer_id))
 
     })
 

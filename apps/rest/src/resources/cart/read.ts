@@ -1,13 +1,13 @@
 import { clients } from './../../../lib/clients';
-import { HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { CART, CART_ITEM } from 'db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { generate_dto } from 'generators';
 import { isEmpty } from '../../../lib/cjs/lodash';
 
 
 
-export const getCart: HandlerFn = async (req, res, clients) => {
+export const getCart: HandlerFn<AuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients
 
@@ -22,7 +22,11 @@ export const getCart: HandlerFn = async (req, res, clients) => {
     try {
 
         const result = await db?.query.CART.findFirst({
-            where: eq(CART.id, id),
+            where: and(eq(CART.id, id), 
+            // @ts-ignore
+            eq(CART.store_id, req.store.id),
+            eq(CART.environment, req.env)
+            ),
             with: {
                 items: true
             }

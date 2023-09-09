@@ -1,26 +1,80 @@
-import Checkout from "./resources/checkout";
+import { ParamsError, PaymentsClientHttpError, PaymentsClientParseError } from './lib/net';
+import Payment from "./resources/payments";
+import PaymentsHttpClient from "./lib/net";
+import Product from "./resources/product";
 import Customer from "./resources/customer";
 import PaymentMethod from "./resources/payment_method";
 import Cart from "./resources/cart";
-import Product from "./resources/product";
-import Payment from "./resources/payments";
+import Checkout from "./resources/checkout";
+import { isUndefined } from './lib/cjs/lodash';
 
-class Payments {
-  public customer: Customer | null = null;
-  public checkout: Checkout | null = null;
-  public payment_method: PaymentMethod | null = null;
-  public cart: Cart | null = null;
-  public product: Product | null = null;
-  public payment: Payment | null = null
 
-  constructor(API_KEY: string) {
-    this.customer = new Customer(API_KEY);
-    this.checkout = new Checkout(API_KEY);
-    this.payment_method = new PaymentMethod(API_KEY);
-    this.cart = new Cart(API_KEY);
-    this.product = new Product(API_KEY);
-    this.payment = new Payment(API_KEY)
+/**
+ * @name createPaymentClient
+ * @description create and instance of the payment client to use
+ * @example 
+ *          const client = createPaymentClient("http://localhost:8089", "YOUR SECRET KEY GOT FROM THE DASHBOARD")
+ * 
+ *          const payment  = client.payments.start({
+ *              amount: 200,
+ *              currency: "KES",
+ *              customer_id: "cus_4839303-3-3-3-3-3-933"
+ *          })
+ * 
+ *          payment.then(console.log).catch(console.log)
+ * @param url - where the rest api is hosted, defaults to your localhost at http://localhost:8089 
+ * @param secretKey - secret key for the seller, got from the dashboard
+ * @returns 
+ */
+export const createPaymentClient = (url: string, secretKey:string ) => {
+
+  if(isUndefined(url) || url?.length === 0) throw new Error("INVALID URL")
+
+  if(isUndefined(secretKey) || secretKey?.length === 0) throw new Error("INVALID URL")
+
+  const client = new PaymentsHttpClient()
+
+  client.url = url 
+
+  client.secretKey = secretKey
+
+  return {
+      /**
+       * Interact with payments
+       */
+      payments: new Payment(client),
+      /**
+       * Interact with products
+       */
+       products: new Product(client),
+       /**
+        * Interact with customers
+        */
+       customers: new Customer(client),
+      /**
+       * Interact with payment methods
+       */
+      paymentMethods: new PaymentMethod(client),
+      /**
+       * Interact with carts
+       */
+      carts: new Cart(client),
+      /**
+       * Interact with checkouts
+       */
+      checkouts: new Checkout(client)
   }
 }
 
-export default Payments
+
+export {
+  PaymentMethod,
+  Checkout,
+  Payment,
+  Product,
+  Customer,
+  Cart,
+  ParamsError,
+  PaymentsClientHttpError,
+  PaymentsClientParseError
+}

@@ -3,6 +3,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import db from "db";
 import { APPCLIENTS, clients } from "./clients";
 import { isEmpty, isUndefined } from "./cjs/lodash";
+import { STORE } from "zodiac";
 
 
 
@@ -10,15 +11,15 @@ import { isEmpty, isUndefined } from "./cjs/lodash";
 /**
  * HandlerFn - a function that handles a request
  */
-export type HandlerFn = (req: Request, res: Response, clients: APPCLIENTS)=>Promise<unknown>
+export type HandlerFn<T = Request> = (req: T, res: Response, clients: APPCLIENTS)=>Promise<unknown>
 
 export type MiddleWareFn = (req: Request, res: Response, next: NextFunction) => unknown
 
 /**
  * HandlerObj - an object that contains a handler function and the path and method it handles
  */
-export type HandlerObj = {
-    fn: HandlerFn,
+export type HandlerObj<T = any> = { // this generic typing is just to make typescript happy
+    fn: HandlerFn<T>,
     path: string, 
     method: "get" | "post" | "put" | "delete" | "patch",
     middlewares?: Array<MiddleWareFn>
@@ -42,6 +43,12 @@ async function handler(router: Router, handler: HandlerObj) {
     {
       console.error("UNHANDLED ERROR:", e)  
     }
+}
+
+export type AuthenticatedRequest = Request & {
+    env: "production" | "testing",
+    store: STORE
+    token: string
 }
 
 export default handler

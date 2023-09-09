@@ -1,130 +1,162 @@
-import { CHECKOUT, checkout } from "zodiac"
-import { CHECKOUT_ENDPOINTS } from "../lib/CONSTANTS"
-import got, { RequestError } from "got"
-import { DTO } from "../lib/types"
+import { CHECKOUT, PAYMENT, PAYMEN_INPUT, payment_input, checkout as schema } from "zodiac";
+import PaymentsHttpClient, { ParamsError, PaymentsClientHttpError, PaymentsClientParseError } from "../lib/net";
+import { DTO, UNKNOWN_ERROR } from "../lib/types";
+import { CHECKOUT_ENDPOINTS, PAYMENT_ENDPOINTS } from "../lib/CONSTANTS";
+import { isEmpty } from "../lib/cjs/lodash";
 
 
+type CHECKOUT_CREATE_DATA = Omit<CHECKOUT, "id" | "created_at" | "updated_at" | "status" | "store_id">
 
-class Checkout {
+type CHECKOUT_UPDATE_DATA = Omit<CHECKOUT, "id" | "created_at" | "updated_at" | "store_id">
 
-    private api_key: string = ""
+type PAYMENT_INPUT_DATA = Omit<PAYMEN_INPUT, "customer_id" | "payment_method_id" | "amount" | "payment_option" | "phone_number">
 
-    constructor(API_KEY: string) {
-        this.api_key = API_KEY
-    }
+export default class Checkout {
 
-    async createCheckout(data: CHECKOUT) {
-        const parsed = checkout.safeParse(data)
+    private client: PaymentsHttpClient
 
-        if (!parsed.success) {
-            throw new Error("INVALID BODY", {
-                cause: parsed.error.formErrors.fieldErrors
-            })
-        }
-
-        const { created_at, updated_at, ...parsedData } = parsed.data
-
-        const url = CHECKOUT_ENDPOINTS.base 
-
-        try {
-
-            const checkout = await got.post(url, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(parsedData),
-                method: "POST"
-            }).json<DTO<CHECKOUT>>()
-
-            return checkout.data
-
-        }
-        catch (e)
-        {
-            throw new Error("UNABLE TO CREATE CHECKOUT", {
-                cause: (e as RequestError).response?.body
-            })
-        }
-    }
-
-    async updateCheckout(id: string, data: CHECKOUT): Promise<CHECKOUT> {
-        const parsed = checkout.safeParse(data) 
-
-        if (!parsed.success) {
-            throw new Error("INVALID BODY", {
-                cause: parsed.error.formErrors.fieldErrors
-            })
-        }
-
-        const { created_at, updated_at, ...parsedData } = parsed.data
-
-        const url = CHECKOUT_ENDPOINTS.base
-
-        try {
-            const checkout = await got.put(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(parsedData),
-            }).json<DTO<CHECKOUT>>()
-
-            return checkout.data
-
-        }
-        catch (e)
-        {
-            throw new Error("UNABLE TO UPDATE CHECKOUT", {
-                cause: (e as RequestError).response?.body
-            })
-        }
+    constructor(client: PaymentsHttpClient){
+        this.client = client
     }
 
 
-    async getCheckout(id: string): Promise<CHECKOUT> {
-        const url = CHECKOUT_ENDPOINTS.base
+    /**
+     * @name create
+     * @param checkout 
+     * @description create a checkout object
+     * @returns 
+     */
+    async create(checkout: CHECKOUT_CREATE_DATA ) {
 
-        try {
-            const checkout = await got.get(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
+        const parsed = schema.safeParse(checkout)
+
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "checkouts")
+
+            const result = await this.client.post(CHECKOUT_ENDPOINTS.base, {
+                body: parsed.data
+            })
+            
+
+            const data = await result.toJSON<DTO<CHECKOUT & { ephemeralKey: string }>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "checkouts")
+    }
+
+
+
+    /**
+     * @name retrieve
+     * @param id 
+     * @description retrieve checkout
+     * @returns 
+     */
+    async retrieve(id: string){
+
+        if(isEmpty(id)) throw new ParamsError("INVALID ID", "ID")
+
+
+            const result = await this.client.get(CHECKOUT_ENDPOINTS.retrieve, {
+                pathSegments: {
+                    checkout_id: id
                 }
-            }).json<DTO<CHECKOUT>>()
-
-            return checkout.data
-        }
-        catch (e)
-        {
-            throw new Error("UNABLE TO GET CHECKOUT", {
-                cause: (e as RequestError).response?.body
             })
-        }
+
+            const data = await result.toJSON<DTO<CHECKOUT>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "checkouts")
+
     }
 
-    async deleteCheckout(id: string): Promise<CHECKOUT> {
-        const url = CHECKOUT_ENDPOINTS.base
+    /**
+     * @name update
+     * @param id 
+     * @param checkout 
+     * @description update the checkout object
+     * @returns 
+     */
+    async update(id: string, checkout: CHECKOUT_UPDATE_DATA){
 
-        try {
-            const checkout = await got.delete(`${url}/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${this.api_key}`,
-                    "Content-Type": "application/json",
+        if(isEmpty(id)) throw new ParamsError("INVALID ID", "ID")
+
+        const parsed = schema.safeParse(checkout)
+
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "checkouts")
+
+            const result = await this.client.put(CHECKOUT_ENDPOINTS.retrieve, {
+                pathSegments: {
+                    checkout_id: id
+                },
+                body: parsed.data
+            })
+
+            const data = await result.toJSON<DTO<CHECKOUT>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "checkouts")
+
+    }
+
+    /**
+     * @name archive
+     * @param id 
+     * @description archive the checkout object
+     * @returns 
+     */
+    async archive(id: string){
+
+
+        if(isEmpty(id)) throw new ParamsError("INVALID ID", "ID")
+
+
+            const result = await this.client.patch(CHECKOUT_ENDPOINTS.archive, {
+                pathSegments: {
+                    checkout_id: id
                 }
-            }).json<DTO<CHECKOUT>>()
-
-            return checkout.data
-        }
-        catch (e)
-        {
-            throw new Error("UNABLE TO GET CHECKOUT", {
-                cause: (e as RequestError).response?.body
             })
-        }
+
+            const data = await result.toJSON<DTO<CHECKOUT>>()
+
+            if(result._res.ok) return data?.data
+
+            throw new PaymentsClientHttpError(result, "checkouts")
+
     }
 
+
+
+    /**
+     * enablePayments on the client side with ephemeral links
+     * @param ephemeralKey 
+     * @param body 
+     * @returns 
+     */
+    async pay(ephemeralKey: string, body: Required<PAYMENT_INPUT_DATA>){
+
+        if(isEmpty(ephemeralKey)) throw new ParamsError("INVALID ephemeral key", "ephemeral key")
+
+
+        const parsed = payment_input.safeParse(body)
+
+        if(!parsed.success) throw new PaymentsClientParseError(parsed.error, "checkout payments")
+
+
+        const result = await this.client.post(PAYMENT_ENDPOINTS.base, {
+            headers: {
+                "X-Ephemeral-Key": ephemeralKey
+            },
+            body: parsed.data
+        })
+
+        if(!result._res.ok) throw new PaymentsClientHttpError(result, "payment")
+
+        const data = await result.toJSON<DTO<PAYMENT>>()
+
+        return data?.data
+
+    }
 }
-
-
-export default Checkout
