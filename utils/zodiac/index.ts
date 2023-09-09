@@ -118,11 +118,11 @@ const payment_input = z.object({
     payment_method_id: z.string().optional(),
     amount: z.number().optional(),
     phone_number: z.string().optional(),
-    payment_option: z.enum(['MPESA']).default("MPESA"),
+    payment_option: z.enum(['MPESA']).optional().default("MPESA"),
     customer_id: z.string().optional()
 })
 
-type PAYMEN_INPUT = z.infer<typeof payment_input>
+type PAYMEN_INPUT = Partial<z.infer<typeof payment_input>>
 
 
 export {
