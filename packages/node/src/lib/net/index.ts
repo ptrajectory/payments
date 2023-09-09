@@ -83,8 +83,6 @@ export default class PaymentsHttpClient {
     // set the secret key
     set secretKey(secret_key: string){
 
-        console.log("SECRET KEYLL", secret_key)
-
         if(typeof secret_key === "undefined") throw Error("Please Provide a valid secret key")
 
         if(secret_key.trim().length  == 0 ) throw Error("Secret Key is invalid")
@@ -119,7 +117,7 @@ export default class PaymentsHttpClient {
         path: string,
         method: httpMethods, 
         data: {
-            body: {[k: string]: any} | null,
+            body?: {[k: string]: any} | null,
             headers: Record<string, string> | undefined | null,
             params: Record<string, string> | undefined | null,
             pathSegments: Record<string, string> | undefined | null
@@ -148,12 +146,10 @@ export default class PaymentsHttpClient {
         requestHeaders.append("Content-Type", "application/json")
         requestHeaders.append("Authorization", `Bearer ${this._SECRET_KEY}`)
 
-        console.log(requestHeaders)
-
         const fetchPromise = fetch(endpoint.toString(), {
             method,
             headers: requestHeaders,
-            body: JSON.stringify(body)
+            body: (method === "GET" || isEmpty(body)) ? undefined : JSON.stringify(body) 
         })
 
         const res = await fetchPromise
@@ -176,7 +172,6 @@ export default class PaymentsHttpClient {
     get: verbFunction = (url, options) => {
 
         return this.makeRequest(url, "GET", {
-            body: options.body ?? null,
             headers: options.headers ?? null,
             params: options.params ?? null,
             pathSegments: options.pathSegments ?? null

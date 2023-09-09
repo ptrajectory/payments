@@ -5,6 +5,9 @@ import { DTO, UNKNOWN_ERROR } from "../lib/types";
 
 
 
+type CREATE_PRODUCT_DATA = Omit<PRODUCT, "id" | "created_at" | "updated_at" | "store_id" | "status">
+
+type UPDATE_PRODUCT_DATA = Omit<PRODUCT, "id" | "created_at" | "updated_at" | "store_id">
 
 export default class Product {
 
@@ -16,7 +19,7 @@ export default class Product {
     }
 
 
-    async create(product: PRODUCT){
+    async create(product: CREATE_PRODUCT_DATA){
 
         const parsed = schema.safeParse(product)
 
@@ -54,7 +57,7 @@ export default class Product {
     }
 
 
-    async update(id: string, data: PRODUCT) {
+    async update(id: string, data: UPDATE_PRODUCT_DATA) {
 
         const parsed = schema.safeParse(data)
 
@@ -69,7 +72,7 @@ export default class Product {
     
             const json = await result.toJSON<DTO<PRODUCT>>()
     
-            if(result._res.ok) return json
+            if(result._res.ok) return json?.data
     
             throw new PaymentsClientHttpError(result, "product")
 
@@ -85,7 +88,7 @@ export default class Product {
 
             const json = await result.toJSON<DTO<PRODUCT>>()
     
-            if(result._res.ok) return json
+            if(result._res.ok) return json?.data 
     
             throw new PaymentsClientHttpError(result, "product")
 

@@ -5,9 +5,14 @@ import { CART_ENDPOINTS } from "../lib/CONSTANTS";
 import { isEmpty } from "../lib/cjs/lodash";
 
 
+type CART_CREATE_DATA = Omit<CART, "id" | "created_at" | "updated_at" | "status" | "store_id">
+
+type CART_UPDATE_DATA = Omit<CART, "id" | "store_id" | "created_at" | "updated_at" >
+
+
 export default class Cart {
 
-    client: PaymentsHttpClient 
+    private client: PaymentsHttpClient 
 
 
     constructor(client: PaymentsHttpClient){
@@ -21,7 +26,7 @@ export default class Cart {
      * @description create a cart
      * @returns 
      */
-    async create(cart: CART) {
+    async create(cart: CART_CREATE_DATA) {
 
         const parsed = schema.safeParse(cart)
 
@@ -48,7 +53,7 @@ export default class Cart {
      */
     async retrieve(id: string){
 
-        if(isEmpty(id)) return new ParamsError("Invalid ID", "ID")
+        if(isEmpty(id)) throw new ParamsError("Invalid ID", "ID")
 
             const result = await this.client.get(CART_ENDPOINTS.retrieve, {
                 pathSegments: {
@@ -73,9 +78,9 @@ export default class Cart {
      * @description update a cart 
      * @returns 
      */
-    async update(id: string, cart: CART){
+    async update(id: string, cart: CART_UPDATE_DATA){
 
-        if(isEmpty(id)) return new ParamsError("Invalid ID", "ID")
+        if(isEmpty(id)) throw new ParamsError("Invalid ID", "ID")
 
         const parsed = schema.safeParse(cart)
 
@@ -131,7 +136,7 @@ export default class Cart {
      */
     async addCartItem(cart_id: string, cart_item: CART_ITEM) {
 
-        if(isEmpty(cart_id)) return new ParamsError("Invalid CART ID", "CART ID")
+        if(isEmpty(cart_id)) throw new ParamsError("Invalid CART ID", "CART ID")
 
         const parsed = sub_schema.safeParse(cart_item)
 
@@ -167,9 +172,9 @@ export default class Cart {
      */
     async updateCartItem(cart_id: string, cart_item_id: string, cart_item: CART_ITEM){
 
-        if(isEmpty(cart_id)) return new ParamsError("Invalid CART ID", "CART ID")
+        if(isEmpty(cart_id)) throw new ParamsError("Invalid CART ID", "CART ID")
 
-        if(isEmpty(cart_item_id)) return new ParamsError("Invalid CART ITEM ID", "CART ITEM ID")
+        if(isEmpty(cart_item_id)) throw new ParamsError("Invalid CART ITEM ID", "CART ITEM ID")
 
         const parsed = sub_schema.safeParse(cart_item)
 
@@ -202,9 +207,9 @@ export default class Cart {
      */
     async deleteCartItem(cart_id: string, cart_item_id: string){
 
-        if(isEmpty(cart_id)) return new ParamsError("Invalid CART ID", "CART ID")
+        if(isEmpty(cart_id)) throw new ParamsError("Invalid CART ID", "CART ID")
 
-        if(isEmpty(cart_item_id)) return new ParamsError("Invalid CART ITEM ID", "CART ITEM ID")
+        if(isEmpty(cart_item_id)) throw new ParamsError("Invalid CART ITEM ID", "CART ITEM ID")
   
 
             const result = await this.client.delete(CART_ENDPOINTS.delete_item, {

@@ -9,7 +9,7 @@ export const CUSTOMER_ENDPOINTS = {
     retrieve:  "/api/customers/{customer_id}",
     update:"/api/customers/{customer_id}",
     archive: "/api/customers/{customer_id}",
-}
+} as const
 
 
 // CHECKOUT SPECIFIC ENDPOINTS
@@ -18,15 +18,15 @@ export const CHECKOUT_ENDPOINTS = {
     retrieve: "/api/checkouts/{checkout_id}",
     update: "/api/checkouts/{checkout_id}",
     archive: "/api/checkouts/{checkout_id}"
-}
+} as const
 
 // PAYMENT_METHOD SPECIFIC ENDPOINTS
 export const PAYMENT_METHOD_ENDPOINTS = {
     base: "/api/payment_methods",
-    retrieve: "/api/payment_method/{payment_method_id}",
-    update:"/api/payment_method/{payment_method_id}",
-    archive: "/api/payment_method/{payment_method_id}",
-}
+    retrieve: "/api/payment_methods/{payment_method_id}",
+    update:"/api/payment_methods/{payment_method_id}",
+    archive: "/api/payment_methods/{payment_method_id}",
+} as const
 
 // CART SPECIFIC ENDPOINTS
 export const CART_ENDPOINTS = {
@@ -37,7 +37,7 @@ export const CART_ENDPOINTS = {
     add_item: "/api/carts/{cart_id}",
     update_item: "/api/carts/{cart_id}/{cart_item_id}",
     delete_item: "/api/carts/{cart_id}/{cart_item_id}"
-}
+} as const
 
 // PRODUCT SPECIFIC ENDPOINTS
 export const PRODUCT_ENDPOINTS = {
@@ -45,7 +45,7 @@ export const PRODUCT_ENDPOINTS = {
     retrieve: "/api/products/{product_id}",
     update: "/api/products/{product_id}",
     patch: "/api/products/{product_id}",
-}
+} as const
 
 
 // PAYMENT SPECIFIC ENDPOINTS
@@ -54,4 +54,5 @@ export const PAYMENT_ENDPOINTS = {
     retrieve: "/api/payments/{payment_id}",
     update:  "/api/payments/{payment_id}",
     patch: "/api/payments/{payment_id}",
-}
+    confirm: "/api/payments/confirm/{payment_id}"
+} as const

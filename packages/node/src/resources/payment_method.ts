@@ -6,10 +6,13 @@ import { isEmpty } from "../lib/cjs/lodash";
 
 
 
+type CREATE_PAYMENT_METHOD_DATA = Omit<PAYMENT_METHOD, "id" | "created_at" | "updated_at" | "status" | "store_id">
+
+type UPDATE_PAYMENT_METHOD_DATA = Omit<PAYMENT_METHOD, "id" | "created_at" | "updated_at" | "store_id">
 
 export default class PaymentMethod {
 
-    client: PaymentsHttpClient
+    private client: PaymentsHttpClient
 
     constructor(client: PaymentsHttpClient){
         this.client = client
@@ -19,11 +22,11 @@ export default class PaymentMethod {
 
     /**
      * @name create
-     * @param {PAYMENT_METHOD} payment_method 
+     * @param {CREATE_PAYMENT_METHOD_DATA} payment_method 
      * @param description add a payment method for a customer
      * @returns 
      */
-    async create(payment_method: PAYMENT_METHOD) {
+    async create(payment_method: CREATE_PAYMENT_METHOD_DATA) {
 
         const parsed = schema.safeParse(payment_method)
 
@@ -90,7 +93,7 @@ export default class PaymentMethod {
      * @description update a payment method
      * @returns 
      */
-    async update(id: string, payment_method: PAYMENT_METHOD){
+    async update(id: string, payment_method: UPDATE_PAYMENT_METHOD_DATA){
 
         if(isEmpty(id)) throw new ParamsError("INVALID ID", "id")
 
