@@ -135,11 +135,11 @@ export const verifyCheckoutEphemeralKey = (token: string) => {
     })
 
     return new Promise((res, rej)=>{
-        jwt.verify(token, publicKey, (err, store)=>{
+        jwt.verify(token, publicKey, (err, chk)=>{
             
             if(err) return rej("Unable to verify")
 
-            return res(store as any)
+            return res((chk as any)?.checkout_id)
         }) 
 
     })

@@ -18,7 +18,7 @@ const determinPaymentDetails = async (body: PAYMEN_INPUT) => {
 
     const { amount, payment_method_id, phone_number, checkout_id, payment_option, customer_id } = parsed.data
 
-    if(isNumber(amount) && isString(phone_number) && !isEmpty(amount) && !isEmpty(phone_number)) return  {  amount, phone_number: phone_number, payment_option }
+    if(isNumber(amount) && isString(phone_number)) return  {  amount, phone_number: phone_number, payment_option }
     
     if(isUndefined(payment_method_id) && !isUndefined(checkout_id)){
 
@@ -116,7 +116,6 @@ export const createPayment: HandlerFn<AuthenticatedRequest> = async (req, res, c
     const { db } = clients
 
     const body = req.body
-
     const parsed = payment_input.safeParse(body)
 
     if(!parsed.success) return res.status(400).send(generate_dto(
@@ -156,7 +155,7 @@ export const createPayment: HandlerFn<AuthenticatedRequest> = async (req, res, c
                         environment: req.env,
                         checkout_id: parsed.data.checkout_id,
                         payment_method_id: parsed.data.payment_method_id,
-                        customer_id: parsed.data.customer_id
+                        customer_id: parsed.data.customer_id,
                     }).returning()
 
 
@@ -173,16 +172,17 @@ export const createPayment: HandlerFn<AuthenticatedRequest> = async (req, res, c
                         status: "PROCESSING",
                         store_id: req.store.id,
                         environment: req.env,
-                        checkout_id: parsed.data.checkout_id,
-                        payment_method_id: parsed.data.payment_method_id,
-                        customer_id: parsed.data.customer_id
+                        checkout_id: parsed.data.checkout_id ?? null,
+                        payment_method_id: parsed.data.payment_method_id ?? null ,
+                        customer_id: parsed.data.customer_id ?? null,
+                        created_at: new Date(),
+                        updated_at: new Date()
                     }).returning()
 
 
                     // check phone numbers
 
                     if(phone_number === TEST_PHONE_NUMBERS?.[payment_option].error || phone_number !== TEST_PHONE_NUMBERS?.[payment_option].success){
-
                         mpesaExpressClient.emit("payment:error", {
                             Body: {
                                 stkCallback: {
@@ -197,14 +197,15 @@ export const createPayment: HandlerFn<AuthenticatedRequest> = async (req, res, c
                     }
 
                     if(phone_number === TEST_PHONE_NUMBERS?.[payment_option].success){
-
                         mpesaExpressClient.emit("payment:success", {
-                            // @ts-ignore
-                            CheckoutRequestID: result?.at(0)?.token,
-                            ResponseCode: "0",
-                            CustomerMessage: "success",
-                            MerchantRequestID: "mrch_some_id",
-                            ResponseDescription: "success"
+                            Body: {
+                                stkCallback: {
+                                    CheckoutRequestID: result?.at(0)?.token ?? "",
+                                    ResultCode:0,
+                                    ResultDesc: "success",
+                                    MerchantRequestID: "mrch_some_id"
+                                }
+                            }
                         })
 
                     }

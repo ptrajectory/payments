@@ -13,7 +13,6 @@ export const storeSecretAuth: MiddleWareFn = async (req, res, next) => {
     const authorization = req.headers.authorization
     console.log(req.headers)
     const store_token = authorization?.split(" ")?.at(1)?.replace("prod_", "")?.replace("test_", "") // JUST IN CASE THE PREFIXES HADNT BEEN REMOVED 
-    console.log("STORE TOKEN::", store_token)
     if(isUndefined(store_token)) return res.status(401).send(generate_dto(null, "Access Unauthorized", "error"))
 
     try{
@@ -40,25 +39,21 @@ export const storeSecretAuth: MiddleWareFn = async (req, res, next) => {
 const doubleCheck =  async (store_token: string) => {
     let store
     try {
-        store = await verifyPublishableKey(store_token)
+        return await verifyPublishableKey(store_token)
     }
     catch (e)
     {
 
         // JUST INCASE the request is coming from the backend
         try {
-            store = verifySecretKey(store_token)
+            return await verifySecretKey(store_token)
         }
         catch (e)
         {
             throw e
         }
 
-        throw e
-
     }
-    
-    return store
 }
 
 
