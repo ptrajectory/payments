@@ -23,7 +23,7 @@ async function StorePage(props: {params: {store_id: string}}) {
 
 
   return (
-                <div className="flex flex-col w-full h-full">
+                <div className="flex flex-col w-full h-full pb-[200px]">
 
                     <div className="flex flex-col w-full space-y-3 pb-3 border-b-2 border-gray-200 mb-5">
                         <h1 className="text-lg font-semibold">

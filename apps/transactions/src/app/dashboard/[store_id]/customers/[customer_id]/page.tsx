@@ -116,7 +116,7 @@ async function index(props: {
 
 
   return (
-    <div className="flex flex-col w-full h-full justify-start">
+    <div className="flex flex-col w-full h-full justify-start pb-[200px]">
         <div className="flex flex-row w-full items-center justify-start px-5">
             <Link href={`/dashboard/${store_id}/customers`} >
                 <button className='bg-none outline-none' > 

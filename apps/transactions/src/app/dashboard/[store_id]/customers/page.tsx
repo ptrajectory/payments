@@ -97,7 +97,7 @@ function CustomerPage(props: PageProps) {
     
 
   return (
-    <div className="flex flex-col w-full h-full space-y-5">
+    <div className="flex flex-col w-full h-full space-y-5 pb-[200px]">
             <div className="flex flex-row w-full items-center justify-between ">
                 <span className="font-semibold text-xl">
                     Customers

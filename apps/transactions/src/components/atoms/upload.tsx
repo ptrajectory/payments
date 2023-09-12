@@ -127,11 +127,11 @@ function Upload(props: UploadProps) {
             />
         </div>
 
-        <div className="grid grid-cols-3 gap-x-3 gap-y-2 w-full px-5 py-5">
+        <div className="grid grid-cols-3 gap-x-3 gap-y-2 w-full py-5">
             {
                 images?.map((image, i)=>{
                     return (
-                        <div key={i} className={cn("flex w-full h-[100px] flex-row items-center justify-center overflow-hidden relative rounded-sm", !multiple ? "col-span-3" : "")}>
+                        <div key={i} className={cn("flex w-full h-[100px] flex-row items-center justify-center overflow-hidden relative rounded-sm ")}>
                             <Image
                              alt={`Upload ${i}`}
                              fill 

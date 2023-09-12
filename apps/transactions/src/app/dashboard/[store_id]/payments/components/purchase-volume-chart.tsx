@@ -1,13 +1,20 @@
 "use client"
 import { Card, DateRangePicker, DateRangePickerValue, LineChart, Title } from '@tremor/react'
 import React, { useEffect, useState } from 'react'
-import { ChartData, fetch_home_daily_purchases_chart_data } from './utils'
 import { useRouter } from 'next/router'
 import { isString } from 'lodash'
 import { useParams } from 'next/navigation'
 import { SkeletonBlock } from '@/layouts/skeletons'
+import axios from 'axios'
 
-function HomeDailyPurchases() {
+interface ChartData {
+    day: string,
+    "Successful Payments": number
+    "Failed Payments": number
+
+}
+
+function PurchaseVolumeChart() {
   const [chart_data, set_chart_data] = useState<Array<ChartData>>([])
   const [loading, setLoading] = useState(false)
   const [currentDateRange, setCurrentDateRange ] = useState<DateRangePickerValue|undefined>({
@@ -22,10 +29,13 @@ function HomeDailyPurchases() {
     try {
 
         if(!isString(query?.store_id)) return
-        const data = await fetch_home_daily_purchases_chart_data(query?.store_id as string,range ? {
-            from: range.from?.toISOString(),
-            to: range.to?.toISOString()
-        }: undefined)
+        const data = (await axios.get("/api/graphs/payments/purchase-volume", {
+            params: {
+                from: range?.from,
+                to: range?.to,
+                store_id: query?.store_id
+            }
+        }))?.data?.data
 
         console.log("HERE IS SOME CHART DATA::", data)
 
@@ -58,15 +68,15 @@ function HomeDailyPurchases() {
         </div>
         <Card>
             <Title>
-                Daily total purchases
+                Purchase Volume
             </Title>
             { 
                 loading ? <SkeletonBlock className='w-full h-[30vh]' /> :
                 <LineChart
                     data={chart_data}
                     index='day'
-                    categories={['total_amount_spent']}
-                    colors={['amber']}
+                    categories={['Successful Payments', 'Failed Payments']}
+                    colors={['blue', 'red']}
                 />
             }
         </Card>
@@ -74,4 +84,4 @@ function HomeDailyPurchases() {
   )
 }
 
-export default HomeDailyPurchases
+export default PurchaseVolumeChart

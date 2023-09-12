@@ -1,16 +1,13 @@
 "use client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/dialog'
 import { DataTable } from '@/components/headless/data-table'
-import ProductColumns from '@/components/headless/data-tables/products/columns'
-import ProductForm from '@/components/organisms/product-forms/create'
-import { PaginationState } from '@tanstack/react-table'
-import { Button } from '@tremor/react'
+import CustomerPaymentColumns from '@/components/headless/data-tables/customers/payments'
 import axios from 'axios'
-import { PlusIcon } from 'lucide-react'
+import { useRouter } from 'next/router'
+import React, { useCallback, useEffect, useReducer, useState } from 'react'
+import { PAYMENT as tPAYMENT } from 'zodiac'
+import StorePaymentColumns from './columns'
 import { useParams } from 'next/navigation'
-import React, { useCallback, useEffect, useReducer } from 'react'
-import { PRODUCT } from 'zodiac'
-import CreateProductForm from './components/create-product-form'
+import { PaginationState } from '@tanstack/react-table'
 
 const page_state = (state: any, action: {type: "pending" | "fullfilled" | "rejected", payload?: any})=>{
 
@@ -42,21 +39,14 @@ const page_state = (state: any, action: {type: "pending" | "fullfilled" | "rejec
     }
 }
 
-interface Props {
-    products: Array<PRODUCT>
-}
-
-
-function ProductsTable(props: Props) {
-    const { products } = props
-
+export default function StorePaymentsTable() {
     const [pageState, updater] = useReducer(page_state, {
-        data: products ?? []
+        data: []
     })
 
     const params = useParams()
 
-    const fetch_products = async (pagination?: PaginationState) => {
+    const fetch_payments = async (pagination?: PaginationState) => {
 
         updater({
             type: "pending"
@@ -64,7 +54,7 @@ function ProductsTable(props: Props) {
 
         try{
 
-            const results = (await axios.get("/api/products", {
+            const results = (await axios.get("/api/payments", {
                 params: {
                     page: (pagination?.pageIndex ?? 0) + 1 ,
                     size: (pagination?.pageSize ?? 10),
@@ -91,24 +81,21 @@ function ProductsTable(props: Props) {
 
 
     const handlePaginationChange = useCallback((state: PaginationState) => {
-        console.log("Pagination changed::", state)
-        fetch_products(state)
+        fetch_payments(state)
     }, [])  
 
     useEffect(()=>{
-        fetch_products()
+        fetch_payments()
     },[])
 
-
   return (
-    <div className="flex flex-col w-full h-full space-y-5 pb-[200px]">
+    <div className="flex flex-col w-full h-full space-y-5 ">
 
             <div className="flex flex-row w-full items-center justify-between">
                 <span className="font-semibold text-xl">
-                    Products
+                    Payments
                 </span>
 
-               <CreateProductForm/>
 
             </div>
             
@@ -119,7 +106,7 @@ function ProductsTable(props: Props) {
                 <DataTable
                     data={pageState.data ?? []}
                     loading={pageState.loading}
-                    columns={ProductColumns}
+                    columns={StorePaymentColumns}
                     onPaginationStateChanged={handlePaginationChange}
                 />
                 
@@ -129,5 +116,3 @@ function ProductsTable(props: Props) {
         </div>
   )
 }
-
-export default ProductsTable

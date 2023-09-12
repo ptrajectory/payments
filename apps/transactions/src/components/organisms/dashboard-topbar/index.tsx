@@ -55,7 +55,7 @@ function DashboardTopBar(props: DashboardProps) {
         </div>
       </div>
       {
-        scrolled && <div className="flex flex-row w-full h-[80px]"></div>
+        scrolled && <div className="flex flex-row w-full h-[100px]"></div>
       }
     </>
   )

@@ -74,7 +74,7 @@ async function index(props: { params: { store_id: string, product_id: string } }
     console.log("HERE IS THE DATA::", data)
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full pb-[200px]">
         <ProductPageHero
             {...data}
         />
