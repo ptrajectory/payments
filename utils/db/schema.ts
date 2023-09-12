@@ -246,7 +246,8 @@ export const STORE = pgTable("Store", {
     test_publishable_key: text("test_publishable_key"),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
-    status: text("status")
+    status: text("status"),
+    environment
 })
 
 export const STORERelations = relations(STORE, ({many, one})=>{
