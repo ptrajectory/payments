@@ -10,6 +10,7 @@ import { PlusIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useCallback, useEffect, useReducer } from 'react'
 import { PRODUCT } from 'zodiac'
+import CreateProductForm from './components/create-product-form'
 
 const page_state = (state: any, action: {type: "pending" | "fullfilled" | "rejected", payload?: any})=>{
 
@@ -107,28 +108,7 @@ function ProductsTable(props: Props) {
                     Products
                 </span>
 
-                <Dialog modal  onOpenChange={(open)=>{
-
-                }} >
-                    <DialogTrigger asChild>
-                        <Button
-                            size="xs"
-                            icon={()=> <PlusIcon
-                                size="16px"
-                            />}
-                        >
-                            Create Products
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent  >
-                        <DialogHeader>
-                            <DialogTitle>
-                                Create Product
-                            </DialogTitle>
-                        </DialogHeader>
-                        <ProductForm />
-                    </DialogContent>
-                </Dialog>
+               <CreateProductForm/>
 
             </div>
             

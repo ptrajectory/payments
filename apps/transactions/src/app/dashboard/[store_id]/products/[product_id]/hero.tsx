@@ -7,6 +7,10 @@ import { Card, Metric, Text } from '@tremor/react'
 import Image from 'next/image'
 import React from 'react'
 import { PRODUCT } from 'zodiac'
+import EditProductForm from './edit-product-form'
+import { ArrowLeft } from 'lucide-react'
+import { useParams, useRouter } from "next/navigation"
+import Link from 'next/link'
 
 interface Props {
     total_sales: number 
@@ -16,9 +20,23 @@ interface Props {
 
 function ProductPageHero(props:Partial<Props>) {
     const { total_sales = 0, customers = 0, product = null } = props 
+    const { store_id } = useParams()
+
   return (
     <div className="flex flex-col p-5 rounded-md shadow-sm space-y-4">
-              <div className="flex flex-row items-start justify-between p-5 rounded-md">
+            <div className="flex flex-row items-center justify-start w-full ">
+                <Link
+                    href={`/dashboard/${store_id}/products`}
+                >
+                    <button className=" group border-none rounded-full p-2 hover:bg-gray-200 ">
+                        <ArrowLeft 
+                            className={`text-gray-400 group-hover:text-black`}
+                            size="16px"
+                        />
+                    </button>
+                </Link>
+            </div>
+              <div className="flex flex-row items-start justify-between p-5 pt-1 rounded-md">
                 
                 {/* left side */}
                 <div className="grid grid-cols-2 gap-x-2 gap-y-1">
@@ -62,26 +80,9 @@ function ProductPageHero(props:Partial<Props>) {
 
                   <div className="flex flex-col items-end justify-start space-y-5 ">
 
-                        <Dialog modal>
-                            <DialogTrigger asChild>
-                                <Button variant='secondary' className='w-full' >
-                                    Edit
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>
-                                      Edit Product
-                                  </DialogTitle>
-                                </DialogHeader>
-                                <>
-                                    <ProductForm
-                                        action='edit'
-                                        {...product}
-                                    />
-                                </>
-                            </DialogContent>
-                        </Dialog>
+                        <EditProductForm
+                            data={product}
+                        />
                 </div>
             </div>
             <Separator

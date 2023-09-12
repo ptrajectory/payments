@@ -4,7 +4,7 @@ import { DataTable } from '@/components/headless/data-table'
 import { CustomerPaymentMethodsColumns } from '@/components/headless/data-tables/customers/columns'
 import CustomerPaymentColumns from '@/components/headless/data-tables/customers/payments'
 import ProductForm from '@/components/organisms/product-forms/create'
-import payments from '@/lib/resources/payments'
+
 import { PageLayoutProps } from '@/lib/types'
 import { DialogClose } from '@radix-ui/react-dialog'
 import { Button, Card, DateRangePicker, LineChart, Metric, Text } from '@tremor/react'
@@ -17,12 +17,13 @@ import Image from 'next/image'
 import React from 'react'
 import { payment, CUSTOMER as tCUSTOMER, PAYMENT as tPAYMENT, PAYMENT_METHOD as tPAYMENT_METHOD } from 'zodiac'
 import db from "db"
-import PaymentMethodsTable from '@/components/organisms/payment-methods-table'
+import PaymentMethodsTable from '@/app/dashboard/[store_id]/customers/[customer_id]/components/payment-methods-table'
 import PurchaseOverview from '@/components/organisms/purchase-overview/purchase-overview'
 import CustomerPaymentHistory from '@/components/organisms/customer-payment-history'
 import { stringifyDatesInJSON } from '@/lib/utils'
 import Link from 'next/link'
 import { ArrowLeftIcon } from 'lucide-react'
+import UpdateCustomerForm from './components/update-customer-details'
 
 
 const getCustomerInfo = async (id?: string) => {
@@ -32,8 +33,9 @@ const getCustomerInfo = async (id?: string) => {
     let customer
 
     try {
-        customer = await payments.customer?.getCustomer(id)
-
+        customer = await db.query.CUSTOMER.findFirst({
+            where: (cus, { eq }) => eq(cus.id, id)
+        })
 
     }
     catch (e)
@@ -152,7 +154,9 @@ async function index(props: {
                 {/* right side */}
 
                 <div className="flex flex-col items-center justify-center space-y-5 ">
-                        
+                      <UpdateCustomerForm
+                          data={data?.customer ?? null}
+                      />
                         {/* <Dialog modal>
                             <DialogTrigger asChild>
                                 <Button  className='w-full' >
@@ -229,53 +233,3 @@ async function index(props: {
 }
 
 export default index
-
-const get_amount_spent = (customer_id: string) => sql`
-    select SUM(amount) as total_amount
-    from ${PAYMENT}
-    where customer_id = ${customer_id}
-`
-
-const get_products_purchased = (customer_id: string ) => sql`
-    select COUNT(quantity) as product_count
-    from ${CART_ITEM} as crt_itm
-    join ${CART} as crt on crt.id = crt_itm.cart_id
-    where crt.customer_id = ${customer_id};
-    
-`
-
-
-export const getServderSideProps: GetServerSideProps<PageLayoutProps & CustomerPageProps> = async (context)=> {
-
-    const { customer_id } = context.query
-
-    let customer: tCUSTOMER | null = null 
-    let amount_spent: number | null = 0 
-    let purchased_products: number | null = 0
-
-    try {
-
-        console.log("customer_id", customer_id)
-        customer = isString(customer_id) ? ( (await payments.customer?.getCustomer(customer_id)) ?? null) : null
-
-        const total_amount = isString(customer_id) ? (await db.execute(get_amount_spent(customer_id)))?.at(0)?.total_amount : null
-        amount_spent = isString(total_amount) ? Number(total_amount) : 0
-
-        const total_purchased = isString(customer_id) ? (await db.execute(get_products_purchased(customer_id)))?.at(0)?.product_count : null
-
-        purchased_products = isString(total_purchased) ? Number(total_purchased) : 0
-    }
-    catch (e) 
-    {
-
-    }
-
-    return {
-        props: {
-            layout: "dashboard",
-            customer,
-            amount_spent,
-            purchased_products
-        }
-    }
-}

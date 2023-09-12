@@ -5,9 +5,10 @@ import { DataTable } from '@/components/headless/data-table'
 import { CustomerPaymentMethodsColumns } from '@/components/headless/data-tables/customers/columns'
 import React, { useEffect, useState } from 'react'
 import { PAYMENT_METHOD as tPAYMENT_METHOD } from 'zodiac'
-import CreatePaymentMethod from './create-payment-method-form'
+import CreatePaymentMethod from '../../../../../../components/organisms/payment-methods-table/create-payment-method-form'
 import axios from 'axios'
 import { useParams } from 'next/navigation'
+import AddPaymentMethodForm from './add-payment-method'
 
 const fake_payment_method_data: Array<tPAYMENT_METHOD> = [
     {
@@ -53,16 +54,13 @@ function PaymentMethodsTable() {
             })).data.data
 
             set_payment_methods(data)
-            console.log("Incoming data", data)
 
         }
-        catch (e)
-        {
+        catch (e) {
             console.log("something went wrong")
             // TODO: handle this error
         }
-        finally
-        {
+        finally {
             setLoading(false)
         }
 
@@ -70,44 +68,32 @@ function PaymentMethodsTable() {
     }
 
 
-    useEffect(()=>{
+    useEffect(() => {
 
         fetch_payment_methods()
 
     }, [])
 
-  return (
-    <div className="flex flex-col w-full space-y-4">
-        <div className="flex flex-row items-center justify-between">
-            <span className="text-2xl font-semibold">
-                Payment Methods
-            </span>
-            <Dialog modal onOpenChange={(open)=>{
-                if(!open) return fetch_payment_methods()
-            }} >
-                <DialogTrigger asChild>
-                    <Button>
-                        Add Payment Method
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>
-                            Create a new Payment Method
-                        </DialogTitle>
-                    </DialogHeader>
-                    <CreatePaymentMethod/>
-                </DialogContent>
-            </Dialog>
+    return (
+        <div className="flex flex-col w-full space-y-4">
+            <div className="flex flex-row items-center justify-between">
+                <span className="text-2xl font-semibold">
+                    Payment Methods
+                </span>
+                <AddPaymentMethodForm
+                    onClose={()=>{
+                        fetch_payment_methods()
+                    }}
+                />
+            </div>
+            <DataTable
+                data={payment_methods}
+                columns={CustomerPaymentMethodsColumns}
+                paginationEnabled={false}
+                loading={loading}
+            />
         </div>
-        <DataTable
-            data={payment_methods}
-            columns={CustomerPaymentMethodsColumns}
-            paginationEnabled={false}
-            loading={loading}
-        />
-    </div>
-  )
+    )
 }
 
 export default PaymentMethodsTable

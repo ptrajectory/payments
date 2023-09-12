@@ -19,7 +19,9 @@ const uploadFile = async (form: FormData) => {
     )
 
     let uploads: Array<UploadApiResponse> = []
-    console.log("reached here", form)
+
+    console.log(Array.from(form.entries()))
+
     for (const [key, value] of Array.from(form.entries())){
         console.log("KEY",key)
         if(!isUndefined(value)){
@@ -79,6 +81,8 @@ export const POST = async (req: Request) => {
     try {
 
         const uploaded = await uploadFile(form)
+
+        console.log("Here is uploaded::", uploaded)
 
         return NextResponse.json(generate_dto(uploaded?.at(0), "UPLOADED", "success"), {
             status: 201

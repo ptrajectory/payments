@@ -1,5 +1,4 @@
 import db from "db"
-import payments from "@/lib/resources/payments"
 import { CART, CART_ITEM, PRODUCT } from "db/schema"
 import { eq } from "db/utils"
 import { CUSTOMER } from "zodiac"
@@ -11,35 +10,44 @@ import CheckoutMainPageSection from "./_page"
 const getCheckoutData = async (checkout_id: string) => {
 
     try {
-        const checkout = await payments.checkout?.getCheckout(checkout_id)
+        const checkout = await db.query.CHECKOUT.findFirst({
+            where: (chk,  {eq}) => eq(chk.id, checkout_id),
+            columns: {
+                id: true,
+                customer_id: true,
+                cart_id: true,
+                store_id: true,
+                status: true, 
+                environment: true,
+            },
+            with: {
+                cart: {
+                    with: {
+                        items: {
+                            with: {
+                                product: true
+                            }
+                        }
+                    }
+                },
+                store: true,
+                customer: true
+            }
+        })
 
-        const cart = checkout?.cart_id ? await payments.cart?.getCart(checkout?.cart_id) : null
+        const cart = checkout?.cart?.at(0) ?? null
 
-        const store = checkout?.store_id ? await db.query.STORE.findFirst({
-            where: (str, {eq}) => eq(str.id, checkout?.store_id)
-        }) : null
+        const store = checkout?.store ?? null
 
-        const products = await db.select({
-            name: PRODUCT.name,
-            price: PRODUCT.price,
-            quantity: CART_ITEM.quantity,
-            image: PRODUCT.image,
-            description: PRODUCT.description
-        }).from(CART_ITEM)
-        .innerJoin(PRODUCT, eq(PRODUCT.id, CART_ITEM.product_id))
-        .where(eq(CART_ITEM.cart_id, cart?.id))
+        const products = checkout?.cart?.at(0)?.items?.map(({product})=>product?.at(0)) ?? [];
 
-        const total_price = products?.reduce((prev, cur)=>{
-            return prev + (Number(cur?.price ?? 0) * cur.quantity)
+        const total_price = products?.reduce((prev, cur, i)=>{
+            return prev + (Number(cur?.price ?? 0) * (checkout?.cart?.at(0)?.items?.[i]?.quantity ?? 0))
         },0)
 
 
-        let customer: CUSTOMER | null = null
+        let customer: CUSTOMER | null = checkout?.customer?.at(0) ?? null
 
-        if(checkout?.customer_id) {
-
-            customer = await payments.customer?.getCustomer(checkout?.customer_id) ?? null
-        }
 
 
 

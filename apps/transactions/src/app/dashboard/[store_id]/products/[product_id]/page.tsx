@@ -1,7 +1,6 @@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/dialog'
 import { Separator } from '@/components/atoms/separator'
 import ProductForm from '@/components/organisms/product-forms/create'
-import payments from '@/lib/resources/payments'
 import { PageLayoutProps } from '@/lib/types'
 import { stringifyDatesInJSON } from '@/lib/utils'
 import { DialogClose } from '@radix-ui/react-dialog'
@@ -24,7 +23,10 @@ const getProductData = async (id?: string) => {
 
     try{
 
-        const product = await payments.product?.getProduct(id)
+        const product = await db.query.PRODUCT.findFirst({
+            where: (prod, {eq}) => eq(prod.id, id),
+            
+        })
 
         console.log("HERE IS THE PRODUCT::", product)
 

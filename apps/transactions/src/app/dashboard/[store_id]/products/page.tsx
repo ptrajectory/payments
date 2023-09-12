@@ -27,7 +27,6 @@ const getProducts = async (store_id: string) => {
     }
     catch (e)
     {
-    
         // TODO: deal with the error
         return []
     }

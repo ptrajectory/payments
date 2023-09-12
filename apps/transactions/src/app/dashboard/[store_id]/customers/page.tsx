@@ -10,9 +10,8 @@ import { Button } from '@tremor/react'
 import axios from 'axios'
 import { isString, isUndefined } from 'lodash'
 import { PlusIcon } from 'lucide-react'
-import React, { useCallback, useEffect, useReducer, useState } from 'react'
-import { CUSTOMER } from 'zodiac'
-import TestServerComponent from './testserver'
+import React, { useCallback, useEffect, useReducer } from 'react'
+import CreateCustomerForm from './components/create-customer-form'
 
 interface PageProps {
     params: Partial<{
@@ -89,7 +88,6 @@ function CustomerPage(props: PageProps) {
     }
 
     const handlePaginationChange = useCallback((state: PaginationState) => {
-        console.log("Pagination changed::", state)
         fetch_customers(state)
     }, [])   
 
@@ -104,13 +102,11 @@ function CustomerPage(props: PageProps) {
                 <span className="font-semibold text-xl">
                     Customers
                 </span>
-                    <Modal
-                        action='create'
-                        button_title='Create Customer'
-                        modal_title='Create Customer'
-                    >
-                        <CreateCustomer/>
-                    </Modal>
+                    <CreateCustomerForm
+                        onClose={()=>{
+                            fetch_customers()
+                        }}
+                    />
             </div>
 
             <div className="flex flex-col w-full">

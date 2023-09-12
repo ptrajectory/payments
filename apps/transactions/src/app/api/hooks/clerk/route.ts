@@ -7,7 +7,7 @@ import { NextResponse } from "next/server"
 
 
 
-export const GET = async (request: Request) => {
+export const POST = async (request: Request) => {
 
     
     const event: WebhookEvent = await request.json()
@@ -38,7 +38,9 @@ export const GET = async (request: Request) => {
                     "New User",
                     result.at(0)
                 )
-                return
+                return NextResponse.json(null, {
+                    status: 200
+                })
             };
             default:{
                 //TODO: don't know what to do here
