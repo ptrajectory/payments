@@ -2,9 +2,15 @@ import { MiddleWareFn } from "../handler";
 import { generate_dto } from "generators";
 import { verifyCheckoutEphemeralKey, verifyPublishableKey, verifySecretKey } from "../functions";
 import db from "db";
-import { EphemeralPaymentKeys } from "db/schema";
+import { EphemeralPaymentKeys, SELLER } from "db/schema";
 import { eq } from "drizzle-orm";
 import { isEmpty, isNull, isString, isUndefined } from "../cjs/lodash";
+import Clerk from "@clerk/clerk-sdk-node/esm/instance"
+
+
+const clerk = Clerk({
+    secretKey: process.env.CLERK_SECRET
+})
 
 
 
@@ -113,3 +119,40 @@ export const withEphemeralKey: MiddleWareFn = async (req, res, next) => {
 
 }
 
+
+export const clerkAuth: MiddleWareFn = async (req, res, next) => {
+
+
+    const clerk_session_id = req.headers?.["x-session-id"] as string
+
+    if(!isString(clerk_session_id) || isEmpty(clerk_session_id) ) return res.status(401).send(generate_dto(null, "Unauthorized", "error"))
+
+    try {
+        const session = await clerk.sessions.getSession(clerk_session_id)
+
+        const seller = await db.select({
+            id: SELLER.id
+        }).from(SELLER)
+        .where(
+            eq(SELLER.uid, session.userId)
+        )
+        const data = seller?.at(0)
+        if(data) {
+            // @ts-ignore 
+            req.id = data?.id
+            //@ts-ignore
+            req.uid = session.userId 
+
+            next()
+        }
+        else
+        {
+            return res.status(403).send(generate_dto(null, "Unauthorized", "error"))
+        }
+    }
+    catch (e)
+    {
+        return res.status(401).send(generate_dto(null, "Unauthorized", "error"))
+    }
+
+}

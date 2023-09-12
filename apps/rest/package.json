@@ -28,7 +28,9 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.12.5",
     "cookie-parser": "^1.4.6",
+    "cookies": "^0.8.0",
     "cors": "^2.8.5",
     "db": "workspace:*",
     "drizzle-orm": "^0.28.2",

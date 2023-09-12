@@ -51,4 +51,9 @@ export type AuthenticatedRequest = Request & {
     token: string
 }
 
+export type ClerkAuthenticatedRequest = Request & {
+    uid: string
+    id: string
+}
+
 export default handler
