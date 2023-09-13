@@ -12,7 +12,7 @@ const StorePaymentColumns: ColumnDef<PAYMENT & { created_at: Date, updated_at: D
         id: "created_at",
         accessorKey: "created_at",
         header: ({column}) => <DataTableColumnHeader column={column} title="Paid On" />,
-        cell: ({row}) => dayjs(row.getValue("amount")).format("MMM dd")
+        cell: ({row}) => dayjs(row.getValue("created_at")).format("MMM DD")
     },
     {
         id: "amount",

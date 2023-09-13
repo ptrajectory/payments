@@ -47,8 +47,8 @@ export default async function SuccessfulPayments(props: SuccessfulPaymentsProps)
         <SimpleDisplayTable
             title="Successful Payments"
             data={payments?.map((payment)=>({
-                id: payment.id,
-                value: `${payment.currency} ${payment.amount}`
+                id: `${payment.id?.slice(0,10)}...`,
+                value: `${payment.currency ?? "KES"} ${payment.amount}`
             }))}
             empty_message="No Successful Payments Yet!"
         />

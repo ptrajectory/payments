@@ -71,8 +71,6 @@ async function index(props: { params: { store_id: string, product_id: string } }
     const {params: { product_id }} = props
     const data = await getProductData(product_id)
 
-    console.log("HERE IS THE DATA::", data)
-
   return (
     <div className="flex flex-col w-full h-full pb-[200px]">
         <ProductPageHero
@@ -81,19 +79,6 @@ async function index(props: { params: { store_id: string, product_id: string } }
         <div className="flex flex-col w-full h-full space-y-3 p-5">
 
             <ProductPurchaseOverview/>
-
-
-            {/* <div className="flex flex-col w-full">
-                <span className="text-2xl font-semibold">
-                    Product Purchase overview
-                </span>
-                <LineChart
-                  data={chart_data}
-                  index='day'
-                  categories={['number_of_purchases', 'amount_purchased']}
-                  colors={['amber','cyan']}
-                />
-            </div> */}
 
 
         </div>

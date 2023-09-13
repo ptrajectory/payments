@@ -52,7 +52,7 @@ function CheckoutMainPageSection( props:{data:  Partial<{
                 <h3
                     className='text-2xl font-semibold text-black'
                 >
-                    { data?.checkout?.currency } { data?.price }
+                    { data?.checkout?.currency ?? "KES" } { data?.price }
                 </h3>
             </div>
 

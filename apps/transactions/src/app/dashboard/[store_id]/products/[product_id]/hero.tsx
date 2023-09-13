@@ -11,6 +11,7 @@ import EditProductForm from './edit-product-form'
 import { ArrowLeft } from 'lucide-react'
 import { useParams, useRouter } from "next/navigation"
 import Link from 'next/link'
+import GeneratePurchaseLink from './create-purchase-link'
 
 interface Props {
     total_sales: number 
@@ -83,6 +84,10 @@ function ProductPageHero(props:Partial<Props>) {
 
                         <EditProductForm
                             data={product}
+                        />
+
+                        <GeneratePurchaseLink
+                            product_id={product?.id ?? "no id"}
                         />
                 </div>
             </div>
