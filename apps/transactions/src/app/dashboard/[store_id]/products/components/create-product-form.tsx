@@ -5,6 +5,7 @@ import { Input } from "@/components/atoms/input"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/atoms/sheet"
 import { TextArea } from "@/components/atoms/textarea"
 import Upload from "@/components/atoms/upload"
+import { useToast } from "@/components/atoms/use-toast"
 import * as Form from "@radix-ui/react-form"
 import axios from "axios"
 import { useParams, useRouter } from "next/navigation"
@@ -15,17 +16,21 @@ import { Ref, useRef, useState } from "react"
 
 
 export default function CreateProductForm(){
+    const [isLoading, setLoading] = useState(false)
     const [image, setImage ] = useState<string>()
 
     const { refresh } = useRouter()
 
     const close_button_ref = useRef<any>(null)
 
+    const { toast } = useToast()
+
     const params = useParams()
 
     const store_id = params.store_id
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        setLoading(true)
         let data =  Object.fromEntries(new FormData(e.currentTarget))
         e.preventDefault()
 
@@ -42,12 +47,27 @@ export default function CreateProductForm(){
 
             close_button_ref?.current?.click()
 
+            toast({
+                title: "🎉 Product Created",
+                description: "Your Product has been saved.",
+                duration: 3000
+            })
+
             refresh()
 
         }
         catch (e)
         {
-            console.log(e)
+            toast({
+                title: "Oops!!",
+                description: "Something went wrong. Try again",
+                variant: "destructive",
+                duration: 3000
+            })
+        }
+        finally
+        {
+            setLoading(false)
         }
     }
 
@@ -117,7 +137,7 @@ export default function CreateProductForm(){
                             </Form.Label>
                             <Form.Control required asChild>
                                 <Input
-                                placeholder='Store Name (Required)'
+                                placeholder='Product Name (Required)'
                                 />
                             </Form.Control>
                             <span className="text-sm" >
@@ -183,7 +203,10 @@ export default function CreateProductForm(){
                     <div className="flex flex-row w-full items-center justify-start py-5">
                         <Form.Submit asChild
                         >
-                            <Button>
+                            <Button
+                                isLoading={isLoading}
+                                loadingText="Creating Product..."
+                            >
                                 Submit
                             </Button>
                         </Form.Submit>

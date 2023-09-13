@@ -1,11 +1,10 @@
 "use client"
-import { Card, DateRangePicker, DateRangePickerValue, LineChart, Title } from '@tremor/react'
-import React, { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
+import { DateRangePickerValue } from '@tremor/react'
+import React from 'react'
 import { isString } from 'lodash'
 import { useParams } from 'next/navigation'
-import { SkeletonBlock } from '@/layouts/skeletons'
 import axios from 'axios'
+import AppLineChart from '@/components/organisms/app-line-chart'
 
 interface ChartData {
     day: string,
@@ -14,20 +13,16 @@ interface ChartData {
 
 }
 
-function PurchaseVolumeChart() {
-  const [chart_data, set_chart_data] = useState<Array<ChartData>>([])
-  const [loading, setLoading] = useState(false)
-  const [currentDateRange, setCurrentDateRange ] = useState<DateRangePickerValue|undefined>({
-      from: new Date(),
-      to: new Date()
-  })
+interface Props {
+    initialData: Array<ChartData>
+}
+
+function PurchaseVolumeChart(props: Props) {
+  const { initialData } = props
 
   const query = useParams()
 
   const handleDailyPurchases = async (range?: DateRangePickerValue) => {
-    setLoading(true)
-    try {
-
         if(!isString(query?.store_id)) return
         const data = (await axios.get("/api/graphs/payments/purchase-volume", {
             params: {
@@ -37,51 +32,18 @@ function PurchaseVolumeChart() {
             }
         }))?.data?.data
 
-        console.log("HERE IS SOME CHART DATA::", data)
-
-        set_chart_data(data)
-
-    }
-    catch (e)
-    {
-        //TODO: deal with error later
-    }
-    finally{
-        setLoading(false)
-    }
+        return data
   }
 
-  useEffect(()=>{
-    handleDailyPurchases()
-  }, [])
 
-  return (
-    <div className="flex flex-col w-full space-y-2 h-full">
-        <div className="flex flex-row w-full items-center justify-start">
-            <DateRangePicker
-                onValueChange={(range)=>{
-                    setCurrentDateRange(range)
-                    handleDailyPurchases(range)
-                }}
-                value={currentDateRange}
-            />
-        </div>
-        <Card>
-            <Title>
-                Purchase Volume
-            </Title>
-            { 
-                loading ? <SkeletonBlock className='w-full h-[30vh]' /> :
-                <LineChart
-                    data={chart_data}
-                    index='day'
-                    categories={['Successful Payments', 'Failed Payments']}
-                    colors={['blue', 'red']}
-                />
-            }
-        </Card>
-    </div>
-  )
+  return <AppLineChart 
+    title="Purchase Volume"
+    lines={["Successful Payments", "Failed Payments"]}
+    colors={["blue", "red"]}
+    fetchFunction={handleDailyPurchases}
+    index="day"
+    initialData={initialData}
+  />
 }
 
 export default PurchaseVolumeChart

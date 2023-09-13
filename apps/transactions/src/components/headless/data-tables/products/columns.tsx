@@ -38,7 +38,7 @@ const ProductColumns: ColumnDef<PRODUCT & { created_at: Date, updated_at: Date }
         cell: ({row}) => (
             <div className="flex flex-row items-center justify-center relative rounded-md overflow-hidden w-10 h-10">
                 <Image
-                    src={row.getValue("image") ?? ""}
+                    src={row.getValue("image") ?? "/brand/placeholder_image.png"}
                     alt={row.getValue("id")}
                     fill
                     style={{

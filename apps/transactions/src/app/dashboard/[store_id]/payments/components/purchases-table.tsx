@@ -4,56 +4,17 @@ import CustomerPaymentColumns from '@/components/headless/data-tables/customers/
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
-import { PAYMENT as tPAYMENT } from 'zodiac'
+import { PAYMENT, PAYMENT as tPAYMENT } from 'zodiac'
 import StorePaymentColumns from './columns'
 import { useParams } from 'next/navigation'
 import { PaginationState } from '@tanstack/react-table'
+import AppTable from '@/components/organisms/app-table/app-table'
 
-const page_state = (state: any, action: {type: "pending" | "fullfilled" | "rejected", payload?: any})=>{
-
-    switch(action.type){
-        case "pending": {
-            return {
-                ...state,
-                loading: true,
-                rejected: false
-            }
-        }
-        case "rejected": {
-            return {
-                ...state,
-                loading: false,
-                rejected: true
-            }
-        }
-        case "fullfilled": {
-            return {
-                ...state,
-                loading: false,
-                rejected: false,
-                data: action.payload
-            }
-        }
-        default:
-            return state
-    }
-}
-
-export default function StorePaymentsTable() {
-    const [pageState, updater] = useReducer(page_state, {
-        data: []
-    })
-
+export default function StorePaymentsTable(props: { initialData: Array<PAYMENT> }) {
+    const { initialData } = props
     const params = useParams()
 
     const fetch_payments = async (pagination?: PaginationState) => {
-
-        updater({
-            type: "pending"
-        })
-
-        try{
-
             const results = (await axios.get("/api/payments", {
                 params: {
                     page: (pagination?.pageIndex ?? 0) + 1 ,
@@ -62,31 +23,11 @@ export default function StorePaymentsTable() {
                 }
             })).data
 
-            updater({
-                type: "fullfilled",
-                payload: results.data
-            })
-
-        }
-        catch (e)
-        {
-            console.log("SOmething went wrong")
-            updater({
-                type: "rejected"
-            })
-        }
-        
-
+            return results?.data
     }
 
 
-    const handlePaginationChange = useCallback((state: PaginationState) => {
-        fetch_payments(state)
-    }, [])  
-
-    useEffect(()=>{
-        fetch_payments()
-    },[])
+    
 
   return (
     <div className="flex flex-col w-full h-full space-y-5 ">
@@ -103,11 +44,10 @@ export default function StorePaymentsTable() {
             <div className="flex flex-col w-full h-full">
 
 
-                <DataTable
-                    data={pageState.data ?? []}
-                    loading={pageState.loading}
-                    columns={StorePaymentColumns}
-                    onPaginationStateChanged={handlePaginationChange}
+                <AppTable
+                    ColumnDefinitions={StorePaymentColumns}
+                    fetchFunction={fetch_payments}
+                    initialTableData={initialData}
                 />
                 
 

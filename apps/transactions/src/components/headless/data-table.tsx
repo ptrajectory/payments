@@ -40,6 +40,7 @@ interface DataTableProps<TData, TValue> {
   onStateChanged?: (state: TableState) => void
   state?: TableState
   paginationEnabled?: boolean
+  error?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -49,7 +50,8 @@ export function DataTable<TData, TValue>({
   loading,
   onStateChanged,
   state,
-  paginationEnabled
+  paginationEnabled,
+  error
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState(state?.rowSelection ?? {})
   const [columnVisibility, setColumnVisibility] =
@@ -112,7 +114,7 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody className="relative" >
             {
-              loading && <div className=" absolute flex flex-row w-full h-full items-center justify-center bg-white opacity-60">
+              loading && <div className=" absolute flex flex-row w-full h-full items-center justify-center bg-slate-100 opacity-80">
                 <CogIcon className="animate-spin" />
               </div>
             }
@@ -138,7 +140,9 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {
+                    error ? "Oops!! Something went wrong." : "No results."
+                  }
                 </TableCell>
               </TableRow>
             )}

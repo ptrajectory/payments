@@ -9,21 +9,24 @@ import Upload from "@/components/atoms/upload"
 import { useState } from "react"
 import axios from "axios"
 import { useParams, useRouter } from "next/navigation"
+import { useToast } from "@/components/atoms/use-toast"
 
 
 
 export default function StoreCreateForm(){
+    const [isLoading, setIsLoading] = useState(false)
     const [image, setImage ] = useState<string>()
     const { back, push } = useRouter()
+    const { toast } = useToast()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        setIsLoading(true)
         let data =  Object.fromEntries(new FormData(e.currentTarget))
         e.preventDefault()
-        console.log("Here is the data::", data)
     
     
         try {
-            const result = (await axios.post("/api/stores", {
+            (await axios.post("/api/stores", {
                 ...data,
                 image
             })).data
@@ -33,7 +36,15 @@ export default function StoreCreateForm(){
         }
         catch (e)
         {
-            console.log(e)
+            toast({
+                title: "Oops!",
+                description: "Something went wrong. Try again",
+                variant: "destructive",
+                duration: 3000
+            })
+        }
+        finally{
+            setIsLoading(false)
         }
     
       }
@@ -139,7 +150,7 @@ export default function StoreCreateForm(){
                     <div className="flex flex-row w-full items-center justify-start py-5">
                         <Form.Submit asChild
                         >
-                        <Button>
+                        <Button isLoading={isLoading} loadingText="Creating Store..." >
                             Submit
                         </Button>
                         </Form.Submit>

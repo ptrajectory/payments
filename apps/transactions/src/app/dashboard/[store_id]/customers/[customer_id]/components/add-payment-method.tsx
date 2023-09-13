@@ -4,10 +4,11 @@ import { Button } from "@/components/atoms/button"
 import { Input } from "@/components/atoms/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/atoms/select"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/atoms/sheet"
+import { useToast } from "@/components/atoms/use-toast"
 import * as Form from "@radix-ui/react-form"
 import axios from "axios"
 import { useParams, useRouter } from "next/navigation"
-import { Ref, useRef } from "react"
+import { Ref, useRef, useState } from "react"
 import { CUSTOMER } from "zodiac"
 
 
@@ -17,6 +18,8 @@ interface Props {
 }
 
 export default function AddPaymentMethodForm(props: Props ){
+    const [isLoading, setLoading ] = useState(false)
+    const { toast } = useToast()
     const { onClose } = props
 
     const close_button_ref = useRef<any>(null)
@@ -26,13 +29,14 @@ export default function AddPaymentMethodForm(props: Props ){
     const store_id = params.store_id
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        setLoading(true)
         let data =  Object.fromEntries(new FormData(e.currentTarget))
         e.preventDefault()
         
 
         try {
 
-            const result = (await axios.post(`/api/payment_methods`, {
+            (await axios.post(`/api/payment_methods`, {
                 ...data,
                 store_id,
                 customer_id: params.customer_id
@@ -40,13 +44,28 @@ export default function AddPaymentMethodForm(props: Props ){
 
             close_button_ref?.current?.click()
 
+            toast({
+                title: "Payment Method added",
+                description: "Payment Method added to customer",
+                duration: 3000
+            })
+
             onClose()
           
 
         }
         catch (e)
         {
-            console.log(e)
+            toast({
+                title: "Oops!",
+                description: "Something went wrong. Try again.",
+                variant: "destructive",
+                duration: 3000
+            })
+        }
+        finally
+        {
+            setLoading(false)
         }
     }
 
@@ -132,7 +151,10 @@ export default function AddPaymentMethodForm(props: Props ){
                     <div className="flex flex-row w-full items-center justify-start py-5">
                         <Form.Submit asChild
                         >
-                            <Button>
+                            <Button
+                                isLoading={isLoading}
+                                loadingText="Adding Payment Method"
+                            >
                                 Add
                             </Button>
                         </Form.Submit>

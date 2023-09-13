@@ -1,8 +1,18 @@
-import React from 'react'
-import PurchaseVolumeChart from './components/purchase-volume-chart'
-import StorePaymentsTable from './components/purchases-table'
+import React, { Suspense } from 'react'
+import PurchaseTableServerWrapper from './components/purchase-table-server-wrapper'
+import { SkeletonBlock } from '@/layouts/skeletons'
+import PurchaseVolumeServerWrapper from './components/purchase-volume-wrapper'
 
-function PaymentsPage() {
+interface PaymentsPageProps {
+  params: {
+    store_id: string
+  }
+}
+
+function PaymentsPage(props: PaymentsPageProps) {
+
+  const { store_id } = props.params
+  
   return (
     <div className="flex flex-col w-full h-full items-start justify-start p-5 pb-[200px]">
 
@@ -14,8 +24,24 @@ function PaymentsPage() {
         </span>
 
         <div className="flex flex-col w-full py-5 space-y-5">
-            <PurchaseVolumeChart/>
-            <StorePaymentsTable/>
+            <Suspense
+              fallback={<SkeletonBlock
+                className='w-full h-[60vh]'
+              />}
+            >
+              <PurchaseVolumeServerWrapper
+                store_id={store_id}
+              />
+            </Suspense>
+            <Suspense
+              fallback={<SkeletonBlock
+                className='w-full h-[40vh]'
+              />}
+            >
+              <PurchaseTableServerWrapper
+                store_id={store_id}
+              />
+            </Suspense>
         </div>
     </div>
   )

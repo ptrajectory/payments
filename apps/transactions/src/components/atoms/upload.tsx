@@ -135,7 +135,7 @@ function Upload(props: UploadProps) {
                             <Image
                              alt={`Upload ${i}`}
                              fill 
-                             src={image}
+                             src={image ?? '/brand/placeholder_image.png'}
                              style={{
                                 objectFit: 'cover'
                              }}

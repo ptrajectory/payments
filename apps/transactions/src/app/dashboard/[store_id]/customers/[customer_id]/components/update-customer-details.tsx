@@ -3,10 +3,11 @@
 import { Button } from "@/components/atoms/button"
 import { Input } from "@/components/atoms/input"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/atoms/sheet"
+import { useToast } from "@/components/atoms/use-toast"
 import * as Form from "@radix-ui/react-form"
 import axios from "axios"
 import { useParams, useRouter } from "next/navigation"
-import { Ref, useRef } from "react"
+import { Ref, useRef, useState } from "react"
 import { CUSTOMER } from "zodiac"
 
 
@@ -18,6 +19,8 @@ interface UpdateCustomerProps {
 
 
 export default function UpdateCustomerForm(props: UpdateCustomerProps){
+    const [isLoading, setLoading] = useState(false)
+    const {toast} = useToast()
     const { refresh } = useRouter()
     const { data: customer } = props
 
@@ -28,10 +31,9 @@ export default function UpdateCustomerForm(props: UpdateCustomerProps){
     const store_id = params.store_id
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        setLoading(true)
         let data =  Object.fromEntries(new FormData(e.currentTarget))
         e.preventDefault()
-
-        console.log("CUSTOMER::", customer)
         
 
         try {
@@ -49,7 +51,16 @@ export default function UpdateCustomerForm(props: UpdateCustomerProps){
         }
         catch (e)
         {
-            console.log(e)
+            toast({
+                title: "Oops!!",
+                description: "Something went wrong.",
+                variant: "destructive",
+                duration: 3000
+            })
+        }
+        finally
+        {
+            setLoading(false)
         }
     }
 
@@ -151,7 +162,10 @@ export default function UpdateCustomerForm(props: UpdateCustomerProps){
                     <div className="flex flex-row w-full items-center justify-start py-5">
                         <Form.Submit asChild
                         >
-                            <Button>
+                            <Button
+                                isLoading={isLoading}
+                                loadingText="Updating Customer Details"
+                            >
                                 Update
                             </Button>
                         </Form.Submit>

@@ -66,7 +66,8 @@ function ProductPageHero(props:Partial<Props>) {
                     </span>
                     <div className="flex flex-row items-center justify-center relative w-12 h-12 rounded-sm overflow-hidden">
                         <Image
-                            src={product?.image ?? ""}
+                            sizes='48px'
+                            src={product?.image ?? "/brand/placeholder_image.png"}
                             alt='Camera Image'
                             fill 
                             style={{

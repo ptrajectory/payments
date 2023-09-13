@@ -1,18 +1,10 @@
 import React, { Suspense } from 'react'
-import dayjs from "dayjs"
-import db from "db"
-import { and, eq, gt, inArray, lt, sql } from 'db/utils'
-import { CART, CART_ITEM, CHECKOUT, CUSTOMER, PAYMENT, PRODUCT } from 'db/schema'
-import { stringifyDatesInJSON } from '@/lib/utils'
-import { List, ListItem } from '@tremor/react'
-import { PAYMENT as tPAYMENT, CUSTOMER as tCUSTOMER, PRODUCT as tPRODUCT } from 'zodiac'
-import HomeDailyPurchases from '@/components/organisms/charts/home-daily-purchases'
 import SuccessfulPayments from './components/successful-payments'
 import FailedPayments from './components/failed-payments'
 import MostPurchasedProducts from './components/most-purchased-products'
 import RecentCustomers from './components/recent-customers'
 import { SkeletonBlock } from '@/layouts/skeletons'
-// import HomeDailyPurchases from '@/components/organisms/charts/home-daily-purchases'
+import DailyPurchaseData from './components/daily-purchase-data'
 
 
 
@@ -44,7 +36,17 @@ async function StorePage(props: {params: {store_id: string}}) {
                         </div>
 
                         <div className="flex flex-row w-[60%] ">
-                            <HomeDailyPurchases/>
+                            <Suspense
+                                fallback={
+                                    <SkeletonBlock
+                                        className='w-full h-[40vh]'
+                                    />
+                                }
+                            >
+                                <DailyPurchaseData
+                                    store_id={store_id}
+                                />
+                            </Suspense>
                         </div>
 
 

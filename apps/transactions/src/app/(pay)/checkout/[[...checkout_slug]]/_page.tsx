@@ -27,9 +27,10 @@ function CheckoutMainPageSection( props:{data:  Partial<{
 
                 <div className="flex flex-row items-center justify-center relative shadow-sm w-12 h-12 rounded-full overflow-hidden">
                     <Image
-                        src={data?.store?.image ?? ""}
+                        src={data?.store?.image ?? "/brand/placeholder_image.png"}
                         alt={data?.store?.name ?? "store image"}
                         fill 
+                        sizes="48px"
                         style={{
                             objectFit: 'cover'
                         }}
@@ -63,7 +64,8 @@ function CheckoutMainPageSection( props:{data:  Partial<{
                             <div key={product?.id} className="flex flex-row items-start p-2 justify-start rounded-sm border-[1px]  hover:shadow-sm w-full space-x-5">
                                 <div className="flex flex-col items-center justify-center relative rounded-md overflow-hidden w-10 h-10">
                                     <Image
-                                        src={product?.image ?? ""}
+                                        src={product?.image ?? "/brand/placeholder_image.png"} 
+                                        sizes="40px"
                                         alt={product?.name ?? "product"}
                                         fill
                                         style={{

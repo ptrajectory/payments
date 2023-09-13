@@ -5,6 +5,7 @@ import { Input } from "@/components/atoms/input"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/atoms/sheet"
 import { TextArea } from "@/components/atoms/textarea"
 import Upload from "@/components/atoms/upload"
+import { useToast } from "@/components/atoms/use-toast"
 import * as Form from "@radix-ui/react-form"
 import axios from "axios"
 import { useParams, useRouter } from "next/navigation"
@@ -19,8 +20,10 @@ interface EditProductProps {
 }
 
 export default function EditProductForm(props: EditProductProps){
+    const [isLoading, setLoading] = useState(false)
     const { data } = props
     const [image, setImage ] = useState<string>()
+    const { toast } = useToast()
 
     const { refresh } = useRouter()
 
@@ -31,6 +34,7 @@ export default function EditProductForm(props: EditProductProps){
     const store_id = params.store_id
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        setLoading(true)
         let data =  Object.fromEntries(new FormData(e.currentTarget))
         e.preventDefault()
 
@@ -44,13 +48,22 @@ export default function EditProductForm(props: EditProductProps){
             })).data
 
             close_button_ref?.current?.click()
-
+            
             refresh()
 
         }
         catch (e)
         {
-            console.log(e)
+            toast({
+                title: "Oops!",
+                description: "Something went wrong. Try again.",
+                variant: "destructive",
+                duration: 3000
+            })
+        }
+        finally
+        {
+            setLoading(false)
         }
     }
 
@@ -189,7 +202,10 @@ export default function EditProductForm(props: EditProductProps){
                     <div className="flex flex-row w-full items-center justify-start py-5">
                         <Form.Submit asChild
                         >
-                            <Button>
+                            <Button
+                                isLoading={isLoading}
+                                loadingText="Updating Product"
+                            >
                                 Submit
                             </Button>
                         </Form.Submit>

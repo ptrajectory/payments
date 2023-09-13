@@ -3,22 +3,20 @@
 import { Button } from "@/components/atoms/button"
 import { Input } from "@/components/atoms/input"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/atoms/sheet"
+import { useToast } from "@/components/atoms/use-toast"
 import * as Form from "@radix-ui/react-form"
 import axios from "axios"
-import { useParams } from "next/navigation"
-import { Ref, useRef } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { Ref, useRef, useState } from "react"
 
 
 
 
-interface CreateCustomerProps {
-    onClose: ()=>void
-}
 
-
-export default function CreateCustomerForm(props: CreateCustomerProps){
-
-    const { onClose } = props
+export default function CreateCustomerForm(){
+    const [isLoading, setLoading] = useState(false)
+    const { toast } = useToast()
+    const { refresh } = useRouter()
 
     const close_button_ref = useRef<any>(null)
 
@@ -27,6 +25,7 @@ export default function CreateCustomerForm(props: CreateCustomerProps){
     const store_id = params.store_id
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        setLoading(true)
         let data =  Object.fromEntries(new FormData(e.currentTarget))
         e.preventDefault()
 
@@ -34,19 +33,34 @@ export default function CreateCustomerForm(props: CreateCustomerProps){
 
         try {
 
-            const result = (await axios.post("/api/customers", {
+            (await axios.post("/api/customers", {
                 ...data,
                 store_id
             })).data
 
             close_button_ref?.current?.click()
 
-            onClose()
+            toast({
+                title: "🎉 Customer Created",
+                description: "The new customer has been added",
+                duration: 3000
+            })
+
+            refresh()
 
         }
         catch (e)
         {
-            console.log(e)
+            toast({
+                title: "Oops!",
+                description: "Something went wrong. Try again",
+                variant: "destructive",
+                duration: 3000
+            })
+        }
+        finally
+        {
+            setLoading(false)
         }
     }
 
@@ -145,7 +159,10 @@ export default function CreateCustomerForm(props: CreateCustomerProps){
                     <div className="flex flex-row w-full items-center justify-start py-5">
                         <Form.Submit asChild
                         >
-                            <Button>
+                            <Button
+                                isLoading={isLoading}
+                                loadingText="Creating Customer"
+                            >
                                 Submit
                             </Button>
                         </Form.Submit>
