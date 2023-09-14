@@ -8,9 +8,15 @@ import { CUSTOMER } from "db/schema";
 const get_recent_customers = async (store_id: string) => {
 
     try {
+        const store = await db.query.STORE.findFirst({
+            where: (str, {eq}) => eq(str.id, store_id),
+            columns: {
+                environment: true 
+            }
+        })
 
         const customers = await db.query.CUSTOMER.findMany({
-            where: (cus, { eq, and }) => eq(cus.store_id, store_id),
+            where: (cus, { eq, and }) => and(eq(cus.store_id, store_id), eq(cus.environment, store?.environment)),
             limit: 5,
             orderBy: CUSTOMER.created_at,
             columns: {

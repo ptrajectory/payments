@@ -3,8 +3,8 @@ import { auth } from "@clerk/nextjs"
 import { generate_dto, generate_unique_id } from "generators"
 import { isEmpty, isNull, isString } from "lodash"
 import { NextResponse } from "next/server"
-import { eq } from "db/utils"
-import { PRODUCT } from "db/schema"
+import { and, eq } from "db/utils"
+import { PRODUCT, STORE } from "db/schema"
 import { product as schema } from "zodiac"
 
 
@@ -58,20 +58,20 @@ export const GET = async (request: Request, props:{params: { products_slug: Arra
 
     try {
 
-        const products = await db.query.PRODUCT.findMany({
-            where: eq(PRODUCT.store_id, store_id),
-            orderBy: PRODUCT.created_at,
-            columns: {
-                id: true,
-                name: true,
-                image: true,
-                description: true,
-                price: true,
-                store_id: true
-            },
-            limit: Number(size),
-            offset: (Number(page) - 1) * Number(size)
-        })
+        const products = await (await db.select({
+            id: PRODUCT.id,
+            name: PRODUCT.name,
+            price: PRODUCT.price,
+            image: PRODUCT.image,
+            created_at: PRODUCT.created_at,
+            store_id: PRODUCT.store_id,
+            description: PRODUCT.description
+        }).from(PRODUCT)
+        .innerJoin(STORE, eq(STORE.id, PRODUCT.store_id))
+        .where(and(eq(STORE.id, store_id), eq(STORE.environment, PRODUCT.environment)))
+        .orderBy(PRODUCT.created_at)
+        .limit(Number(size))
+        .offset( (Number(page) - 1) * Number(size) ))
 
         return NextResponse.json(generate_dto(products, "success", "error"), {
             status: 200

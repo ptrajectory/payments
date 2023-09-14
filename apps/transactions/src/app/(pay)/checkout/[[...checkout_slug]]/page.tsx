@@ -77,11 +77,9 @@ export default async function Page(props: { params: { checkout_slug: Array<strin
 
     const data = await getCheckoutData(checkout_id)
 
-    console.log("INCOMING DATA::", data)
-
     return (
         <CheckoutMainPageSection
-            data={data}
+            data={data as any}
         />
     )
 

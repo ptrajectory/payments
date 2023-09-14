@@ -4,6 +4,7 @@ import db from "db";
 import { CUSTOMER, PRODUCT, STORE } from "db/schema";
 import { eq, sql } from "db/utils";
 import { AppIcon } from "@/lib/icons";
+import { Badge } from "@tremor/react";
 
 interface StoreCardProps {
     id: string
@@ -12,8 +13,6 @@ interface StoreCardProps {
 
 async function getStoreData (id: string) {
 
-    console.log("THE STORE ID::", id)
-
     try {
         const result = await db.select({
             id: STORE.id,
@@ -21,7 +20,8 @@ async function getStoreData (id: string) {
             customers: sql<number>`count(distinct ${CUSTOMER.id})`.mapWith(Number),
             products: sql<number>`count(distinct ${PRODUCT.id})`.mapWith(Number),
             image: STORE.image,
-            description: STORE.description
+            description: STORE.description,
+            environment: STORE.environment
         })
         .from(STORE)
         .leftJoin(PRODUCT, eq(PRODUCT.store_id, STORE.id))
@@ -72,6 +72,13 @@ export default async function StoreCard(props: StoreCardProps){
                         <span>
                             {store?.products} products
                         </span>
+                    </div>
+                    <div className="flex flex-row items-center justify-start py-3">
+                        <Badge size="lg" >
+                            {
+                                store?.environment?.toUpperCase()
+                            }
+                        </Badge>
                     </div>
                 </div>
             </div>

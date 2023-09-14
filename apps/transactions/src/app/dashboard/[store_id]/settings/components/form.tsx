@@ -11,6 +11,7 @@ import axios from "axios"
 import { useParams, useRouter } from "next/navigation"
 import { STORE } from "zodiac"
 import { Switch } from "@/components/atoms/switch"
+import { toast, useToast } from "@/components/atoms/use-toast"
 
 
 interface StoreEditFormProps {
@@ -21,6 +22,7 @@ export default function StoreEditForm(props: StoreEditFormProps){
     const { data } = props
     const [image, setImage ] = useState<string>()
     const { back, push, refresh } = useRouter()
+    const {} = useToast()
 
     const { store_id } = useParams()
 
@@ -50,12 +52,22 @@ export default function StoreEditForm(props: StoreEditFormProps){
             const result = (await axios.put(`/api/stores/${store_id}`, {
                 environment: data?.environment === "testing" ? "production" : "testing"
             })).data
-    
+            toast({
+                title: "Done",
+                description: data?.environment === "testing" ? "🎉 You are now set for production." : "Testing with confidence is important.",
+                duration: 3000,
+            })
             refresh()
     
         }
         catch (e)
         {
+            toast({
+                title: "Oops!",
+                description: "Something went wrong",
+                duration: 3000,
+                variant: "destructive"
+            })
             console.log(e)
         }
     }
@@ -189,7 +201,8 @@ export default function StoreEditForm(props: StoreEditFormProps){
                         Test with confidence in test mode.
                     </span>
                     <Switch
-                        onChange={()=>handleToggleEnvironment()}
+                        onCheckedChange={handleToggleEnvironment}
+                        onChange={handleToggleEnvironment}
                         defaultChecked={(data as any)?.environment === "testing"}
                     />
                </div>

@@ -2,28 +2,27 @@
 
 import { stringifyDatesInJSON } from "@/lib/utils"
 import db from "db"
-import { CUSTOMER } from "db/schema"
+import { CUSTOMER, PRODUCT, STORE } from "db/schema"
 import ProductsClientTableWrapper from "./client-table-wrapper"
+import { and, eq } from "db/utils"
 
 
 async function getStoreProductsData(store_id: string) {
 
     try {
-        const products = (await db.query.PRODUCT.findMany({
-            where: (prod, { eq, and }) => and(
-                eq(prod.store_id, store_id),
-            ),
-            orderBy: CUSTOMER.created_at,
-            columns: {
-                id: true,
-                name: true,
-                price: true,
-                image: true,
-                created_at: true
-            },
-            limit: 11,
-            offset: 0
-        })) ?? []
+
+        const products = (await db.select({
+            id: PRODUCT.id,
+            name: PRODUCT.name,
+            price: PRODUCT.price,
+            image: PRODUCT.image,
+            created_at: PRODUCT.created_at
+        }).from(PRODUCT)
+        .innerJoin(STORE, eq(STORE.id, PRODUCT.store_id))
+        .where(and(eq(STORE.id, store_id), eq(STORE.environment, PRODUCT.environment)))
+        .orderBy(PRODUCT.created_at)
+        .limit(10)
+        .offset(0)) ?? []
 
         return stringifyDatesInJSON(products)
 

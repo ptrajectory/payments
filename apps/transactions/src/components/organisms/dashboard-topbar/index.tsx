@@ -3,7 +3,9 @@ import Logo from '@/components/atoms/logo'
 import { UserButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
+import StoreDetails from './store-details';
+import { SkeletonBlock } from '@/layouts/skeletons';
 
 interface DashboardProps {
   store_id?: string
@@ -12,6 +14,7 @@ interface DashboardProps {
 }
 
 function DashboardTopBar(props: DashboardProps) {
+  console.log(props)
   const query = useParams()
   const [scrolled, setScrolled] = useState(false)
   const { push } = useRouter()
@@ -43,11 +46,9 @@ function DashboardTopBar(props: DashboardProps) {
           <span className="text-2xl text-gray-200 ">
             /
           </span>
-          <h4 className="text-md font-medium">
-            {
-              query?.store_id
-            }
-          </h4>
+            <StoreDetails
+              store_id={props.store_id}
+            />
         </div>
 
         <div className="flex flex-row items-center justify-end">

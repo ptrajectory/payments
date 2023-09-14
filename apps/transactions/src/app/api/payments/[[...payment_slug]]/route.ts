@@ -1,7 +1,8 @@
 import { stringifyDatesInJSON } from "@/lib/utils"
 import { auth } from "@clerk/nextjs"
 import db from "db"
-import { PAYMENT } from "db/schema"
+import { PAYMENT, STORE } from "db/schema"
+import { and, eq, ne } from "db/utils"
 import { generate_dto } from "generators"
 import { isEmpty, isNull, isString, isUndefined } from "lodash"
 import { NextResponse } from "next/server"
@@ -72,23 +73,24 @@ export const GET = async  (request: Request,
     if(!isEmpty(store_id)) {
 
         try {
-            const payments = (await db.query.PAYMENT.findMany({
-                where: (pm, {eq}) => eq(pm.store_id, store_id),
-                columns: {
-                    id: true,
-                    status: true,
-                    created_at: true,
-                    amount: true
-                },
-                with: {
-                    payment_method: true,
-                    customer: true,
-                    checkout: true
-                },
-                orderBy: PAYMENT.created_at,
-                limit: Number(size),
-                offset: ( Number(page) - 1 ) * Number(size)
-            })) ?? []
+            const payments = (await db.select({
+                id: PAYMENT.id,
+                status: PAYMENT.status,
+                created_at: PAYMENT.created_at,
+                amount: PAYMENT.amount
+            }).from(PAYMENT)
+            .innerJoin(STORE, eq(STORE.id, PAYMENT.store_id))
+            .where(and(
+                eq(STORE.id, store_id),
+                eq(PAYMENT.environment, STORE.environment),
+                ne(PAYMENT.status, "PROCESSING")
+            ))
+            .limit(Number(size))
+            .offset( 
+
+                (Number(page) - 1) * Number(size)
+
+             )) ?? []
 
             return NextResponse.json(generate_dto(stringifyDatesInJSON(payments), "Success", "success"))
 

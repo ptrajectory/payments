@@ -12,6 +12,7 @@ export default function CheckoutPayForm (props: { pay: number | null, checkout_i
 {
     const { pay, checkout_id } = props
     const [isLoading, setLoading] = useState(false)
+    const [customer_id, setCustomerId] = useState("")
     const { toast } = useToast()
     const { push } = useRouter() // TODO: Redirect to dashboard for now
 
@@ -22,8 +23,11 @@ export default function CheckoutPayForm (props: { pay: number | null, checkout_i
 
             const payment = (await axios.post("/api/checkout/pay", {
                 ...data,
-                checkout_id
+                checkout_id,
+                customer_id
             })).data.data
+
+            setCustomerId(payment.customer_id ?? undefined)
 
             toast({
                 title: "Check your phone",

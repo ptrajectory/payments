@@ -73,23 +73,18 @@ export const GET = async  (request: Request,
 
 
     try {
-        const customers = await db.query.CUSTOMER.findMany({
-            where: (cus, { eq, and }) => and(
-                eq(cus.store_id, store_id),
-            ),
-            orderBy: CUSTOMER.created_at,
-            columns: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                email: true,
-                created_at: true
-            },
-            limit: Number(size),
-            offset: (Number(page) - 1) * Number(size)
-        })
-
-        console.log("CUSTOMERS::", customers)
+        const customers = await db.select({
+            id: CUSTOMER.id,
+            first_name: CUSTOMER.first_name,
+            last_name: CUSTOMER.last_name,
+            email: CUSTOMER.email,
+            created_at: CUSTOMER.created_at
+        }).from(CUSTOMER)
+        .innerJoin(STORE, eq(STORE.id, CUSTOMER.store_id))
+        .where(and(eq(STORE.id, store_id), eq(STORE.environment, CUSTOMER.environment)))
+        .orderBy(CUSTOMER.created_at)
+        .limit(Number(size))
+        .offset((Number(page)  - 1) * Number(size))
 
         return NextResponse.json(generate_dto(customers || [], "success", "success"), {
             status: 200

@@ -4,7 +4,7 @@ import { getAllDaysBetweenDates, get_today_end, get_today_start, isSameDate, isS
 import db from "db"
 import { DateRangePickerValue } from "@tremor/react"
 import { PAYMENT } from "db/schema"
-import { and, gt, lt } from "db/utils"
+import { and, eq, gt, lt } from "db/utils"
 import { PAYMENT as tPAYMENT } from "zodiac"
 import dayjs from "dayjs"
 
@@ -18,6 +18,13 @@ export const fetch_home_daily_purchases_chart_data= async (store_id: string, ran
 
     try {
 
+        const store = await db.query.STORE.findFirst({
+            where: (str, {eq}) => eq(str.id, store_id),
+            columns: {
+                environment: true 
+            }
+        })
+
         // vvalidate the start and end dates
         const { from = get_today_start().toISOString(), to = get_today_end().toISOString() } = range ? range : {}
     
@@ -26,7 +33,9 @@ export const fetch_home_daily_purchases_chart_data= async (store_id: string, ran
         let all_payments: Array<tPAYMENT & { created_at?: string }> | null = (await db.select().from(PAYMENT).where(
             and(
                 gt(PAYMENT.created_at, new Date(from)),
-                lt(PAYMENT.created_at, new Date(to))
+                lt(PAYMENT.created_at, new Date(to)),
+                eq(PAYMENT.environment, store?.environment),
+                eq(PAYMENT.store_id, store_id)
             ),
         )) ?? null
     

@@ -1,33 +1,33 @@
 "use server"
 
 import db from "db"
-import { PAYMENT } from "db/schema"
+import { PAYMENT, STORE } from "db/schema"
 import StorePaymentsTable from "./purchases-table"
+import { and, eq, ne } from "db/utils"
 
 
 
 async function getPurchaseTableData(store_id: string){
 
     try {
-        const payments = (await db.query.PAYMENT.findMany({
-            where: (pm, {eq}) => eq(pm.store_id, store_id),
-            columns: {
-                id: true,
-                status: true,
-                created_at: true,
-                amount: true
-            },
-            with: {
-                payment_method: true,
-                customer: true,
-                checkout: true
-            },
-            orderBy: PAYMENT.created_at,
-            limit: 11,
-            offset: 0
-        })) ?? []
 
-        return payments
+        const payments = await db.select({
+            id: PAYMENT.id,
+            status: PAYMENT.status,
+            created_at: PAYMENT.created_at,
+            amount: PAYMENT.amount
+        }).from(PAYMENT)
+        .innerJoin(STORE, eq(STORE.id, PAYMENT.store_id))
+        .where(and(
+            eq(STORE.id, store_id),
+            eq(PAYMENT.environment, STORE.environment),
+            ne(PAYMENT.status, "PROCESSING")
+        ))
+        .limit(10)
+        .offset(0)
+        
+
+        return payments ?? []
     }
     catch (e)
     {

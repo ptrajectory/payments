@@ -10,10 +10,18 @@ const get_payments = async (store_id: string) => {
 
     try {   
 
+        const store = await db.query.STORE.findFirst({
+            where: (str, {eq}) => eq(str.id, store_id),
+            columns: {
+                environment: true 
+            }
+        })
+
         const payments = await db.query.PAYMENT.findMany({
             where: (pms, { eq, and }) => and(
                 eq(pms.store_id, store_id),
-                eq(pms.status, "SUCCESS")
+                eq(pms.status, "SUCCESS"),
+                eq(pms.environment, store?.environment)
             ),
             orderBy: PAYMENT.created_at,
             limit: 5,

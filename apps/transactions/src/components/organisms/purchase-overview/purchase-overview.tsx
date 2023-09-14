@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 import { get_today_end, get_today_start } from '@/lib/utils'
 import { DateRangePicker, DateRangePickerProps, DateRangePickerValue, LineChart } from '@tremor/react'

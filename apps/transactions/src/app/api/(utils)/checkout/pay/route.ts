@@ -55,7 +55,7 @@ export const POST = async (req: Request) => {
         const { customer_id, email, first_name, last_name } = parsed.data
 
         let customer = null
-
+        let payment_method = null
         if(email && first_name && last_name ){
 
             customer = await temporaryClient.customers.create({
@@ -64,20 +64,28 @@ export const POST = async (req: Request) => {
                 last_name
             })
 
+            payment_method = await temporaryClient.paymentMethods.create({
+                customer_id: customer?.id,
+                is_default: true,
+                phone_number: parsed.data.phone_number,
+                type: "MPESA" // TODO: update later
+            })
+
         }
 
-        if(customer?.id || customer_id) {
+        if(customer?.id || ((customer_id?.length ?? 0) > 3)) {
 
             console.log("HERE us ths customer", customer)
 
             const cart = await temporaryClient.carts.update((checkout?.cart as any)?.id as string, {
-                customer_id: customer_id ?? customer?.id ?? undefined
+                customer_id: customer?.id ?? customer_id ?? undefined
             })
 
             console.log("HEre is the cart::",cart)
 
             const ck = await temporaryClient.checkouts.update(checkout?.id as string, {
-                customer_id: customer_id ?? customer?.id ?? undefined
+                customer_id: customer?.id ?? customer_id ?? undefined,
+                payment_method_id: payment_method?.id,
             });
 
             console.log("Here is the checkout::", ck)
@@ -89,7 +97,7 @@ export const POST = async (req: Request) => {
             amount: total,
             phone_number: parsed.data.phone_number,
             checkout_id: checkout?.id,
-            customer_id: customer_id ?? customer?.id ?? undefined
+            customer_id: customer?.id ?? customer_id ?? undefined
         })
 
         return NextResponse.json(generate_dto(payment, "success", "success"), {

@@ -5,7 +5,7 @@ import { isNull, isString, isUndefined } from "lodash"
 import { NextResponse } from "next/server"
 import { CUSTOMER, PRODUCT, SELLER, STORE } from "db/schema"
 import { SELLER as tSELLER, store as schema } from "zodiac"
-import { eq, sql } from "db/utils"
+import { and, eq, sql } from "db/utils"
 
 
 
@@ -41,13 +41,14 @@ export const GET = async (request: Request, {params}:{params: { store_slug: Arra
                 customers: sql<number>`count(distinct ${CUSTOMER.id})`.mapWith(Number),
                 products: sql<number>`count(distinct ${PRODUCT.id})`.mapWith(Number),
                 image: STORE.image,
-                description: STORE.description
+                description: STORE.description,
+                environment: STORE.environment
             })
             .from(STORE)
-            .innerJoin(PRODUCT, eq(PRODUCT.store_id, STORE.id))
-            .innerJoin(CUSTOMER, eq(CUSTOMER.store_id, STORE.id))
-            .innerJoin(SELLER, eq(SELLER.id,  STORE.seller_id))
-            .where(eq(SELLER.uid, userId))
+            .leftJoin(PRODUCT, eq(PRODUCT.store_id, STORE.id))
+            .leftJoin(CUSTOMER, eq(CUSTOMER.store_id, STORE.id))
+            .leftJoin(SELLER, eq(SELLER.id,  STORE.seller_id))
+            .where(and(eq(STORE.id, store_id),eq(SELLER.uid, userId)))
             .groupBy(STORE.id)
             .limit(1)
 
@@ -242,6 +243,7 @@ export const PUT = async (request: Request, props: { params: { store_slug: strin
     }
     catch (e)
     {
+        console.log("THE ERROR::",e)
         return NextResponse.json(generate_dto(null, "Something went wrong", "error"), {
             status: 500
         })

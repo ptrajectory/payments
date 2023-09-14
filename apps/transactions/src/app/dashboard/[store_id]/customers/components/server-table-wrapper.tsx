@@ -2,30 +2,28 @@
 
 import { stringifyDatesInJSON } from "@/lib/utils"
 import db from "db"
-import { CUSTOMER } from "db/schema"
+import { CUSTOMER, STORE } from "db/schema"
 import CustomerClientTableWrapper from "./client-table-wrapper"
+import { and, eq } from "db/utils"
 
 
 async function getStoreCustomerData(store_id: string) {
 
     try {
-        const customers = (await db.query.CUSTOMER.findMany({
-            where: (cus, { eq, and }) => and(
-                eq(cus.store_id, store_id),
-            ),
-            orderBy: CUSTOMER.created_at,
-            columns: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                email: true,
-                created_at: true
-            },
-            limit: 11,
-            offset: 0
-        })) ?? []
+        const customers = await db.select({
+            id: CUSTOMER.id,
+            first_name: CUSTOMER.first_name,
+            last_name: CUSTOMER.last_name,
+            email: CUSTOMER.email,
+            created_at: CUSTOMER.created_at
+        }).from(CUSTOMER)
+        .innerJoin(STORE, eq(STORE.id, CUSTOMER.store_id))
+        .where(and(eq(STORE.id, store_id), eq(STORE.environment, CUSTOMER.environment)))
+        .orderBy(CUSTOMER.created_at)
+        .limit(10)
+        .offset(0)
 
-        return stringifyDatesInJSON(customers)
+        return stringifyDatesInJSON(customers ?? [])
 
     } catch (e)
     {
