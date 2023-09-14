@@ -67,15 +67,12 @@ function ProductPurchaseOverview() {
                     product_id: params?.product_id
                 }
             })).data
-
-            console.log("HERE IS THE DATA::",result)
             
             set_chart_data(result.data)
 
         }
         catch (e)
         {
-            console.log("HERE IS THE ERROR::", e)
             // TODO: handle this error
         }
     }

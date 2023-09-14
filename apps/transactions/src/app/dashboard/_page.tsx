@@ -14,8 +14,6 @@ export function MainDashboardPage(props: { stores?: null | Array<string> }) {
 
     const { stores } = props
 
-    console.log("HERE ARE STORES::", stores)
-
     return (
         <div className="w-full h-full flex flex-col items-center justify-start">
                 <div className="flex flex-col items-center justify-start w-4/5 space-y-5">

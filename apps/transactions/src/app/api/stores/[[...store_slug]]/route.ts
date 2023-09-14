@@ -57,7 +57,6 @@ export const GET = async (request: Request, {params}:{params: { store_slug: Arra
         }
         catch (e)
         {
-            console.log("SOMETHING WENT WRONG::",e)
             return NextResponse.json(generate_dto(null, "Something went wrong", "error"))
         }
 
@@ -90,7 +89,6 @@ export const GET = async (request: Request, {params}:{params: { store_slug: Arra
     }
     catch (e)
     {
-        console.log('SOMETHING WENT WRONG::', e)
 
         return NextResponse.json(generate_dto(null, "Something went wrong", "error"), {
             status: 500
@@ -243,7 +241,6 @@ export const PUT = async (request: Request, props: { params: { store_slug: strin
     }
     catch (e)
     {
-        console.log("THE ERROR::",e)
         return NextResponse.json(generate_dto(null, "Something went wrong", "error"), {
             status: 500
         })

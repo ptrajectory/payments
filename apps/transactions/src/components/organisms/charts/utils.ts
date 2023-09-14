@@ -72,7 +72,6 @@ export const fetch_home_daily_purchases_chart_data= async (store_id: string, ran
     }
     catch (e)
     {
-        console.log("SOMETHING WENT WRONG::", e)
         //TODO: add better error handling
         return []
     }

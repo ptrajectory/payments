@@ -22,7 +22,6 @@ function StoreDetails(props: any) {
         }
         catch (e)
         {
-            console.log(e)
             // TODO: will handle error later
             return null
         }

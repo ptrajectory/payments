@@ -75,20 +75,14 @@ export const POST = async (req: Request) => {
 
         if(customer?.id || ((customer_id?.length ?? 0) > 3)) {
 
-            console.log("HERE us ths customer", customer)
-
             const cart = await temporaryClient.carts.update((checkout?.cart as any)?.id as string, {
                 customer_id: customer?.id ?? customer_id ?? undefined
             })
-
-            console.log("HEre is the cart::",cart)
 
             const ck = await temporaryClient.checkouts.update(checkout?.id as string, {
                 customer_id: customer?.id ?? customer_id ?? undefined,
                 payment_method_id: payment_method?.id,
             });
-
-            console.log("Here is the checkout::", ck)
 
 
         }
@@ -107,7 +101,7 @@ export const POST = async (req: Request) => {
     }
     catch (e)
     {
-        console.log("ERROR::",e)
+        // TODO: better error handling
         return NextResponse.json(generate_dto(null, "Something went wrong", "error"), {
             status: 500
         })

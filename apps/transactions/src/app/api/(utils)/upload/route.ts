@@ -20,10 +20,8 @@ const uploadFile = async (form: FormData) => {
 
     let uploads: Array<UploadApiResponse> = []
 
-    console.log(Array.from(form.entries()))
 
     for (const [key, value] of Array.from(form.entries())){
-        console.log("KEY",key)
         if(!isUndefined(value)){
 
             const UploadForm = new FormData()
@@ -40,13 +38,11 @@ const uploadFile = async (form: FormData) => {
                 })
     
                 if(result.ok){
-                    console.log("done")
                     const data = await result.json()
                     uploads.push(data)
                 }
     
                 else {
-                    console.log("error")
                     return Promise.reject(
                         `UNABLE TO UPLOAD ${key}`
                     )
@@ -82,7 +78,6 @@ export const POST = async (req: Request) => {
 
         const uploaded = await uploadFile(form)
 
-        console.log("Here is uploaded::", uploaded)
 
         return NextResponse.json(generate_dto(uploaded?.at(0), "UPLOADED", "success"), {
             status: 201
@@ -91,7 +86,6 @@ export const POST = async (req: Request) => {
     }
     catch (e)
     {
-        console.log("SOMETHING WENT WRONG::",e)
 
         return NextResponse.json(generate_dto(null, "SOMETHING WENT WRONG", "error"))
     }

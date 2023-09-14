@@ -101,7 +101,7 @@ export const POST = async (req: Request) => {
     }
     catch (e)
     {
-        console.log("Error is::", e)
+        // TODO: better error handling
         return NextResponse.json(generate_dto(null, "Something went wrong", "error"))
     }
 

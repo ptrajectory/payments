@@ -14,7 +14,6 @@ interface DashboardProps {
 }
 
 function DashboardTopBar(props: DashboardProps) {
-  console.log(props)
   const query = useParams()
   const [scrolled, setScrolled] = useState(false)
   const { push } = useRouter()
@@ -52,7 +51,9 @@ function DashboardTopBar(props: DashboardProps) {
         </div>
 
         <div className="flex flex-row items-center justify-end">
-          <UserButton/> 
+          <UserButton
+          afterSignOutUrl='/'
+          /> 
         </div>
       </div>
       {

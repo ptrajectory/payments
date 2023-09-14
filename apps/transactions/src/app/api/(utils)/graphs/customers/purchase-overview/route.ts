@@ -34,7 +34,6 @@ export const GET = async (request: Request) => {
 
     try {
 
-        console.log("Now getting data")
         const data = await db.select({
             id: PAYMENT.id,
             number_of_purchases: sql<number>`count(${PAYMENT.id})`.mapWith(Number),
@@ -52,7 +51,6 @@ export const GET = async (request: Request) => {
         .groupBy(PAYMENT.id)
 
 
-        console.log("Graph Data::", data)
 
         const categorized_data = graph_time_range?.val?.map((time)=>{
 

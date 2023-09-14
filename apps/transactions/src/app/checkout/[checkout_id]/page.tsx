@@ -63,7 +63,6 @@ const getStoreDetails = async (checkout_id: string) => {
     catch (e)
     {
         // TODO: deal with this better
-        console.log("Something went wrong", e)
         return null
     }
 

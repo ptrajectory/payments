@@ -112,7 +112,6 @@ export const GET = async (request: Request) => {
     }
     catch (e)
     {
-        console.log("SOMETHING WENT WRONG::", e)
         // TODO: better error handling
         return NextResponse.json(generate_dto(e || null, "Something went wrong", "error"), {
             status: 500

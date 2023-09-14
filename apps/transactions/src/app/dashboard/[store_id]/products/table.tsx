@@ -92,7 +92,6 @@ function ProductsTable(props: Props) {
 
 
     const handlePaginationChange = useCallback((state: PaginationState) => {
-        console.log("Pagination changed::", state)
         fetch_products(state)
     }, [])  
 

@@ -54,7 +54,6 @@ export const GET = async  (request: Request,
         }
         catch (e)
         {
-            console.log("SOME ERROR::",e)
             return NextResponse.json(generate_dto( null, "Something went wrong", "error"), {
                 status: 500
             })
@@ -93,7 +92,6 @@ export const GET = async  (request: Request,
     }
     catch (e)
     {
-        console.log("ERROR::", e)
 
         return NextResponse.json(generate_dto(null, "Something went wrong", "error"), {
             status: 500
@@ -116,8 +114,6 @@ export const POST = async (request: Request) => {
     })
 
     const data = parsed.data
-
-    console.log("Incoming data::", data)
 
     try {
 
@@ -143,7 +139,6 @@ export const POST = async (request: Request) => {
     }   
     catch (e)
     {
-        console.log("ERROR:",e)
         return NextResponse.json(generate_dto(e || null, "Something went wrong", "error"), {
             status: 500
         })

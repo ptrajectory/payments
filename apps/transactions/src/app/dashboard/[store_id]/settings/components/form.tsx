@@ -42,7 +42,7 @@ export default function StoreEditForm(props: StoreEditFormProps){
         }
         catch (e)
         {
-            console.log(e)
+            // TODO: better error handling
         }
     
       }

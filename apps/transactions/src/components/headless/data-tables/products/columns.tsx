@@ -12,7 +12,6 @@ const ActionButton = (props: {row: Row<PRODUCT & { created_at: Date, updated_at:
     const { row } = props
     const params = useParams()
 
-    console.log("HERE AEE THE PARAMS", params )
 
     return (
         <div className="flex flex-row items-center justify-center">

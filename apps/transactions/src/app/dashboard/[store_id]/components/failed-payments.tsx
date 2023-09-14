@@ -37,7 +37,6 @@ const get_payments = async (store_id: string) => {
     }
     catch (e)
     {
-        console.log("SOMETHING WENT WRONG::",e)
 
         return []
     }

@@ -77,7 +77,6 @@ function Upload(props: UploadProps) {
         for (let i =0; i <files?.length; i++){
 
             const file = files.item(i)
-            console.log(file)
             if(isNull(file) || isUndefined(file)) continue 
 
             form.append(`ptrajectory-payments-upload-${i}-${file.name}`,file, file.name)

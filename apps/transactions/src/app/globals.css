@@ -79,3 +79,11 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+.underline-background {
+  width: 300px;
+  height: 200px;
+  background-image: url('../../public/assets/under_construction.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}

@@ -23,8 +23,6 @@ function CreatePaymentMethod() {
                 store_id
             })
 
-            console.log(payment_method)
-
         }
         catch (e)
         {

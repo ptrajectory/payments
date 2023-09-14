@@ -34,17 +34,13 @@ export const POST = async (request: Request) => {
                     uid: user.id
                 }).returning()
 
-                console.log(
-                    "New User",
-                    result.at(0)
-                )
                 return NextResponse.json(null, {
                     status: 200
                 })
             };
             default:{
                 //TODO: don't know what to do here
-                console.log("NULL", )
+                // TODO: will figure out later
 
             }
             

@@ -34,7 +34,6 @@ function PurchaseOverview() {
                     customer_id: params?.customer_id
                 }
             })).data
-            console.log("Here is the result::", result)
             set_chart_data(result.data)
 
         }

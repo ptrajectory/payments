@@ -54,8 +54,6 @@ function CustomerPaymentHistory() {
                 }
             }))?.data 
 
-            console.log("Here is the result::", result )
-
             set_payments(result?.data)
 
         }

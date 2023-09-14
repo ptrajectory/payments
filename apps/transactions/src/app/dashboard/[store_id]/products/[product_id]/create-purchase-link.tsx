@@ -40,8 +40,6 @@ export default function GeneratePurchaseLink(props:Props){
         e.preventDefault()
 
         try {
-
-            console.log(quantity)
             const result = (await axios.post("/api/purchase_link", {
                 store_id,
                 product_id,

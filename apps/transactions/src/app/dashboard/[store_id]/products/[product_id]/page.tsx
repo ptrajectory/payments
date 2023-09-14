@@ -28,7 +28,6 @@ const getProductData = async (id?: string) => {
             
         })
 
-        console.log("HERE IS THE PRODUCT::", product)
 
         const sales_agg_data = await db.select({
             total_sales: sql<number>`sum(${PAYMENT.amount})`.mapWith(Number)
@@ -38,8 +37,6 @@ const getProductData = async (id?: string) => {
         .innerJoin(CART_ITEM, eq(CART_ITEM.cart_id, CART.id))
         .where(eq(CART_ITEM.product_id, id))
         .groupBy(CART_ITEM.product_id)
-
-        console.log("HERE ARE THE SALES", sales_agg_data)
 
         const customer_agg_data = await db.select({
             customers: sql<number>`count(distinct ${CART.customer_id})`.mapWith(Number)
