@@ -71,7 +71,8 @@ const cart_item = z.object({
     product_id: z.string().optional(),
     quantity: z.number().optional(),
     store_id: z.string().optional(),
-    status: z.string().optional()
+    status: z.string().optional(),
+    customer_id: z.string().optional()
 })
 
 type CART_ITEM = z.infer<typeof cart_item>;
@@ -108,7 +109,8 @@ const store = z.object({
     name: z.string().optional(),
     image: z.string().optional(),
     description: z.string().optional(),
-    status: z.string().optional()
+    status: z.string().optional(),
+    environment: z.enum(['production', 'testing']).optional()
 })
 
 type STORE = z.infer<typeof store>
@@ -125,6 +127,30 @@ const payment_input = z.object({
 type PAYMEN_INPUT = Partial<z.infer<typeof payment_input>>
 
 
+const purchase_link = z.object({
+    product_id: z.string(), 
+    store_id: z.string(),
+    quantity: z.number().positive().default(1),
+    email: z.string().optional(),
+    first_name: z.string().optional(),
+    last_name: z.string().optional(),
+    customer_id: z.string().optional()
+})
+
+type PURCHASE_LINK = z.infer<typeof purchase_link>
+
+
+const checkout_pay = z.object({
+    checkout_id: z.string(),
+    phone_number: z.string(),
+    email: z.string().optional(),
+    first_name: z.string().optional(),
+    last_name: z.string().optional(),
+    customer_id: z.string().optional()
+})
+
+type CHECKOUT_PAY = z.infer<typeof checkout_pay>
+
 export {
   checkout,
   customer,
@@ -136,6 +162,8 @@ export {
   seller,
   store,
   payment_input,
+  purchase_link,
+  checkout_pay,
   PAYMENT_METHOD,
   CUSTOMER,
   CHECKOUT,
@@ -145,5 +173,7 @@ export {
   PAYMENT,
   SELLER,
   STORE,
-  PAYMEN_INPUT
+  PAYMEN_INPUT,
+  PURCHASE_LINK,
+  CHECKOUT_PAY
 };

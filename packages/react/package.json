@@ -15,7 +15,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsup && postcss src/index.css -o dist/styles.css",
+    "build": "tsup && pnpx postcss-cli src/index.css -o dist/styles.css",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
