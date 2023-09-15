@@ -60,5 +60,11 @@ declare namespace NodeJS {
           * CLERK SECRET
           */
          CLERK_SECRET: string
+         /**
+          * VALIDATION:
+          */
+         PRIVATE_KEY: string 
+         PUBLIC_KEY: string
+         SECRET_KEY: string
     }
 }
