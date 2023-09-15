@@ -85,6 +85,7 @@ export const storePublicAuth: MiddleWareFn = async (req, res, next) => {
     }
     catch (e)
     {
+        console.log("PUBLIC ERROR", e)
         return res.status(500).send(generate_dto(null, "Something went wrong", "error"))
     }
  
@@ -112,7 +113,7 @@ export const withEphemeralKey: MiddleWareFn = async (req, res, next) => {
     }
     catch (e)
     {   
-
+        console.log("Ephemeral Validation error::",e)
         return res.status(403).send(generate_dto(null, "Ephemeral Key Failed", "error"))
 
     }
