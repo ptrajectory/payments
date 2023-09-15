@@ -91,12 +91,12 @@ export function verifyPublishableKey(token: string): Promise<STORE & { env: envi
 
 export function verifySecretKey(token: string): Promise<STORE & {env: environment}>{
     
-    const privateKey = process.env.PRIVATE_KEY
+    const privateKey = process.env.SECRET_KEY
 
     return new Promise((res, rej)=>{
         jwt.verify(token, privateKey, (err, store)=>{
             
-            if(err) return rej("Unable to verify")
+            if(err) return rej("Unable to verify with private key")
 
             return res(store as any)
         }) 
