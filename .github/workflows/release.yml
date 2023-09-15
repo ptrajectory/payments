@@ -48,7 +48,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm i -g postcss-cli
       - run: npm install -g pnpm
-      - run: pnpm --filter=zodiac --filter=functions recursive build
+      - run: pnpm --filter=zodiac --filter=functions --recursive build
       - run: cd packages/react && pnpm install && pnpm run build
       - run: cd packages/react && pnpm publish --no-git-checks
         env:
