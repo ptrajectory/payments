@@ -9,7 +9,8 @@ function CartItem() {
         <div className="flex flex-row items-center justify-start w-full space-x-2">
             <div className="relative flex flex-row items-center justify-center w-10 h-10 rounded-md overflow-hidden">
                 <Image
-                    src={bag_image}
+                    sizes="40px"
+                    src={bag_image ?? "/brand/placeholder_image.png"}
                     alt="Cart Item"
                     fill
                     style={{

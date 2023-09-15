@@ -5,6 +5,7 @@ import paymentMethodRouter from "./payment_method";
 import productRouter from "./product"
 import cartRouter from "./cart";
 import paymentRouter from "./payment";
+import storeRouter from "./store";
 
 
 const router = Router() 
@@ -15,6 +16,7 @@ router.use(paymentMethodRouter)
 router.use(productRouter)
 router.use(cartRouter)
 router.use(paymentRouter)
+router.use(storeRouter)
 
 
 router.get('/', (req, res)=>{

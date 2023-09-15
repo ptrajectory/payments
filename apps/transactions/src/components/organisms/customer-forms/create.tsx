@@ -24,12 +24,11 @@ function CreateCustomer() {
             store_id: query.store_id
         })).data
 
-        console.log("RESULT", result)
 
     }
     catch (e)
     {
-        console.log(e)
+        // TODO: better error handling
     }
 
   }

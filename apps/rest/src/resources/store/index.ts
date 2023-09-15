@@ -1,5 +1,5 @@
 import { STORE as tSTORE, store } from "zodiac";
-import { AuthenticatedRequest, HandlerFn } from "../../../lib/handler";
+import { AuthenticatedRequest, ClerkAuthenticatedRequest, HandlerFn } from "../../../lib/handler";
 import { generate_dto, generate_unique_id } from "generators";
 import { STORE } from "db/schema";
 import { generateSecretKey } from "../../../lib/functions";
@@ -8,7 +8,6 @@ import { isUndefined } from "../../../lib/cjs/lodash";
 
 
 const generateStoreSecrets = (store: tSTORE) => {
-
     const prod_secret_key = generateSecretKey({
         name: store.name,
         id: store.id,
@@ -41,11 +40,13 @@ const generateStoreSecrets = (store: tSTORE) => {
     }
 }
 
-export const createStore: HandlerFn = async (req, res, clients) => {
+export const createStore: HandlerFn<ClerkAuthenticatedRequest> = async (req, res, clients) => {
 
     const { db } = clients 
 
     const body = req.body
+
+    console.log("incoming body::", body)
 
     const parsed = store.safeParse(body)
 
@@ -60,7 +61,9 @@ export const createStore: HandlerFn = async (req, res, clients) => {
             id: generate_unique_id("str"),
             ...parsed.data,
             created_at: new Date(),
-            updated_at: new Date()
+            updated_at: new Date(),
+            seller_id: req.id,
+            environment: "testing"
         }).returning()
 
        const store = result?.at(0)
@@ -89,6 +92,7 @@ export const createStore: HandlerFn = async (req, res, clients) => {
        }
        catch (e)
        {
+        console.log("THE ERROR::", e)
         return res.status(500).send(generate_dto(null, "Unable to generate store secrets", "error"))
        }
 
@@ -97,6 +101,7 @@ export const createStore: HandlerFn = async (req, res, clients) => {
     }
     catch (e)
     {
+        console.log("THE ERRO:", e)
         return res.status(500).send(generate_dto(null, "Something went wrong", "error"))
     }
     

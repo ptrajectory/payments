@@ -158,6 +158,7 @@ model Store {
   name            String?
   image           String?
   description     String?
+  environment       ENVIRONMENT @default(testing)
   prod_secret_key      String? // formatted JWT
   test_secret_key      String? // formatted JWT
   prod_publishable_key String?

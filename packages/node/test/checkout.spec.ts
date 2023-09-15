@@ -156,38 +156,38 @@ describe("CHECKOUT", ()=>{
 
     after(async ()=>{
 
-        // delete all cart items for the current cart
+        // // delete all cart items for the current cart
 
-        cart_id && await db.delete(CART_ITEM)
-        .where(eq(CART_ITEM.cart_id, cart_id))
+        // cart_id && await db.delete(CART_ITEM)
+        // .where(eq(CART_ITEM.cart_id, cart_id))
 
 
-        // delete product
+        // // delete product
 
-        product_id && await db.delete(PRODUCT)
-        .where(eq(PRODUCT.id, product_id))
+        // product_id && await db.delete(PRODUCT)
+        // .where(eq(PRODUCT.id, product_id))
 
-        // delete cart
+        // // delete cart
 
-        cart_id && await db.delete(CART)
-        .where(eq(CART.id, cart_id))
+        // cart_id && await db.delete(CART)
+        // .where(eq(CART.id, cart_id))
 
-        // delete checkout
+        // // delete checkout
 
-        checkout_id && await db.delete(CHECKOUT)
-        .where(eq(CHECKOUT.id, checkout_id)) 
+        // checkout_id && await db.delete(CHECKOUT)
+        // .where(eq(CHECKOUT.id, checkout_id)) 
 
-        // delete payment_method
-        payment_method_id && await db.delete(PAYMENT_METHOD)
-        .where(eq(PAYMENT_METHOD.id, payment_method_id))
+        // // delete payment_method
+        // payment_method_id && await db.delete(PAYMENT_METHOD)
+        // .where(eq(PAYMENT_METHOD.id, payment_method_id))
 
-        // delete  customer
-        customer_id && await db.delete(CUSTOMER)
-        .where(eq(CUSTOMER.id, customer_id))
+        // // delete  customer
+        // customer_id && await db.delete(CUSTOMER)
+        // .where(eq(CUSTOMER.id, customer_id))
 
-        // delete payment
-        payment_id && await db.delete(PAYMENT)
-        .where(eq(PAYMENT.id, payment_id))
+        // // delete payment
+        // payment_id && await db.delete(PAYMENT)
+        // .where(eq(PAYMENT.id, payment_id))
 
     })
 

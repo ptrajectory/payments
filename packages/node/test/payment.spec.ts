@@ -89,8 +89,8 @@ describe('Payments', () => {
 
         // delete payment
 
-        payment_id && await db.delete(PAYMENT)
-        .where(eq(PAYMENT.id, payment_id))
+        // payment_id && await db.delete(PAYMENT)
+        // .where(eq(PAYMENT.id, payment_id))
 
     })
 

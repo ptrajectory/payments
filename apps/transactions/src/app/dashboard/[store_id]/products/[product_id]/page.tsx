@@ -1,7 +1,6 @@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/dialog'
 import { Separator } from '@/components/atoms/separator'
 import ProductForm from '@/components/organisms/product-forms/create'
-import payments from '@/lib/resources/payments'
 import { PageLayoutProps } from '@/lib/types'
 import { stringifyDatesInJSON } from '@/lib/utils'
 import { DialogClose } from '@radix-ui/react-dialog'
@@ -24,9 +23,11 @@ const getProductData = async (id?: string) => {
 
     try{
 
-        const product = await payments.product?.getProduct(id)
+        const product = await db.query.PRODUCT.findFirst({
+            where: (prod, {eq}) => eq(prod.id, id),
+            
+        })
 
-        console.log("HERE IS THE PRODUCT::", product)
 
         const sales_agg_data = await db.select({
             total_sales: sql<number>`sum(${PAYMENT.amount})`.mapWith(Number)
@@ -36,8 +37,6 @@ const getProductData = async (id?: string) => {
         .innerJoin(CART_ITEM, eq(CART_ITEM.cart_id, CART.id))
         .where(eq(CART_ITEM.product_id, id))
         .groupBy(CART_ITEM.product_id)
-
-        console.log("HERE ARE THE SALES", sales_agg_data)
 
         const customer_agg_data = await db.select({
             customers: sql<number>`count(distinct ${CART.customer_id})`.mapWith(Number)
@@ -69,29 +68,14 @@ async function index(props: { params: { store_id: string, product_id: string } }
     const {params: { product_id }} = props
     const data = await getProductData(product_id)
 
-    console.log("HERE IS THE DATA::", data)
-
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full pb-[200px]">
         <ProductPageHero
             {...data}
         />
         <div className="flex flex-col w-full h-full space-y-3 p-5">
 
             <ProductPurchaseOverview/>
-
-
-            {/* <div className="flex flex-col w-full">
-                <span className="text-2xl font-semibold">
-                    Product Purchase overview
-                </span>
-                <LineChart
-                  data={chart_data}
-                  index='day'
-                  categories={['number_of_purchases', 'amount_purchased']}
-                  colors={['amber','cyan']}
-                />
-            </div> */}
 
 
         </div>

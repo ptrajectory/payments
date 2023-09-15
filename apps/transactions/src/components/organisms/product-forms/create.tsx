@@ -33,12 +33,9 @@ function ProductForm(props: ProductFormProps) {
         description: data.description === product.description ? undefined : data.description
       })).data
 
-      console.log("The result::", result)
-
     }
     catch (e)
     {
-      console.log(e)
       // TODO: handle error
     }
 

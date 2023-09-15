@@ -16,8 +16,11 @@ app.use(cookieParser())
 
 app.use("/api",router)
 app.use("/", hookRouter)
+app.get("/ping", (req, res) => {
+  res.status(200).send("PONG🏓");
+});
 
-const port = process.env.APP_PORT || 8089
+const port = process.env.PORT || 8089
 
 app.listen(port, ()=>{
     console.log(`✨ Server is listening on port ${port}`) 

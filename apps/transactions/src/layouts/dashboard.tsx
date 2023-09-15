@@ -25,7 +25,6 @@ function DashboardLayout(props: DashboardLayoutProps) {
   const handleChangeStart = (url: string) => {
 
     const skeleton = ((): tSkeleton | "none"=>{
-      console.log("The customer id::", customer_id)
       if(!isString(store_id)) return "none"
       if(route_matches(url, store_id, `/dashboard/${store_id}`)) return "dashboard-store-home"
       if(route_matches(url, store_id, `/dashboard/${store_id}/customers`) && url?.includes("cus_")) return "dashboard-store-customers-customer"

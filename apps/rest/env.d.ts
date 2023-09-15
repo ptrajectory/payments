@@ -56,5 +56,15 @@ declare namespace NodeJS {
           * The business name for the app, will be used to identify the initiator
           */
          B2C_MPESA_SHORTCODE: number;
+         /**
+          * CLERK SECRET
+          */
+         CLERK_SECRET: string
+         /**
+          * VALIDATION:
+          */
+         PRIVATE_KEY: string 
+         PUBLIC_KEY: string
+         SECRET_KEY: string
     }
 }

@@ -37,10 +37,11 @@ B2C_MPESA_SHORTCODE=
 import "dotenv/config"
 import express from 'express'
 import mpesaExpressClient from 'porkytheblack-mpesa/events/express' // This is a singleton instance of the mpesa express client
-mpesaExpressClient.init({
+mpesaExpressClient.init({ // NOTE: you dont need to manually pass in any of your env variables since they'll automatically get picked up
     b2c_business_name: "testapi",
     c2b_business_name: "testapi",
     env: "sandbox",
+    callback_url: "https://an_ngrok_url_if_testing.app" // BASE URL
 })
 
 process.on('uncaughtException', (e)=>{
@@ -159,12 +160,10 @@ Note: Always ensure to secure your keys and secrets. The above example uses hard
 
 ## Development Notice
 
-Please be aware that this library is currently under active development. We are working hard to make this library as robust, user-friendly, and feature-complete as possible.
+Please be aware that this library is currently under active development. I am working hard to make this library as robust, user-friendly, and feature-complete as possible.
 
-As we continue to improve and expand the library, you may notice regular updates. These will often include bug fixes, performance improvements, and even new features. We strongly recommend keeping up to date with the latest versions to benefit from these improvements.
+As I continue to improve and expand the library, you may notice regular updates. These will often include bug fixes, performance improvements, and even new features. I strongly recommend keeping up to date with the latest versions to benefit from these improvements.
 
-Please rest assured that every update is thoroughly tested to ensure compatibility and minimize any potential disruptions. We understand that updating your dependencies can sometimes be a concern, but we are committed to making each update as smooth and beneficial as possible.
+Please rest assured that every update is thoroughly tested to ensure compatibility and minimize any potential disruptions.
 
-Our goal is to provide you with a stable, reliable, and efficient tool for interacting with the Mpesa API. We appreciate your support and patience as we continue to enhance the library.
-
-Thank you for choosing this library as your Mpesa API solution, and we look forward to helping you achieve your goals.
+My goal is to provide you with a stable, reliable, and efficient tool for interacting with the Mpesa API. I appreciate your support and patience as I continue to enhance the library.
