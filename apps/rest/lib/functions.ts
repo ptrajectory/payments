@@ -43,9 +43,7 @@ type environment = "production" | "testing"
 
 
 export function generatePublishableKey(store: STORE, env: environment){
-    const privateKey = fs.readFileSync("./keys/privateKey.pem", {
-        encoding: 'utf-8'
-    })
+    const privateKey = process.env.PRIVATE_KEY ?? fs.readFileSync("./keys/privateKey.pem", { encoding: 'utf-8' })
     const publishableKey = jwt.sign({
         ...store,
         env
@@ -61,9 +59,7 @@ export function generatePublishableKey(store: STORE, env: environment){
 
 export function generateSecretKey(store: STORE, env: environment){
 
-    const privateKey = fs.readFileSync("./keys/secretKey.txt",{
-        encoding: 'utf-8'
-    })
+    const privateKey = process.env.SECRET_KEY ?? fs.readFileSync("./keys/secretKey.txt", { encoding: 'utf-8' })
 
     const secretKey = jwt.sign({
         ...store,
@@ -79,9 +75,7 @@ export function generateSecretKey(store: STORE, env: environment){
 
 export function verifyPublishableKey(token: string): Promise<STORE & { env: environment } >{
     
-    const publicKey = fs.readFileSync("./keys/publicKey.pem",{
-        encoding: 'utf-8'
-    })
+    const publicKey = process.env.PUBLIC_KEY ?? fs.readFileSync("./keys/publicKey.pem", { encoding: 'utf-8' })
 
     return new Promise((res, rej)=>{
         jwt.verify(token, publicKey, (err, store)=>{
@@ -97,14 +91,12 @@ export function verifyPublishableKey(token: string): Promise<STORE & { env: envi
 
 export function verifySecretKey(token: string): Promise<STORE & {env: environment}>{
     
-    const privateKey = fs.readFileSync("./keys/secretKey.txt",{
-        encoding: 'utf-8'
-    })
+    const privateKey = process.env.SECRET_KEY ?? fs.readFileSync("./keys/secretKey.txt", { encoding: 'utf-8' })
 
     return new Promise((res, rej)=>{
         jwt.verify(token, privateKey, (err, store)=>{
             
-            if(err) return rej("Unable to verify")
+            if(err) return rej("Unable to verify with private key")
 
             return res(store as any)
         }) 
@@ -115,9 +107,7 @@ export function verifySecretKey(token: string): Promise<STORE & {env: environmen
 
 export const generateCheckoutEphemeralKey = (checkout_id: string) => {
 
-    const privateKey = fs.readFileSync("./keys/privateKey.pem", {
-        encoding: 'utf-8'
-    })
+    const privateKey = process.env.PRIVATE_KEY ?? fs.readFileSync("./keys/privateKey.pem", { encoding: 'utf-8' })
     const publishableKey = jwt.sign({
         checkout_id
     }, privateKey, {
@@ -130,9 +120,7 @@ export const generateCheckoutEphemeralKey = (checkout_id: string) => {
 
 
 export const verifyCheckoutEphemeralKey = (token: string) => {
-    const publicKey = fs.readFileSync("./keys/publicKey.pem", {
-        encoding: 'utf-8'
-    })
+    const publicKey = process.env.PUBLIC_KEY ?? fs.readFileSync("./keys/publicKey.pem", { encoding: 'utf-8' })
 
     return new Promise((res, rej)=>{
         jwt.verify(token, publicKey, (err, chk)=>{

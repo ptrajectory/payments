@@ -180,20 +180,20 @@ describe("CART", ()=> {
 
     after(async ()=>{
 
-        // cart item already deleted
+        // // cart item already deleted
 
-        // delete cart
-        cart_id && await db.delete(CART)
-        .where(eq(CART.id, cart_id))
+        // // delete cart
+        // cart_id && await db.delete(CART)
+        // .where(eq(CART.id, cart_id))
 
 
-        // delete product
-        product_id && await db.delete(PRODUCT)
-        .where(eq(PRODUCT.id, product_id ))
+        // // delete product
+        // product_id && await db.delete(PRODUCT)
+        // .where(eq(PRODUCT.id, product_id ))
 
-        // delete customer
-        customer_id && await db.delete(CUSTOMER)
-        .where(eq(CUSTOMER.id, customer_id))
+        // // delete customer
+        // customer_id && await db.delete(CUSTOMER)
+        // .where(eq(CUSTOMER.id, customer_id))
 
     })
 

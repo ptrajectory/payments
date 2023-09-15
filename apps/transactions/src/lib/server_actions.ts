@@ -24,7 +24,6 @@ export const fetch_table_customers = async (paginationState: PaginationState, st
     catch (e)
     {
         //TODO: handle error
-        console.log("SOMETHING WENT WRONG::", e)
         return []
     }
 

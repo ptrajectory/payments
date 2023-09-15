@@ -345,11 +345,13 @@ class ExpressMpesaEvents extends EventEmitter {
         env: 'production' | 'sandbox',
         c2b_business_name: string,
         b2c_business_name: string,
+        callback_url: string
     }>){
         this.client.set_client({
             env: props.env,
             b2c_business_name: props.b2c_business_name,
-            c2b_business_name: props.c2b_business_name
+            c2b_business_name: props.c2b_business_name,
+            callback_url: props.callback_url
         })
     }
 }

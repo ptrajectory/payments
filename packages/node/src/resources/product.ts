@@ -11,7 +11,7 @@ type UPDATE_PRODUCT_DATA = Omit<PRODUCT, "id" | "created_at" | "updated_at" | "s
 
 export default class Product {
 
-    client: PaymentsHttpClient 
+    private client: PaymentsHttpClient 
 
 
     constructor(client: PaymentsHttpClient){

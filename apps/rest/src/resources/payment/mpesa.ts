@@ -10,7 +10,7 @@ mpesaExpressClient.init({
 })
 
 // TODO: update the way the callback url gets passed down to the client
-mpesaExpressClient.client.set_callback_url("https://334b-41-80-118-85.ngrok-free.app")
+mpesaExpressClient.client.set_callback_url("https://d713-41-80-117-206.ngrok-free.app")
 
 mpesaExpressClient.on('payment:error', async (data)=>{
     console.log("Here is the payment  error::", data)

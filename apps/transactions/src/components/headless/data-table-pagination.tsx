@@ -34,7 +34,6 @@ import {
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => {
-                console.log("NEW VALUE::", value)
                 table.setPageSize(Number(value))
               }}
             >

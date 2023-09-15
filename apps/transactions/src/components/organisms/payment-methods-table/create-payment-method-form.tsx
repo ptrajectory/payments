@@ -6,12 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/atoms/button'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import { useParams } from 'next/navigation'
 
 function CreatePaymentMethod() {
 
-    const { query } = useRouter()
-
-    const { customer_id, store_id } = query
+    const { customer_id, store_id } = useParams()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         let data =  Object.fromEntries(new FormData(e.currentTarget))
@@ -24,15 +23,11 @@ function CreatePaymentMethod() {
                 store_id
             })
 
-            console.log(payment_method)
-
         }
         catch (e)
         {
             // TODO: error toast
         }
-
-
 
     }
 

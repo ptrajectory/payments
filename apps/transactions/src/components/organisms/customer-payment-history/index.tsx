@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { DataTable } from '@/components/headless/data-table'
 import CustomerPaymentColumns from '@/components/headless/data-tables/customers/payments'
 import axios from 'axios'
@@ -53,8 +54,6 @@ function CustomerPaymentHistory() {
                 }
             }))?.data 
 
-            console.log("Here is the result::", result )
-
             set_payments(result?.data)
 
         }
@@ -77,7 +76,7 @@ function CustomerPaymentHistory() {
         </span>
         <DataTable
             data={payments}
-            columns={CustomerPaymentColumns}
+            columns={CustomerPaymentColumns as any}
         />
     </div>
   )

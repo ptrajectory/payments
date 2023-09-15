@@ -21,6 +21,8 @@ export const createCustomer: HandlerFn<AuthenticatedRequest> = async (req, res, 
 
     const data = parsed.data
 
+    console.log(data)
+
 
     try {
         const result = await db?.insert(CUSTOMER).values({

@@ -1,11 +1,11 @@
 import db from "db"
-import payments from "@/lib/resources/payments"
 import { auth } from "@clerk/nextjs"
-import { generate_dto } from "generators"
+import { generate_dto, generate_unique_id } from "generators"
 import { isEmpty, isNull, isString } from "lodash"
 import { NextResponse } from "next/server"
 import { stringifyDatesInJSON } from "@/lib/utils"
 import { PAYMENT_METHOD } from "db/schema"
+import { payment_method } from "zodiac"
 
 
 
@@ -25,7 +25,7 @@ export const GET = async (request: Request, {params}:{params: {payment_methods_s
 
     const { payment_methods_slug } = params
 
-    const [payment_method_id] = payment_methods_slug
+    const [payment_method_id] = payment_methods_slug ?? []
 
     const { searchParams: query } = new URL(request.url)
 
@@ -41,9 +41,20 @@ export const GET = async (request: Request, {params}:{params: {payment_methods_s
 
         try {
 
-            const payment_method = await payments.payment_method?.getPaymentMethod(payment_method_id)
+            const payment_method = await db.query.PAYMENT_METHOD.findFirst({
+                where: (pm, { eq }) => eq(pm.id, payment_method_id),
+                columns: {
+                    id: true,
+                    type: true,
+                    customer_id: true,
+                    status: true,
+                    phone_number: true,
+                    environment: true
+                },
+                orderBy: PAYMENT_METHOD.created_at
+            })
 
-            return NextResponse.json(generate_dto(payment_method, "success", "success")) 
+            return NextResponse.json(generate_dto(payment_method ?? null, "success", "success")) 
         }
         catch (e)
         {
@@ -83,4 +94,58 @@ export const GET = async (request: Request, {params}:{params: {payment_methods_s
 
     
 
+}
+
+
+export const POST = async (request: Request, {params}:{params: {payment_methods_slug: Array<string>}}) => {
+    const { userId } = auth() 
+
+    if(isNull(userId)) return NextResponse.json(
+        generate_dto(
+            null,
+            "Unauthorized",
+            "error"
+        ),
+        {
+            status: 401
+        }
+    )
+
+    const body = await request.json()
+
+    const parsed = payment_method.safeParse(body)
+
+    if(!parsed.success) return NextResponse.json(generate_dto(parsed.error.formErrors.fieldErrors, "body Invalid", "error"), { status: 400 })
+
+    try{
+        const store = (await db.query.STORE.findFirst({
+            where: (str, {eq}) => eq(str.id, body.store_id),
+            columns: {
+                environment: true
+            }
+        })) ?? null 
+
+        const result = await db.insert(PAYMENT_METHOD).values({
+            id: generate_unique_id("pm"),
+            ...body,
+            created_at: new Date(),
+            updated_at: new Date(),
+            environment: store?.environment ?? "testing"
+        }).returning({
+            id: PAYMENT_METHOD.id
+        })
+
+        return NextResponse.json(generate_dto(result?.at(0), "Success", "success"), {
+            status: 201
+        })
+
+    }
+    catch (e)
+    {
+        // TODO: better error handling
+
+        return NextResponse.json(generate_dto(null, "Something went wrong", "error"), {
+            status: 500
+        })
+    }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/atoms/dialog'
 import { DataTable } from '@/components/headless/data-table'
@@ -10,6 +11,7 @@ import { PlusIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useCallback, useEffect, useReducer } from 'react'
 import { PRODUCT } from 'zodiac'
+import CreateProductForm from './components/create-product-form'
 
 const page_state = (state: any, action: {type: "pending" | "fullfilled" | "rejected", payload?: any})=>{
 
@@ -90,7 +92,6 @@ function ProductsTable(props: Props) {
 
 
     const handlePaginationChange = useCallback((state: PaginationState) => {
-        console.log("Pagination changed::", state)
         fetch_products(state)
     }, [])  
 
@@ -100,35 +101,14 @@ function ProductsTable(props: Props) {
 
 
   return (
-    <div className="flex flex-col w-full h-full space-y-5 ">
+    <div className="flex flex-col w-full h-full space-y-5 pb-[200px]">
 
             <div className="flex flex-row w-full items-center justify-between">
                 <span className="font-semibold text-xl">
                     Products
                 </span>
 
-                <Dialog modal  onOpenChange={(open)=>{
-
-                }} >
-                    <DialogTrigger asChild>
-                        <Button
-                            size="xs"
-                            icon={()=> <PlusIcon
-                                size="16px"
-                            />}
-                        >
-                            Create Products
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent  >
-                        <DialogHeader>
-                            <DialogTitle>
-                                Create Product
-                            </DialogTitle>
-                        </DialogHeader>
-                        <ProductForm />
-                    </DialogContent>
-                </Dialog>
+               <CreateProductForm/>
 
             </div>
             

@@ -12,6 +12,8 @@ export const updateCart: HandlerFn<AuthenticatedRequest> = async (req, res, clie
 
     const body = req.body 
 
+    console.log("THE BODY::", body)
+
     const id = req.params.cart_id 
 
     if(isEmpty(id)) return res.status(400).send(generate_dto(
@@ -43,6 +45,7 @@ export const updateCart: HandlerFn<AuthenticatedRequest> = async (req, res, clie
     }
     catch (e)
     {
+        console.log("Here is the error::",e)
         res.status(500).send(generate_dto(e, "Unable to update cart", "error"))
     }
 

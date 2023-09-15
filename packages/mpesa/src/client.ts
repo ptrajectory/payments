@@ -339,10 +339,12 @@ class MpesaClient {
         env: 'sandbox' | 'production',
         b2c_business_name: string,
         c2b_business_name: string,
+        callback_url: string,
     }>){
         this._env = props.env || 'sandbox'
         this._b2c.business_name = props.b2c_business_name || ''
         this._c2b.business_name = props.c2b_business_name || ''
+        this._callback_url = props.callback_url || ''
     }
 }
 

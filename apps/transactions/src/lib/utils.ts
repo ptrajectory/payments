@@ -34,7 +34,6 @@ export const getAllDaysBetweenDates = (from: Date | string, to: Date | string) =
           const sd = new Date()
           const day_start = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), 0, 0, 0, 0)
   
-          console.log(day_start)
           const val = [
               ...Array(24).fill(0)
           ]?.map((_, i)=>{

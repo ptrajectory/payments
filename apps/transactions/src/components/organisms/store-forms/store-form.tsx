@@ -23,12 +23,10 @@ function CreateStore() {
             image
         })).data
 
-        console.log("RESULT", result)
-
     }
     catch (e)
     {
-        console.log(e)
+        // TODO: better error handling
     }
 
   }
