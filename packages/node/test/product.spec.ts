@@ -109,8 +109,8 @@ describe("PRODUCTS", ()=> {
 
     after(async ()=>{
 
-        product_id && await db.delete(PRODUCT)
-        .where(eq(PRODUCT.id, product_id))
+        // product_id && await db.delete(PRODUCT)
+        // .where(eq(PRODUCT.id, product_id))
 
     })
 

@@ -125,8 +125,8 @@ describe("CUSTOMER", ()=> {
 
         // delete the customer
 
-        customer_id && await db.delete(CUSTOMER)
-        .where(eq(CUSTOMER.id, customer_id))
+        // customer_id && await db.delete(CUSTOMER)
+        // .where(eq(CUSTOMER.id, customer_id))
 
     })
 

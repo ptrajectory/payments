@@ -127,16 +127,16 @@ describe("PAYMENT METHODS", ()=>{
 
     after(async ()=>{
 
-        // delete payment method
+        // // delete payment method
 
-        payment_method_id && await db.delete(PAYMENT_METHOD)
-        .where(eq(PAYMENT_METHOD.id, payment_method_id))
+        // payment_method_id && await db.delete(PAYMENT_METHOD)
+        // .where(eq(PAYMENT_METHOD.id, payment_method_id))
 
 
-        // delete customer
+        // // delete customer
 
-        customer_id && await db.delete(CUSTOMER)
-        .where(eq(CUSTOMER.id, customer_id))
+        // customer_id && await db.delete(CUSTOMER)
+        // .where(eq(CUSTOMER.id, customer_id))
 
     })
 
