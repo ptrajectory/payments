@@ -59,7 +59,7 @@ export function generatePublishableKey(store: STORE, env: environment){
 
 export function generateSecretKey(store: STORE, env: environment){
 
-    const privateKey = process.env.PRIVATE_KEY
+    const privateKey = process.env.SECRET_KEY
 
     const secretKey = jwt.sign({
         ...store,

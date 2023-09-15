@@ -8,9 +8,6 @@ import { isUndefined } from "../../../lib/cjs/lodash";
 
 
 const generateStoreSecrets = (store: tSTORE) => {
-    console.log("SECRET KEY::",process.env.SECRET_KEY)
-    console.log("SECRET KEY::",process.env.PUBLIC_KEY)
-    console.log("SECRET KEY::",process.env.PRIVATE_KEY)
     const prod_secret_key = generateSecretKey({
         name: store.name,
         id: store.id,
