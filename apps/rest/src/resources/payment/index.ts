@@ -32,6 +32,7 @@ const determinPaymentDetails = async (body: PAYMEN_INPUT) => {
         .innerJoin(CART, eq(CART.id, CHECKOUT.cart_id))
         .innerJoin(CART_ITEM, eq(CART_ITEM.cart_id, CART.id))
         .innerJoin(PRODUCT, eq(PRODUCT.id, CART_ITEM.product_id))
+        .where(eq(CHECKOUT.id, checkout_id))
         .orderBy(PRODUCT.id)
 
         const agg_total = checkout?.reduce((prev, cur)=> prev + cur.amount, 0)
