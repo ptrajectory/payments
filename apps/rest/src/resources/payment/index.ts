@@ -25,7 +25,8 @@ const determinPaymentDetails = async (body: PAYMEN_INPUT) => {
         const checkout = await db.select({
             product_id: PRODUCT.id,
             amount: sql<number>`${CART_ITEM.quantity} * ${PRODUCT.price}`.mapWith(Number),
-            phone_number: PAYMENT_METHOD.phone_number
+            phone_number: PAYMENT_METHOD.phone_number,
+            customer_id: CHECKOUT.customer_id
         })
         .from(CHECKOUT)
         .innerJoin(PAYMENT_METHOD, eq(PAYMENT_METHOD.id, CHECKOUT.payment_method_id))
@@ -41,7 +42,8 @@ const determinPaymentDetails = async (body: PAYMEN_INPUT) => {
         return {
             amount: agg_total,
             phone_number: checkout?.at(0)?.phone_number,
-            payment_option
+            payment_option,
+            customer_id: checkout?.at(0)?.customer_id
         }
 
     }
@@ -131,7 +133,7 @@ export const createPayment: HandlerFn<AuthenticatedRequest> = async (req, res, c
     try {
 
         const paymentDetails = await determinPaymentDetails(data)
-        const { amount, payment_option, phone_number } = paymentDetails
+        const { amount, payment_option, phone_number, customer_id } = paymentDetails
 
 
 
@@ -156,7 +158,7 @@ export const createPayment: HandlerFn<AuthenticatedRequest> = async (req, res, c
                         environment: req.env,
                         checkout_id: parsed.data.checkout_id,
                         payment_method_id: parsed.data.payment_method_id,
-                        customer_id: parsed.data.customer_id,
+                        customer_id: parsed.data.customer_id ?? customer_id ?? null,
                     }).returning()
 
 
@@ -175,7 +177,7 @@ export const createPayment: HandlerFn<AuthenticatedRequest> = async (req, res, c
                         environment: req.env,
                         checkout_id: parsed.data.checkout_id ?? null,
                         payment_method_id: parsed.data.payment_method_id ?? null ,
-                        customer_id: parsed.data.customer_id ?? null,
+                        customer_id: parsed.data.customer_id ?? customer_id ?? null,
                         created_at: new Date(),
                         updated_at: new Date()
                     }).returning()
