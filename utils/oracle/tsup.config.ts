@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig((opts)=>{
     return {
-        entry: ["./src/index.ts", "./src/schema.ts", "./src/utils.ts"],
+        entry: ["./src/index.ts"],
         splitting: false,
         sourcemap: true,
         clean: !opts.watch,

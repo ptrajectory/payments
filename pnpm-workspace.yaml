@@ -3,3 +3,5 @@ packages:
   - "examples/*"
   - "apps/*"
   - "utils/*"
+  - "utils/email/.react-email"
+  - "utils/email"

@@ -7,10 +7,10 @@
       "strict": true,                                   
       "skipLibCheck": true,
       "moduleResolution": "Node",
-      "outDir": "./dist"                               
+      "outDir": "./dist",
+      "noErrorTruncation": true                              
     },
     "exclude": ["node_modules"],
-    "include": ["**/*.ts"],
-    "files": ["src/index.ts"]
+    "include": ["**/*.ts"]
   }
   

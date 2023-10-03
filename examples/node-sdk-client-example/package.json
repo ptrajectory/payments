@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "ts-node --esm src/index.ts"
+    "start": "ts-node --esm src/index.ts",
+    "test_your_client": "ts-node --esm src/your_client.ts"
   },
   "keywords": [],
   "author": "",

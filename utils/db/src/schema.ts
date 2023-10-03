@@ -1,7 +1,93 @@
 import { relations } from "drizzle-orm"
 import { boolean, date, doublePrecision, json, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 
-const environment = text('environment', { enum: ["production", "testing"] })
+// app environments
+const environment = text('environment', { enum: ["production", "testing"] }).default("testing")
+
+// product types
+const product_types = text('product_types', {
+    enum: [
+        "physical",
+        "digital",
+        "service",
+        "subscription",
+        "bundle",
+        "event_ticket",
+        "discounted",
+        "pay_what_you_want"
+    ]
+}).default("physical")
+
+const purchase_type = text("purchase_type", {
+    enum: [
+        "monthly_subscription",
+        "one_time",
+        "pre_order",
+        "backorder",
+        "pay_what_you_want"
+    ]
+}).default("one_time")
+
+
+const product_status = text("product_status", {
+    enum: [
+        "draft",
+        "published",
+        "archived"
+    ]
+}).default("draft")
+
+
+const checkout_status = text("checkout_status", {
+    enum: [
+        "pending_payment",
+        "processing",
+        "failed",
+        "success"
+    ]
+}).default("pending_payment")
+
+
+const key_status = text("key_status", {
+    enum: [
+        "active",
+        "inactive"
+    ]
+}).default("active")
+
+
+const cart_status = text("cart_status", {
+    enum: [
+        "open",
+        "closed"
+    ]
+})
+
+
+const payment_status = text('payment_state',{
+    enum: [
+        "processing",
+        "failed",
+        "success",
+        "cancelled",
+        "timed_out"
+    ]
+})
+
+const checkout_currency = text("currency", {
+    enum: [
+        "KES",
+        "EUR"
+    ]
+}).default("KES")
+
+const payment_method_type = text("type", {
+    enum: [
+        "mpesa",
+        "momo",
+        "airtel"
+    ]
+})
 
 /**
  * Customer
@@ -36,7 +122,7 @@ export const CUSTOMERRelations = relations(CUSTOMER, ({many, one})=>{
  */
 export const PAYMENT_METHOD = pgTable("PaymentMethod", {
     id: text("id").primaryKey(),
-    type: text("type"),
+    type: payment_method_type,
     phone_number: text("phone_number"),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
@@ -68,8 +154,8 @@ export const PAYMENT_METHODRelations = relations(PAYMENT_METHOD, ({one, many})=>
 export const CHECKOUT = pgTable("Checkout", {
     id: text("id").primaryKey(),
     amount: doublePrecision("amount"),
-    currency: text("currency"),
-    status: text("status"),
+    currency: checkout_currency,
+    status: checkout_status,
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
     customer_id: text("customer_id").references(()=>CUSTOMER.id),
@@ -77,7 +163,7 @@ export const CHECKOUT = pgTable("Checkout", {
     cart_id: text("cart_id").references(()=>CART.id),
     store_id: text("store_id").references(()=>STORE.id),
     environment,
-    purchase_type: text("purchase_type", {enum: [ "one_time", "monthly_subscription" ]})
+    purchase_type
 })
 
 export const CHECKOUTRelations = relations(CHECKOUT, ({one, many})=>{
@@ -112,7 +198,8 @@ export const PRODUCT = pgTable("Product", {
     updated_at: timestamp("updated_at").defaultNow(),
     store_id: text("store_id").references(()=>STORE.id),
     environment,
-    status: text("status")
+    status: product_status,
+    type: product_types
 })
 
 export const PRODUCTRelations = relations(PRODUCT, ({many, one})=>{
@@ -128,7 +215,7 @@ export const PRODUCTRelations = relations(PRODUCT, ({many, one})=>{
 export const CART = pgTable("Cart", {
     id: text("id").primaryKey(),
     customer_id: text("customer_id").references(()=>CUSTOMER.id), 
-    status: text("status"),
+    status: cart_status,
     create_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
     store_id: text("store_id").references(()=>STORE.id),
@@ -183,7 +270,7 @@ export const PAYMENT = pgTable("Payment", {
     id: text("id").primaryKey(),
     amount: doublePrecision("amount"),
     token: text("token"),
-    status: text("status"),
+    state: payment_status,
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
     payment_method_id: text("payment_method_id").references(()=>PAYMENT_METHOD.id),
@@ -240,10 +327,6 @@ export const STORE = pgTable("Store", {
     name: text("name"),
     image: text("image"),
     description: text("description"),
-    prod_secret_key: text("prod_secret_key"),
-    test_secret_key: text("test_secret_key"),
-    prod_publishable_key: text("prod_publishable_key"),
-    test_publishable_key: text("test_publishable_key"),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
     status: text("status"),
@@ -262,12 +345,18 @@ export const STORERelations = relations(STORE, ({many, one})=>{
         carts: many(CART),
         cart_items: many(CART_ITEM),
         payments: many(PAYMENT),
-        checkouts: many(CHECKOUT)
+        checkouts: many(CHECKOUT),
+        keys: many(KEYS)
     }
 })
 
 
-export const EphemeralPaymentKeys = pgTable("EphemeralPaymentKeys",{
+export const KEYS = pgTable("Keys", {
     id: text("id").primaryKey(),
-    created_at: timestamp("created_at").defaultNow()
+    store_id: text("store_id").references(()=>STORE.id),
+    name: text("name"),
+    expiry: timestamp("expiry"),
+    status: key_status,
+    value: text("value"),
+    environment
 })

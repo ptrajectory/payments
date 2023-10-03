@@ -1,0 +1,28 @@
+{
+  "name": "oracle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsup"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "db": "workspace:*",
+    "drizzle-orm": "^0.28.2",
+    "generators": "workspace:*",
+    "postgres": "^3.3.5",
+    "zod": "^3.21.4",
+    "zodiac": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.2",
+    "tsc": "^2.0.4",
+    "tsup": "^6.7.0",
+    "typescript": "^5.2.2"
+  }
+}

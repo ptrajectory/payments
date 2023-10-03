@@ -142,3 +142,80 @@ app.delete("/carts/:cart_id/:cart_item_id", async (req, res)=>{
 app.listen(8090, ()=>{
     console.log("🚀 Huston we have ignition.")
 })
+
+
+
+const my_test_api_key = "test_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiU3BvbmdlYm9iIEJpa2UgU3RvcmUiLCJpZCI6InN0cl9jOWI2ZWNmMjE5YWU1MzcxYzIwMTM3N2JkMzgwYjVmMCIsInNlbGxlcl9pZCI6InNsbF8yYTQ0MWM3Y2JlNjI4MDE4YjAzMWQyMzMyY2E4ZDJiNCIsImVudiI6InRlc3RpbmciLCJpYXQiOjE2OTQ3OTYwNDF9.zw5zbMaTJKjoSZb1MBFsRHYAxfPo1Dlxgp-q9Im5m5I"
+
+const client = createPaymentClient("https://payments-api.ptrajectory.com", my_test_api_key);
+
+
+(async()=>{
+
+
+    const customer = await client.customers.create({
+        first_name: "Jack",
+        last_name: "Ryan",
+        email: "jryan@cia.org"
+    })
+
+    console.log("NEW CUSTOMER CREATED::", customer)
+
+    const payment_method = await client.paymentMethods.create({
+        customer_id: customer?.id,
+        phone_number: "254711111111",
+        is_default: true,
+        type: "MPESA"
+    })
+
+    console.log("NEW PAYMENT METHOD", payment_method)
+
+    const product = await client.products.create({
+        name: "Cool Bike For testing",
+        description: "This is the coolest product ever",
+        image: "",
+        price: 10
+    })
+
+    const cart = await client.carts.create({
+        customer_id: customer?.id
+    })
+
+
+    const new_cart_item = await client.carts.addCartItem(cart?.id, {
+        cart_id: cart?.id,
+        customer_id: customer?.id,
+        quantity: 5,
+        product_id: product?.id
+    })
+
+
+    const checkout = await client.checkouts.create({
+        cart_id: cart?.id,
+        currency: "KES",
+        customer_id: customer?.id,
+        purchase_type: "one_time",
+        payment_method_id: payment_method?.id
+    })
+
+
+    // trigger payment
+
+    const payment = await client.checkouts.pay(checkout?.ephemeralKey, {
+        checkout_id: checkout?.id
+    })
+
+    // confirm if the payment was successful
+
+    const status = await client.payments.confirm(payment.id)
+
+    if(status === "SUCCESS"){
+        console.log("Hooray 🎉🎉🎉🎉🎉🎉🎉🎉🎉")
+    }
+    else {
+        console.log("Ohh No")
+    }
+
+
+
+})();

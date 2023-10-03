@@ -9,3 +9,5 @@ dist
 local_only
 *.txt
 .vercel
+.next
+.react-email

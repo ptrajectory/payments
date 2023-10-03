@@ -64,7 +64,29 @@ declare namespace NodeJS {
           * VALIDATION:
           */
          PRIVATE_KEY: string 
+         /**
+          * Public Key
+          */
          PUBLIC_KEY: string
+         /**
+          * Secret Key
+          */
          SECRET_KEY: string
+         /**
+          * Callback url
+          */
+         MPESA_CALLBACK_URL: string
+         /**
+          * Business Name
+          */
+         MPESA_BUSINESS_NAME: string
+         /**
+          * LHE ENPOINT
+          */
+         LHE_URL: string
+         /**
+          * LHE_KEY
+          */
+         LHE_KEY: string
     }
 }
