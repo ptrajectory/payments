@@ -1,0 +1,28 @@
+<component name="libraryTable">
+  <library name="ts-external-references" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+accepts@1.3.5/node_modules/@types/accepts/index.d.ts" />
+        <item url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+content-disposition@0.5.6/node_modules/@types/content-disposition/index.d.ts" />
+        <item url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+cookies@0.7.7/node_modules/@types/cookies/index.d.ts" />
+        <item url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+http-assert@1.5.3/node_modules/@types/http-assert/index.d.ts" />
+        <item url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+http-errors@2.0.1/node_modules/@types/http-errors/index.d.ts" />
+        <item url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+keygrip@1.0.3/node_modules/@types/keygrip/index.d.ts" />
+        <item url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+koa-compose@3.2.6/node_modules/@types/koa-compose/index.d.ts" />
+        <item url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+node@20.8.3/node_modules/@types/node/index.d.ts" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+accepts@1.3.5/node_modules/@types/accepts/index.d.ts" />
+      <root url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+content-disposition@0.5.6/node_modules/@types/content-disposition/index.d.ts" />
+      <root url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+cookies@0.7.7/node_modules/@types/cookies/index.d.ts" />
+      <root url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+http-assert@1.5.3/node_modules/@types/http-assert/index.d.ts" />
+      <root url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+http-errors@2.0.1/node_modules/@types/http-errors/index.d.ts" />
+      <root url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+keygrip@1.0.3/node_modules/@types/keygrip/index.d.ts" />
+      <root url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+koa-compose@3.2.6/node_modules/@types/koa-compose/index.d.ts" />
+      <root url="file://$PROJECT_DIR$/../../node_modules/.pnpm/@types+node@20.8.3/node_modules/@types/node/index.d.ts" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

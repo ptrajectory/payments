@@ -22,4 +22,16 @@ export const checkout = new Checkout(db, schema)
 export const store = new Store(db, schema)
 
 
+export default {
+    keys,
+    payment,
+    cart,
+    cart_item,
+    seller,
+    product,
+    customer,
+    checkout,
+    store
+}
+
 

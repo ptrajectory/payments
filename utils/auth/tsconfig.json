@@ -1,11 +1,19 @@
 {
     "compilerOptions": {
-      "target": "es2016",
-      "module": "commonjs",
+      "target": "ESNext",
+      "module": "ESNext",
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
       "strict": true,                                   
-      "skipLibCheck": true                                
-    }
+      "skipLibCheck": true,
+      "moduleResolution": "Node",
+      "outDir": "./dist",
+      "noErrorTruncation": true
+  },
+  "exclude": ["node_modules"],
+  "include": ["**/*.ts", "mykoa.d.ts", "env.d.ts"],
+  "files": ["env.d.ts","./mykoa.d.ts", "./src/index.ts"],
+  "ts-node": {
+    "experimentalSpecifierResolution": "node"
   }
-  
+}
