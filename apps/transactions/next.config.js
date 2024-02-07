@@ -2,14 +2,21 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: [
-      "images.pexels.com",
-      "res.cloudinary.com"
-    ]
+    remotePatterns: [
+      {
+        hostname: "images.pexels.com",
+        pathname: "*",
+        protocol: "https",
+        port: "*",
+      },
+      {
+        hostname: "res.cloudinary.com",
+        pathname: "*",
+        protocol: "https",
+        port: "*",
+      },
+    ],
   },
-  experimental: {
-    serverActions: true
-  }
-}
+};
 
 module.exports = nextConfig
