@@ -18,28 +18,36 @@ export const POST = async (request: Request) => {
         switch(event.type) {
             
             case "user.created": {
+              const user = event.data;
+              const email_id = user?.primary_email_address_id;
+              const email = user?.email_addresses?.find(
+                ({ id }) => id === email_id
+              )?.email_address;
 
-                const user = event.data
-                const email_id = user?.primary_email_address_id 
-                const email = user?.email_addresses?.find(({id}) => id === email_id)?.email_address
+              if (!email) {
+                return NextResponse.json(null, {
+                  status: 400,
+                });
+              } //TODO: add logger
 
-                if(!email) return null //TODO: add logger
+              const result = await db
+                .insert(SELLER)
+                .values({
+                  id: generate_unique_id("sll"),
+                  email: email,
+                  avatar: user?.image_url,
+                  first_name: user?.first_name,
+                  last_name: user?.last_name,
+                  uid: user.id,
+                })
+                .returning();
 
-                const result = await db.insert(SELLER).values({
-                    id: generate_unique_id("sll"),
-                    email: email,
-                    avatar: user?.image_url,
-                    first_name: user?.first_name,
-                    last_name: user?.last_name,
-                    uid: user.id
-                }).returning()
-
-                return NextResponse.json(
-                  {},
-                  {
-                    status: 200,
-                  }
-                );
+              return NextResponse.json(
+                {},
+                {
+                  status: 200,
+                }
+              );
             };
             default:{
                 //TODO: don't know what to do here
