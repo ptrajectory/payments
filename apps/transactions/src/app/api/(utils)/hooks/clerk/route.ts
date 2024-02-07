@@ -34,9 +34,12 @@ export const POST = async (request: Request) => {
                     uid: user.id
                 }).returning()
 
-                return NextResponse.json(null, {
-                    status: 200
-                })
+                return NextResponse.json(
+                  {},
+                  {
+                    status: 200,
+                  }
+                );
             };
             default:{
                 //TODO: don't know what to do here
@@ -54,7 +57,10 @@ export const POST = async (request: Request) => {
         
     }
     
-    return NextResponse.json(null, {
-        status: 200
-    })
+    return NextResponse.json(
+      {},
+      {
+        status: 200,
+      }
+    );
 }
